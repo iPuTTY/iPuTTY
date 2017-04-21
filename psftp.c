@@ -28,6 +28,7 @@ const char *const appname = "PSFTP";
 static int psftp_connect(char *userhost, char *user, int portnumber);
 static int do_sftp_init(void);
 void do_sftp_cleanup();
+static int check_is_dir(char *);
 
 /* ----------------------------------------------------------------------
  * sftp client state.
@@ -998,6 +999,7 @@ int sftp_cmd_ls(struct sftp_command *cmd)
     struct sftp_packet *pktin;
     struct sftp_request *req;
     int i;
+    char *sfile = NULL;
 
     if (back == NULL) {
 	not_connected();
@@ -1042,6 +1044,21 @@ int sftp_cmd_ls(struct sftp_command *cmd)
 	return 0;
     }
 
+    if (!check_is_dir(cdir) && !strchr(cdir, '*')) {
+	char *chk = (char *) strrchr(cdir, '/');
+
+	if (cdir == chk) {
+	    char *cdirtmp = (char *) malloc(sizeof(char) * strlen(cdir) + 2);
+	    sprintf(cdirtmp, "/%s", cdir);
+	    sfree(cdir);
+	    cdir = strdup(cdirtmp);
+	    sfree(cdirtmp);
+	    chk = (char *) strrchr(cdir, '/');
+	}
+
+	*chk++ = 0;
+	sfile = chk;
+    }
     printf("Listing directory %s\n", cdir);
 
     req = fxp_opendir_send(cdir);
@@ -1097,8 +1114,18 @@ int sftp_cmd_ls(struct sftp_command *cmd)
 	 * And print them.
 	 */
 	for (i = 0; i < nnames; i++) {
+	    int cx;
+	    if (sfile != NULL) {
+		cx = strcmp(sfile, ournames[i]->filename);
+		if (cx != 0) {
+		    fxp_free_name(ournames[i]);
+		    continue;
+		}
+	    }
 	    printf("%s\n", ournames[i]->longname);
 	    fxp_free_name(ournames[i]);
+	    if (sfile != NULL && !cx)
+		break;
 	}
 	sfree(ournames);
     }
