@@ -194,6 +194,7 @@ foreach $i (@prognames) {
       push @scanlist, $file;
     } elsif ($j !~ /\./) {
       $file = "$j.c";
+      $file = "$j.cpp" unless &findfile($file);
       $file = "$j.m" unless &findfile($file);
       $depends{$j} = [$file];
       push @scanlist, $file;
@@ -269,7 +270,7 @@ sub mfval($) {
     # prints a warning and returns false;
     if (grep { $type eq $_ }
 	("vc","vcproj","cygwin","borland","lcc","devcppproj","gtk","unix",
-         "am","osx","vstudio10","vstudio12","clangcl")) {
+         "am","osx","vstudio10","vstudio12","vstudio15","vstudio17","clangcl")) {
         return 1;
     }
     warn "$.:unknown makefile type '$type'\n";
@@ -306,6 +307,7 @@ sub findfile {
   my $dir = '';
   my $i;
   my $outdir = undef;
+
   unless (defined $findfilecache{$name}) {
     $i = 0;
     foreach $dir (@srcdirs) {
@@ -548,7 +550,11 @@ if (defined $makefiles{'clangcl'}) {
         if ($d->{obj} =~ /\.res\.o$/) {
             print "\t\$(RC) \$(RCFLAGS) ".$d->{deps}->[0]." -o ".$d->{obj}."\n\n";
 	} else {
-            print "\t\$(CC) /Fo\$(BUILDDIR) \$(COMPAT) \$(CFLAGS) \$(XFLAGS) /c \$<\n\n";
+	    if ($d->{deps}->[0] =~ /\.cpp$/) {
+                print "\t\$(CC) /Fo\$(BUILDDIR) \$(COMPAT) \$(CFLAGS) \$(XFLAGS) /c /Tp \$<\n\n";
+	    } else {
+                print "\t\$(CC) /Fo\$(BUILDDIR) \$(COMPAT) \$(CFLAGS) \$(XFLAGS) /c \$<\n\n";
+	    }
         }
     }
     print "\n";
@@ -801,7 +807,7 @@ if (defined $makefiles{'vc'}) {
 	print "\tlink \$(LFLAGS) \$(XLFLAGS) -out:\$(BUILDDIR)$prog.exe -map:\$(BUILDDIR)$prog.map -nologo -subsystem:$subsys\$(SUBSYSVER) \@$inlinefilename\n\n";
     }
     foreach $d (&deps("\$(BUILDDIR)X.obj", "\$(BUILDDIR)X.res", $dirpfx, "\\", "vc")) {
-        $extradeps = $forceobj{$d->{obj_orig}} ? ["*.c","*.h","*.rc"] : [];
+        $extradeps = $forceobj{$d->{obj_orig}} ? ["*.c","*.cpp","*.h","*.rc"] : [];
         print &splitline(sprintf("%s: %s", $d->{obj},
                                  join " ", @$extradeps, @{$d->{deps}})), "\n";
         if ($d->{obj} =~ /.res$/) {
@@ -931,6 +937,10 @@ if (defined $makefiles{'vcproj'}) {
 	    $object_deps = $all_object_deps{$object_file};
 	    foreach $object_dep (@$object_deps) {
 		if($object_dep =~ /\.c$/io) {
+		    $source_files{$object_dep} = 1;
+		    next;
+		}
+		if($object_dep =~ /\.cpp$/io) {
 		    $source_files{$object_dep} = 1;
 		    next;
 		}
@@ -1110,7 +1120,7 @@ if (defined $makefiles{'vcproj'}) {
     }
 }
 
-if (defined $makefiles{'vstudio10'} || defined $makefiles{'vstudio12'}) {
+if (defined $makefiles{'vstudio10'} || defined $makefiles{'vstudio12'} || defined $makefiles{'vstudio15'} || defined $makefiles{'vstudio17'}) {
 
     ##-- Visual Studio 2010+ Solution and Projects
 
@@ -1120,6 +1130,14 @@ if (defined $makefiles{'vstudio10'} || defined $makefiles{'vstudio12'}) {
 
     if (defined $makefiles{'vstudio12'}) {
         create_vs_solution('vstudio12', "2012", "12.00", "v110");
+    }
+
+    if (defined $makefiles{'vstudio15'}) {
+        create_vs_solution('vstudio15', "2015", "14.00", "v140");
+    }
+
+    if (defined $makefiles{'vstudio17'}) {
+        create_vs_solution('vstudio17', "2017", "14.10", "v141");
     }
 
     sub create_vs_solution {
@@ -1215,6 +1233,8 @@ if (defined $makefiles{'vstudio10'} || defined $makefiles{'vstudio12'}) {
                 if($object_dep eq $object_deps->[0]) {
                     if($object_dep =~ /\.c$/io) {
                         $source_files{$object_dep} = 1;
+                    } elsif($object_dep =~ /\.cpp$/io) {
+                        $source_files{$object_dep} = 1;
                     } elsif($object_dep =~ /\.rc$/io) {
                         $resource_files{$object_dep} = 1;
                     }
@@ -1289,11 +1309,13 @@ if (defined $makefiles{'vstudio10'} || defined $makefiles{'vstudio12'}) {
             "    <OutDir>.\\Release\\</OutDir>\n" .
             "    <IntDir>.\\Release\\</IntDir>\n" .
             "    <LinkIncremental>false</LinkIncremental>\n" .
+            "    <GenerateManifest>false</GenerateManifest>\n" .
             "  </PropertyGroup>\n" .
             "  <PropertyGroup Condition=\"'\$(Configuration)|\$(Platform)'=='Debug|Win32'\">\n" .
             "    <OutDir>.\\Debug\\</OutDir>\n" .
             "    <IntDir>.\\Debug\\</IntDir>\n" .
             "    <LinkIncremental>true</LinkIncremental>\n" .
+            "    <GenerateManifest>false</GenerateManifest>\n" .
             "  </PropertyGroup>\n" .
             "  <ItemDefinitionGroup Condition=\"'\$(Configuration)|\$(Platform)'=='Release|Win32'\">\n" .
             "    <ClCompile>\n" .
@@ -1304,7 +1326,7 @@ if (defined $makefiles{'vstudio10'} || defined $makefiles{'vstudio12'}) {
             "      <Optimization>MaxSpeed</Optimization>\n" .
             "      <SuppressStartupBanner>true</SuppressStartupBanner>\n" .
             "      <WarningLevel>Level3</WarningLevel>\n" .
-            "      <AdditionalIncludeDirectories>" . (join ";", map {"..\\..\\$dirpfx$_"} @srcdirs) . ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n" .
+            "      <AdditionalIncludeDirectories>..\\..\\../;" . (join ";", map {"..\\..\\$dirpfx$_"} @srcdirs) . ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n" .
             "      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;POSIX;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n" .
             "      <AssemblerListingLocation>.\\Release\\</AssemblerListingLocation>\n" .
             "      <PrecompiledHeaderOutputFile>.\\Release\\$windows_project.pch</PrecompiledHeaderOutputFile>\n" .
@@ -1329,7 +1351,7 @@ if (defined $makefiles{'vstudio10'} || defined $makefiles{'vstudio12'}) {
             "    <Link>\n" .
             "      <SuppressStartupBanner>true</SuppressStartupBanner>\n" .
             "      <SubSystem>$subsystem</SubSystem>\n" .
-            "      <OutputFile>.\\Release\\$windows_project.exe</OutputFile>\n" .
+            "      <OutputFile>\$(TargetPath)</OutputFile>\n" .
             "      <AdditionalDependencies>$libs;%(AdditionalDependencies)</AdditionalDependencies>\n" .
             "    </Link>\n" .
             "  </ItemDefinitionGroup>\n" .
@@ -1343,7 +1365,7 @@ if (defined $makefiles{'vstudio10'} || defined $makefiles{'vstudio12'}) {
             "      <WarningLevel>Level3</WarningLevel>\n" .
             "      <MinimalRebuild>true</MinimalRebuild>\n" .
             "      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>\n" .
-            "      <AdditionalIncludeDirectories>" . (join ";", map {"..\\..\\$dirpfx$_"} @srcdirs) . ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n" .
+            "      <AdditionalIncludeDirectories>..\\..\\../;" . (join ";", map {"..\\..\\$dirpfx$_"} @srcdirs) . ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n" .
             "      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;POSIX;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n" .
             "      <AssemblerListingLocation>.\\Debug\\</AssemblerListingLocation>\n" .
             "      <PrecompiledHeaderOutputFile>.\\Debug\\$windows_project.pch</PrecompiledHeaderOutputFile>\n" .
@@ -1404,8 +1426,8 @@ if (defined $makefiles{'vstudio10'} || defined $makefiles{'vstudio12'}) {
             $resource_file =~ s/..\\windows\\//;
             print
                 "    <ResourceCompile Include=\"..\\..\\$resource_file\">\n" .
-                "      <AdditionalIncludeDirectories Condition=\"'\$(Configuration)|\$(Platform)'=='Release|Win32'\">..\\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n" .
-                "      <AdditionalIncludeDirectories Condition=\"'\$(Configuration)|\$(Platform)'=='Debug|Win32'\">..\\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n" .
+                "      <AdditionalIncludeDirectories Condition=\"'\$(Configuration)|\$(Platform)'=='Release|Win32'\">..\\..\\..;..\\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n" .
+                "      <AdditionalIncludeDirectories Condition=\"'\$(Configuration)|\$(Platform)'=='Debug|Win32'\">..\\..\\..;..\\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n" .
                 "    </ResourceCompile>\n";
             print FILTERS
                 "    <ResourceCompile Include=\"..\\..\\$resource_file\">\n" .
@@ -1869,6 +1891,8 @@ if (defined $makefiles{'osx'}) {
       $firstdep = $d->{deps}->[0];
       if ($firstdep =~ /\.c$/) {
 	  print "\t\$(CC) \$(COMPAT) \$(FWHACK) \$(CFLAGS) \$(XFLAGS) -c \$<\n";
+      } elsif ($firstdep =~ /\.cpp$/) {
+	  print "\t\$(CC) -x c++ \$(COMPAT) \$(FWHACK) \$(CFLAGS) \$(XFLAGS) -c \$<\n";
       } elsif ($firstdep =~ /\.m$/) {
 	  print "\t\$(CC) -x objective-c \$(COMPAT) \$(FWHACK) \$(CFLAGS) \$(XFLAGS) -c \$<\n";
       }
@@ -1937,6 +1961,10 @@ if (defined $makefiles{'devcppproj'}) {
       $object_deps = $all_object_deps{$object_file};
       foreach $object_dep (@$object_deps) {
     if($object_dep =~ /\.c$/io) {
+        $source_files{$object_dep} = 1;
+        next;
+    }
+    if($object_dep =~ /\.cpp$/io) {
         $source_files{$object_dep} = 1;
         next;
     }

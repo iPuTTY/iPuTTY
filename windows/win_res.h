@@ -8,6 +8,12 @@
 #define IDI_MAINICON     200
 #define IDI_CFGICON      201
 
+/*
+ * HACK: PuttyTray
+ * TrayIcon Resource
+ */
+#define IDI_TRAYICON     202
+
 #define IDD_MAINBOX      102
 #define IDD_LOGBOX       110
 #define IDD_ABOUTBOX     111
@@ -28,5 +34,9 @@
 #define IDC_TABLIST     1004
 #define IDC_HELPBTN     1005
 #define IDC_ABOUT       1006
+
+#define IDR_ACCELERATOR1	108
+
+#define IDM_NEXTWINDOW	0x0250 // from window.c
 
 #endif

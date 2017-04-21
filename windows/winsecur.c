@@ -277,7 +277,7 @@ static int really_restrict_process_acl(char **error)
                            win_strerror(GetLastError()));
 	goto cleanup;
     }
-		      
+
 
     ret=TRUE;
     

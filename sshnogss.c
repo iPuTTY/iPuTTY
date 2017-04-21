@@ -1,11 +1,12 @@
 #include "putty.h"
+#include "sshgss.h"
 #ifndef NO_GSSAPI
 
 /* For platforms not supporting GSSAPI */
 
 struct ssh_gss_liblist *ssh_gss_setup(Conf *conf)
 {
-    struct ssh_gss_liblist *list = snew(struct ssh_gss_liblist *);
+    struct ssh_gss_liblist *list = snew(struct ssh_gss_liblist);
     list->libraries = NULL;
     list->nlibraries = 0;
     return list;

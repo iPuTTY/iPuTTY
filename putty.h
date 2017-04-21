@@ -104,15 +104,16 @@ typedef struct terminal_tag Terminal;
  */
 #define UCSWIDE	     0xDFFF
 
-#define ATTR_NARROW  0x800000U
-#define ATTR_WIDE    0x400000U
-#define ATTR_BOLD    0x040000U
-#define ATTR_UNDER   0x080000U
-#define ATTR_REVERSE 0x100000U
-#define ATTR_BLINK   0x200000U
-#define ATTR_FGMASK  0x0001FFU
-#define ATTR_BGMASK  0x03FE00U
-#define ATTR_COLOURS 0x03FFFFU
+#define ATTR_NARROW  0x0800000U
+#define ATTR_WIDE    0x0400000U
+#define ATTR_BOLD    0x0040000U
+#define ATTR_UNDER   0x0080000U
+#define ATTR_REVERSE 0x0100000U
+#define ATTR_BLINK   0x0200000U
+#define ATTR_ITALIC  0x1000000U
+#define ATTR_FGMASK  0x00001FFU
+#define ATTR_BGMASK  0x003FE00U
+#define ATTR_COLOURS 0x003FFFFU
 #define ATTR_FGSHIFT 0
 #define ATTR_BGSHIFT 9
 
@@ -138,6 +139,30 @@ typedef struct terminal_tag Terminal;
 #define ATTR_DEFFG   (256 << ATTR_FGSHIFT)
 #define ATTR_DEFBG   (258 << ATTR_BGSHIFT)
 #define ATTR_DEFAULT (ATTR_DEFFG | ATTR_DEFBG)
+
+/*
+ * HACK: PuttyTray / Nutty
+ * Hyperlink stuff: define
+ */
+#define CHAR_MASK    0x000000FFUL
+
+/*
+ * HACK: PuttyTray / Nutty
+ * Hyperlink stuff: Underline settings
+ */
+enum {
+	URLHACK_UNDERLINE_ALWAYS,
+	URLHACK_UNDERLINE_HOVER,
+	URLHACK_UNDERLINE_NEVER
+};
+
+/*
+ * HACK: PuttyTray
+ * Tray options
+ */
+enum {
+    TRAY_NEVER, TRAY_NORMAL, TRAY_START, TRAY_ALWAYS
+};
 
 struct sesslist {
     int nsessions;
@@ -525,6 +550,7 @@ GLOBAL int default_port;
  * This is set TRUE by cmdline.c iff a session is loaded with "-load".
  */
 GLOBAL int loaded_session;
+
 /*
  * This is set to the name of the loaded session.
  */
@@ -602,8 +628,13 @@ int char_width(Context ctx, int uc);
 #ifdef OPTIMISE_SCROLL
 void do_scroll(Context, int, int, int);
 #endif
+#ifdef PUTTY_WINSTUFF_H
+void set_title(void *frontend, wchar_t *);
+void set_icon(void *frontend, wchar_t *);
+#else
 void set_title(void *frontend, char *);
 void set_icon(void *frontend, char *);
+#endif
 void set_sbar(void *frontend, int, int, int);
 Context get_ctx(void *frontend);
 void free_ctx(Context);
@@ -660,7 +691,11 @@ void set_zoomed(void *frontend, int zoomed);
 int is_iconic(void *frontend);
 void get_window_pos(void *frontend, int *x, int *y);
 void get_window_pixels(void *frontend, int *x, int *y);
+#ifdef PUTTY_WINSTUFF_H
+wchar_t *get_window_title(void *frontend, int icon);
+#else
 char *get_window_title(void *frontend, int icon);
+#endif
 /* Hint from backend to frontend about time-consuming operations.
  * Initial state is assumed to be BUSY_NOT. */
 enum {
@@ -818,6 +853,9 @@ void cleanup_exit(int);
     X(INT, NONE, width) \
     X(INT, NONE, height) \
     X(FONT, NONE, font) \
+    X(INT, NONE, use_font_unicode) /* Hack: iPuTTY */ \
+    X(FONT, NONE, font_unicode)    /* Hack: iPuTTY */ \
+    X(INT, NONE, font_unicode_adj) /* Hack: iPuTTY */ \
     X(INT, NONE, font_quality) \
     X(FILENAME, NONE, logfilename) \
     X(INT, NONE, logtype) \
@@ -911,6 +949,40 @@ void cleanup_exit(int);
     X(INT, NONE, shadowboldoffset) \
     X(INT, NONE, crhaslf) \
     X(STR, NONE, winclass) \
+    /*					\
+     * HACK: PuttyTray / PuTTY File	\
+     */ \
+    X(INT, NONE, session_storagetype) \
+    /*					    \
+     * HACK: PuttyTray / Nutty		    \
+     * Hyperlink stuff: Underline settings  \
+     */ \
+    X(INT, NONE, url_ctrl_click) \
+    X(INT, NONE, url_underline) \
+    X(INT, NONE, url_defbrowser) \
+    X(INT, NONE, url_defregex) \
+    X(FILENAME, NONE, url_browser) \
+    X(STR, NONE, url_regex) \
+    /*			\
+     * HACK: PuttyTray	\
+     */ \
+    X(INT, NONE, tray) \
+    X(INT, NONE, start_tray) \
+    X(INT, NONE, tray_restore) \
+    /*					\
+     * HACK: PuttyTray / Transparency	\
+     */ \
+    X(INT, NONE, transparency) \
+    X(INT, NONE, transparency_mode) \
+    /*					\
+     * HACK: PuttyTray / Reconnect	\
+     */ \
+    X(INT, NONE, wakeup_reconnect) \
+    X(INT, NONE, failure_reconnect) \
+    /*					\
+     * HACK: PuttyTray / Session Icon	\
+     */ \
+    X(STR, NONE, win_icon) \
 
 /* Now define the actual enum of option keywords using that macro. */
 #define CONF_ENUM_DEF(valtype, keytype, keyword) CONF_ ## keyword,
@@ -988,9 +1060,22 @@ char *save_settings(const char *section, Conf *conf);
 void save_open_settings(void *sesskey, Conf *conf);
 void load_settings(const char *section, Conf *conf);
 void load_open_settings(void *sesskey, Conf *conf);
+#ifdef PUTTY_WINSTUFF_H
+int get_sesslist(struct sesslist *, int allocate, int storagetype); // HACK: PuTTYTray / PuTTY File - changed return type
+#else
 void get_sesslist(struct sesslist *, int allocate);
+#endif
 void do_defaults(const char *, Conf *);
 void registry_cleanup(void);
+
+#ifdef PUTTY_WINSTUFF_H
+/*
+ * HACK: PuttyTray / PuTTY File
+ * Quick hack to load defaults from file
+ */
+void do_defaults_file(char *, Conf *);
+void load_settings_file(char *section, Conf *conf);
+#endif
 
 /*
  * Functions used by settings.c to provide platform-specific
@@ -1168,6 +1253,9 @@ extern const char ver[];
 #ifndef CP_UTF8
 #define CP_UTF8 65001
 #endif
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* void init_ucs(void); -- this is now in platform-specific headers */
 int is_dbcs_leadbyte(int codepage, char byte);
 int mb_to_wc(int codepage, int flags, const char *mbstr, int mblen,
@@ -1175,6 +1263,8 @@ int mb_to_wc(int codepage, int flags, const char *mbstr, int mblen,
 int wc_to_mb(int codepage, int flags, const wchar_t *wcstr, int wclen,
 	     char *mbstr, int mblen, const char *defchr, int *defused,
 	     struct unicode_data *ucsdata);
+wchar_t *short_mb_to_wc(int codepage, int flags, char *mbstr, int mblen);
+char *short_wc_to_mb(int codepage, int flags, wchar_t *wstr, int wlen, char *defchar, int *defused);
 wchar_t xlat_uskbd2cyrllic(int ch);
 int check_compose(int first, int second);
 int decode_codepage(char *cp_name);
@@ -1189,6 +1279,9 @@ int mk_wcwidth(unsigned int ucs);
 int mk_wcswidth(const unsigned int *pwcs, size_t n);
 int mk_wcwidth_cjk(unsigned int ucs);
 int mk_wcswidth_cjk(const unsigned int *pwcs, size_t n);
+#ifdef __cplusplus
+}
+#endif
 
 /*
  * Exports from mscrypto.c

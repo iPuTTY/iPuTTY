@@ -1,6 +1,8 @@
+// Microsoft Visual C++ generated resource script.
+//
 #include "rcstuff.h"
 
-#define APPNAME "PuTTY"
+#define APPNAME "iPuTTY"
 #define APPDESC "SSH, Telnet and Rlogin client"
 
 #include "win_res.rc2"

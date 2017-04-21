@@ -30,6 +30,33 @@ static void help_handler(union control *ctrl, void *dlg,
     }
 }
 
+/*
+ * HACK: PuttyTray / Session Icon
+ */ 
+static void window_icon_handler(union control *ctrl, void *dlg, void *data, int event)
+{
+    Conf *conf = (Conf *) data;
+
+    if (event == EVENT_ACTION) {
+	char buf[512], iname[512], *ipointer;
+	int iindex;
+
+	memset(&iname, 0, sizeof(iname));
+	memset(&buf, 0, sizeof(buf));
+	iindex = 0;
+	ipointer = iname;
+	if (dlg_pick_icon(dlg, &ipointer, sizeof(iname), &iindex) /*&& iname[0]*/) {
+	    if (iname[0]) {
+		sprintf(buf, "%s,%d", iname, iindex);
+	    } else {
+		sprintf(buf, "%s", iname);
+	    }
+	    dlg_icon_set((union control *) ctrl->button.context.p, dlg, buf);
+	    conf_set_str(conf, CONF_win_icon, buf);
+	};
+    };
+};
+
 static void variable_pitch_handler(union control *ctrl, void *dlg,
                                    void *data, int event)
 {
@@ -182,13 +209,25 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, int has_help,
 		  HELPCTX(appearance_border),
 		  conf_checkbox_handler, I(CONF_sunken_edge));
 
+    s = ctrl_getset(b, "Window/Appearance", "font",
+		    "Font settings");
+    /*
+     * HACK: iPuTTY
+     */
+    ctrl_checkbox(s, "Use separated unicode font", 'f',
+		  HELPCTX(no_help),
+		  conf_checkbox_handler, I(CONF_use_font_unicode));
+    ctrl_fontsel(s, "Font for unicode characters", 's',
+		 HELPCTX(no_help),
+		 conf_fontsel_handler, I(CONF_font_unicode));
+    ctrl_editbox(s, "Adjustment of unicode font (px)", 'a', 20,
+		 HELPCTX(no_help),
+		 conf_editbox_handler, I(CONF_font_unicode_adj), I(-1));
+    ctrl_checkbox(s, "Allow selection of variable-pitch fonts", NO_SHORTCUT,
+                  HELPCTX(appearance_font), variable_pitch_handler, I(0));
     /*
      * Configurable font quality settings for Windows.
      */
-    s = ctrl_getset(b, "Window/Appearance", "font",
-		    "Font settings");
-    ctrl_checkbox(s, "Allow selection of variable-pitch fonts", NO_SHORTCUT,
-                  HELPCTX(appearance_font), variable_pitch_handler, I(0));
     ctrl_radiobuttons(s, "Font quality:", 'q', 2,
 		      HELPCTX(appearance_font),
 		      conf_radiobutton_handler,
@@ -332,7 +371,7 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, int has_help,
     ctrl_checkbox(s, "Window closes on ALT-F4", '4',
 		  HELPCTX(behaviour_altf4),
 		  conf_checkbox_handler, I(CONF_alt_f4));
-    ctrl_checkbox(s, "System menu appears on ALT-Space", 'y',
+    ctrl_checkbox(s, "System menu appears on ALT-Space", 'm',  /* HACK: PuttyTray: Changed shortcut key */
 		  HELPCTX(behaviour_altspace),
 		  conf_checkbox_handler, I(CONF_alt_space));
     ctrl_checkbox(s, "System menu appears on ALT alone", 'l',
@@ -345,6 +384,94 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, int has_help,
 		  HELPCTX(behaviour_altenter),
 		  conf_checkbox_handler,
 		  I(CONF_fullscreenonaltenter));
+
+    /*
+     * HACK: PuttyTray
+     */
+    ctrl_radiobuttons(s, "Show tray icon:", NO_SHORTCUT, 4,
+		      HELPCTX(no_help),
+		      conf_radiobutton_handler,
+		      I(CONF_tray),
+		      "Normal", 'n', I(TRAY_NORMAL),
+		      "Always", 'y', I(TRAY_ALWAYS),
+		      "Never", 'r', I(TRAY_NEVER),
+		      "On start", 's', I(TRAY_START), NULL);
+    ctrl_checkbox(s, "Accept single-click to restore from tray", 'm',
+		  HELPCTX(no_help),
+		  conf_checkbox_handler, I(CONF_tray_restore));
+
+    /*
+     * HACK: PuttyTray / Session Icon
+     */
+    s = ctrl_getset(b, "Window/Behaviour", "icon", "Adjust the icon");
+    ctrl_columns(s, 3, 40, 20, 40);
+    c = ctrl_text(s, "Window / tray icon:", HELPCTX(appearance_title));
+    c->generic.column = 0;
+    c = ctrl_icon(s, HELPCTX(appearance_title),
+		  I(CONF_win_icon));
+    c->generic.column = 1;
+    c = ctrl_pushbutton(s, "Change Icon...", 'h', HELPCTX(appearance_title),
+			window_icon_handler, P(c));
+    c->generic.column = 2;
+    ctrl_columns(s, 1, 100);
+
+    /*
+     * HACK: PuttyTray / Transparency
+     */
+    s = ctrl_getset(b, "Window", "main", "Window transparency options");
+    ctrl_editbox(s, "Opacity (50-255)", 't', 30, HELPCTX(no_help), conf_editbox_handler, I(CONF_transparency), I(-1));
+
+    /*
+     * HACK: PuttyTray / Reconnect
+     */
+    s = ctrl_getset(b, "Connection", "reconnect", "Reconnect options");
+    ctrl_checkbox(s, "Attempt to reconnect on system wakeup", 'w', HELPCTX(no_help), conf_checkbox_handler, I(CONF_wakeup_reconnect));
+    ctrl_checkbox(s, "Attempt to reconnect on connection failure", 'w', HELPCTX(no_help), conf_checkbox_handler, I(CONF_failure_reconnect));
+
+    /*
+     * HACK: PuttyTray / Nutty
+     * Hyperlink stuff: The Window/Hyperlinks panel.
+     */
+    ctrl_settitle(b, "Window/Hyperlinks", "Options controlling behaviour of hyperlinks");
+    s = ctrl_getset(b, "Window/Hyperlinks", "general", "General options for hyperlinks");
+
+    ctrl_radiobuttons(s, "Underline hyperlinks:", NO_SHORTCUT, 1,
+		      HELPCTX(no_help),
+		      conf_radiobutton_handler,
+		      I(CONF_url_underline),
+		      "Always", NO_SHORTCUT, I(URLHACK_UNDERLINE_ALWAYS),
+		      "When hovered upon", NO_SHORTCUT, I(URLHACK_UNDERLINE_HOVER),
+		      "Never", NO_SHORTCUT, I(URLHACK_UNDERLINE_NEVER),
+		      NULL);
+
+    ctrl_checkbox(s, "Use ctrl+click to launch hyperlinks", 'l',
+		  HELPCTX(no_help),
+		  conf_checkbox_handler, I(CONF_url_ctrl_click));
+
+    s = ctrl_getset(b, "Window/Hyperlinks", "browser", "Browser application");
+
+    ctrl_checkbox(s, "Use the default browser", 'b',
+		  HELPCTX(no_help),
+		  conf_checkbox_handler, I(CONF_url_defbrowser));
+
+    ctrl_filesel(s, "or specify an application to open hyperlinks with:", 's',
+		 "Application (*.exe)\0*.exe\0All files (*.*)\0*.*\0\0", TRUE,
+		 "Select executable to open hyperlinks with", HELPCTX(no_help),
+		 conf_filesel_handler, I(CONF_url_browser));
+
+    s = ctrl_getset(b, "Window/Hyperlinks", "regexp", "Regular expression");
+
+    ctrl_checkbox(s, "Use the default regular expression", 'r',
+		  HELPCTX(no_help),
+		  conf_checkbox_handler, I(CONF_url_defregex));
+
+    ctrl_editbox(s, "or specify your own:", NO_SHORTCUT, 100,
+		 HELPCTX(no_help),
+		 conf_editbox_handler, I(CONF_url_regex),
+		 I(1));
+
+    ctrl_text(s, "The single white space will be cropped in front of the link, if exists.",
+	      HELPCTX(no_help));
 
     /*
      * Windows supports a local-command proxy. This also means we
@@ -401,3 +528,5 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, int has_help,
 		     conf_filesel_handler, I(CONF_xauthfile));
     }
 }
+
+// vim: ts=8 sts=4 sw=4 noet cino=\:2\=2(0u0

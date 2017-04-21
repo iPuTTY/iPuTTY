@@ -5,10 +5,16 @@
 #ifndef PUTTY_WINSTUFF_H
 #define PUTTY_WINSTUFF_H
 
+#ifndef SECURITY_WIN32
+#define SECURITY_WIN32
+#endif
+
 #ifndef AUTO_WINSOCK
 #include <winsock2.h>
+#define WIN32_LEAN_AND_MIN
 #endif
 #include <windows.h>
+#include <commdlg.h>
 #include <stdio.h>		       /* for FILENAME_MAX */
 
 /* We use uintptr_t for Win32/Win64 portability, so we should in

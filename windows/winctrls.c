@@ -22,6 +22,12 @@
 
 #include <commctrl.h>
 
+/*
+ * HACK: PuttyTray / Session Icon
+ */ 
+#include "PickIconDialog.h"
+#define	ICONHEIGHT 20
+
 #define GAPBETWEEN 3
 #define GAPWITHIN 1
 #define GAPXBOX 7
@@ -954,6 +960,26 @@ void prefslist(struct prefslist *hdl, struct ctlpos *cp, int lines,
 }
 
 /*
+ * HACK: PuttyTray / Session Icon
+ */ 
+void staticicon(struct ctlpos *cp, char *stext, char *iname, int id)
+{
+    RECT r;
+    HWND hcontrol;
+    HICON hicon;
+
+    r.left = GAPBETWEEN;
+    r.top = cp->ypos;
+    r.right = cp->width;
+    r.bottom = ICONHEIGHT;
+    cp->ypos += r.bottom + GAPBETWEEN;
+    hcontrol = doctl(cp, r, "STATIC",
+	    WS_CHILD | WS_VISIBLE | SS_ICON, 0, NULL, id);
+    hicon = extract_icon(iname, FALSE);
+    SendMessage(hcontrol, STM_SETICON, (WPARAM) hicon, 0);
+}
+
+/*
  * Helper function for prefslist: move item in list box.
  */
 static void pl_moveitem(HWND hwnd, int listid, int src, int dst)
@@ -1195,7 +1221,7 @@ void winctrl_add_shortcuts(struct dlgparam *dp, struct winctrl *c)
     for (i = 0; i < lenof(c->shortcuts); i++)
 	if (c->shortcuts[i] != NO_SHORTCUT) {
 	    unsigned char s = tolower((unsigned char)c->shortcuts[i]);
-	    assert(!dp->shortcuts[s]);
+	    //assert(!dp->shortcuts[s]);
 	    dp->shortcuts[s] = TRUE;
 	}
 }
@@ -1206,7 +1232,7 @@ void winctrl_rem_shortcuts(struct dlgparam *dp, struct winctrl *c)
     for (i = 0; i < lenof(c->shortcuts); i++)
 	if (c->shortcuts[i] != NO_SHORTCUT) {
 	    unsigned char s = tolower((unsigned char)c->shortcuts[i]);
-	    assert(dp->shortcuts[s]);
+	    //assert(dp->shortcuts[s]);
 	    dp->shortcuts[s] = FALSE;
 	}
 }
@@ -1310,6 +1336,7 @@ struct winctrl *winctrl_findbyindex(struct winctrls *wc, int index)
     return index234(wc->byid, index);
 }
 
+
 void winctrl_layout(struct dlgparam *dp, struct winctrls *wc,
 		    struct ctlpos *cp, struct controlset *s, int *id)
 {
@@ -1327,6 +1354,8 @@ void winctrl_layout(struct dlgparam *dp, struct winctrls *wc,
     char *escaped;
     int i, actual_base_id, base_id, num_ids;
     void *data;
+
+    Conf *conf = (Conf *)dp->data;
 
     base_id = *id;
 
@@ -1518,6 +1547,15 @@ void winctrl_layout(struct dlgparam *dp, struct winctrls *wc,
 	    }
 	    sfree(escaped);
 	    break;
+
+	  /*
+	   * HACK: PuttyTray / Session Icon
+	   */ 
+	  case CTRL_ICON:
+	    num_ids = 1;
+	    staticicon(&pos, ctrl->icon.label, conf_get_str(conf, CONF_win_icon), base_id);
+	    break;
+
 	  case CTRL_RADIO:
 	    num_ids = ctrl->radio.nbuttons + 1;   /* label as well */
 	    {
@@ -2238,6 +2276,20 @@ void dlg_text_set(union control *ctrl, void *dlg, char const *text)
     SetDlgItemText(dp->hwnd, c->base_id, text);
 }
 
+/*
+ * HACK: PuttyTray / Session Icon
+ */ 
+void dlg_icon_set(union control *ctrl, void *dlg, char const *icon)
+{
+    HICON hicon;
+    struct dlgparam *dp = (struct dlgparam *) dlg;
+    struct winctrl *c = dlg_findbyctrl(dp, ctrl);
+    assert(c && c->ctrl->generic.type == CTRL_ICON);
+    hicon = extract_icon((char *) icon, FALSE);
+    SendDlgItemMessage(dp->hwnd, c->base_id, STM_SETICON, (WPARAM) hicon, 0);
+};
+//--------------------------------
+
 void dlg_label_change(union control *ctrl, void *dlg, char const *text)
 {
     struct dlgparam *dp = (struct dlgparam *)dlg;
@@ -2530,6 +2582,23 @@ void dlg_set_fixed_pitch_flag(void *dlg, int flag)
     dp->fixed_pitch_fonts = flag;
 }
 
+struct perctrl_privdata {
+    union control *ctrl;
+    void *data;
+    int needs_free;
+};
+
+static int perctrl_privdata_cmp(void *av, void *bv)
+{
+    struct perctrl_privdata *a = (struct perctrl_privdata *)av;
+    struct perctrl_privdata *b = (struct perctrl_privdata *)bv;
+    if (a->ctrl < b->ctrl)
+        return -1;
+    else if (a->ctrl > b->ctrl)
+        return +1;
+    return 0;
+}
+
 void dp_init(struct dlgparam *dp)
 {
     dp->nctrltrees = 0;
@@ -2539,6 +2608,7 @@ void dp_init(struct dlgparam *dp)
     memset(dp->shortcuts, 0, sizeof(dp->shortcuts));
     dp->hwnd = NULL;
     dp->wintitle = dp->errtitle = NULL;
+	dp->privdata = newtree234(perctrl_privdata_cmp);
     dp->fixed_pitch_fonts = TRUE;
 }
 
@@ -2552,4 +2622,63 @@ void dp_cleanup(struct dlgparam *dp)
 {
     sfree(dp->wintitle);
     sfree(dp->errtitle);
+}
+
+/*
+ * HACK: PuttyTray / Session Icon
+ */ 
+int dlg_pick_icon(void *dlg, char **iname, int inamesize, int *iindex)
+{
+    struct dlgparam *dp = (struct dlgparam *) dlg;
+    int ret = SelectIcon(dp->hwnd, *iname, inamesize, iindex);
+    return ret == IDOK ? TRUE : FALSE;
+};
+
+void *dlg_get_privdata(union control *ctrl, void *dlg)
+{
+    struct dlgparam *dp = (struct dlgparam *)dlg;
+    struct perctrl_privdata tmp, *p;
+    tmp.ctrl = ctrl;
+    p = find234(dp->privdata, &tmp, NULL);
+    if (p)
+        return p->data;
+    else
+        return NULL;
+}
+
+void dlg_set_privdata(union control *ctrl, void *dlg, void *ptr)
+{
+    struct dlgparam *dp = (struct dlgparam *)dlg;
+    struct perctrl_privdata tmp, *p;
+    tmp.ctrl = ctrl;
+    p = find234(dp->privdata, &tmp, NULL);
+    if (!p) {
+        p = snew(struct perctrl_privdata);
+        p->ctrl = ctrl;
+        p->needs_free = FALSE;
+        add234(dp->privdata, p);
+    }
+    p->data = ptr;
+}
+
+void *dlg_alloc_privdata(union control *ctrl, void *dlg, size_t size)
+{
+    struct dlgparam *dp = (struct dlgparam *)dlg;
+    struct perctrl_privdata tmp, *p;
+    tmp.ctrl = ctrl;
+    p = find234(dp->privdata, &tmp, NULL);
+    if (!p) {
+        p = snew(struct perctrl_privdata);
+        p->ctrl = ctrl;
+        p->needs_free = FALSE;
+        add234(dp->privdata, p);
+    }
+    assert(!p->needs_free);
+    p->needs_free = TRUE;
+    /*
+     * This is an internal allocation routine, so it's allowed to
+     * use smalloc directly.
+     */
+    p->data = smalloc(size);
+    return p->data;
 }

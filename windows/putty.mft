@@ -4,9 +4,9 @@
      Hence, some facts below are fibs. -->
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
 <assemblyIdentity
-   version="0.0.0.0"
+   version="0.68.0.0"
    processorArchitecture="*"
-   name="PuTTY"
+   name="iPuTTY"
    type="win32" />
    <description>A network client and terminal emulator</description>
    <dependency>

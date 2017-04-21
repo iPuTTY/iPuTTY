@@ -35,7 +35,13 @@ enum {
     CTRL_COLUMNS,		       /* divide window into columns */
     CTRL_FILESELECT,		       /* label plus filename selector */
     CTRL_FONTSELECT,		       /* label plus font selector */
-    CTRL_TABDELAY		       /* see `tabdelay' below */
+    CTRL_TABDELAY,		       /* see `tabdelay' below */
+
+    /*
+     * HACK: PuttyTray / Session Icon
+     * Add ctrl_icon, ctrl_path, ctrl_sessionlistbox
+     */ 
+    CTRL_ICON					/* static icon without label */
 };
 
 /*
@@ -162,7 +168,7 @@ union control {
 	 * 
 	 * The `data' parameter points to the writable data being
 	 * modified as a result of the configuration activity; for
-	 * example, the PuTTY `Conf' structure, although not
+	 * example, the PuTTY `Config' structure, although not
 	 * necessarily.
 	 * 
 	 * The `dlg' parameter is passed back to the platform-
@@ -410,6 +416,15 @@ union control {
 	STANDARD_PREFIX;
 	char shortcut;
     } fontselect;
+
+    /*
+     * HACK: PuttyTray / Session Icon
+     */ 
+    struct {
+	STANDARD_PREFIX;
+	intorptr handle;
+    } icon;
+    //--------------
 };
 
 #undef STANDARD_PREFIX
@@ -473,10 +488,6 @@ void ctrl_free(union control *);
  * and so data allocated through this function is better not used
  * to hold modifiable per-instance things. It's mostly here for
  * allocating structures to be passed as control handler params.
- *
- * ctrl_alloc_with_free also allows you to provide a function to free
- * the structure, in case there are other dynamically allocated bits
- * and pieces dangling off it.
  */
 void *ctrl_alloc(struct controlbox *b, size_t size);
 void *ctrl_alloc_with_free(struct controlbox *b, size_t size,
@@ -535,6 +546,16 @@ union control *ctrl_checkbox(struct controlset *, const char *label,
                              char shortcut, intorptr helpctx,
 			     handler_fn handler, intorptr context);
 union control *ctrl_tabdelay(struct controlset *, union control *);
+
+/*
+ * HACK: PuttyTray / Session Icon
+ */ 
+union control *ctrl_icon(struct controlset *, intorptr helpctx, intorptr context);
+
+// Should be somewhere below, but this is easier
+void dlg_icon_set(union control *ctrl, void *dlg, char const *icon);
+int dlg_pick_icon(void *dlg, char **iname, int inamesize, int *iindex);
+//------------------------------------
 
 /*
  * Routines the platform-independent dialog code can call to read
@@ -635,6 +656,21 @@ int dlg_coloursel_results(union control *ctrl, void *dlg,
 void dlg_refresh(union control *ctrl, void *dlg);
 
 /*
+ * It's perfectly possible that individual controls might need to
+ * allocate or store per-dialog-instance data, so here's a
+ * mechanism.
+ * 
+ * `dlg_get_privdata' and `dlg_set_privdata' allow the user to get
+ * and set a void * pointer associated with the control in
+ * question. `dlg_alloc_privdata' will allocate memory, store a
+ * pointer to that memory in the private data field, and arrange
+ * for it to be automatically deallocated on dialog cleanup.
+ */
+void *dlg_get_privdata(union control *ctrl, void *dlg);
+void dlg_set_privdata(union control *ctrl, void *dlg, void *ptr);
+void *dlg_alloc_privdata(union control *ctrl, void *dlg, size_t size);
+
+/*
  * Standard helper functions for reading a controlbox structure.
  */
 
@@ -652,3 +688,6 @@ int ctrl_path_elements(const char *path);
 /* Return the number of matching path elements at the starts of p1 and p2,
  * or INT_MAX if the paths are identical. */
 int ctrl_path_compare(const char *p1, const char *p2);
+
+
+// vim: ts=8 sts=4 sw=4 noet cino=\:2\=2(0u0

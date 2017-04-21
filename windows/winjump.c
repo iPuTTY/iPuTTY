@@ -17,10 +17,11 @@
  * contains higher level functions to manipulate the jumplist.
  */
 
-#include <assert.h>
-
 #include "putty.h"
 #include "storage.h"
+#include <assert.h>
+
+#include <propidl.h>
 
 #define MAX_JUMPLIST_ITEMS 30 /* PuTTY will never show more items in
                                * the jumplist than this, regardless of
