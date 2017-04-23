@@ -450,6 +450,18 @@ static void close_session(void *ignored_context)
     }
 }
 
+// CYGTERM patch
+/* Copy at most n characters from src to dst or until copying a '\0'
+ * character.  A pointer to the terminal '\0' in dst is returned, or if no
+ * '\0' was written, dst+n is returned.  */
+    static char *
+stpcpy_max(char *dst, const char *src, size_t n)
+{
+    while (n-- && (*dst = *src++))
+	dst++;
+    return dst;
+}
+
 int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 {
     WNDCLASSEXW wndclass; //HACK: PuttyTray / Session Icon
@@ -649,7 +661,8 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 		} else if (!strcmp(p, "-pgpfp")) {
 		    pgp_fingerprints();
 		    exit(1);
-		} else if (*p != '-') {
+		// CYGTERM patch
+		} else if (p[0] != '-' || p[1] == '\0') {
 		    char *q = p;
 		    if (got_host) {
 			/*
@@ -684,6 +697,27 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 			    conf_set_int(conf, CONF_port, -1);
 			conf_set_str(conf, CONF_host, q);
 			got_host = 1;
+		    // CYGTERM patch
+		    } else if ( conf_get_int(conf,CONF_protocol) == PROT_CYGTERM) {
+			/* Concatenate all the remaining arguments separating
+			 * them with spaces to get the command line to execute.
+			 */
+			char *p,*pst;
+			pst=(char*)malloc(1000);
+			p=pst;
+			strcpy(p, conf_get_str(conf,CONF_cygcmd));
+			char *const end = p + 1000 ;
+
+			for (; i < argc && p < end; i++) {
+			    p = stpcpy_max(p, argv[i], end - p - 1);
+			    *p++ = ' ';
+			}
+			assert(p > pst && p <= end);
+			*--p = '\0';
+			got_host = 1;
+
+			conf_set_str( conf, CONF_cygcmd, pst);
+			free(pst);
 		    } else {
 			/*
 			 * Otherwise, treat this argument as a host
@@ -5099,13 +5133,16 @@ static int TranslateKey(UINT message, WPARAM wParam, LPARAM lParam,
 	    *p++ = 0;
 	    return -2;
 	}
-	if (wParam == VK_BACK && shift_state == 1) {	/* Shift Backspace */
+	// CYGTERM patch
+	if (wParam == VK_BACK && shift_state != 0) {    /* Shift-Backspace, Ctrl-Backspace */
 	    /* We do the opposite of what is configured */
 	    *p++ = (conf_get_int(conf, CONF_bksp_is_delete) ? 0x08 : 0x7F);
 	    *p++ = 0;
 	    return -2;
 	}
 	if (wParam == VK_TAB && shift_state == 1) {	/* Shift tab */
+	    // CYGTERM patch
+	    p = output;
 	    *p++ = 0x1B;
 	    *p++ = '[';
 	    *p++ = 'Z';
@@ -5116,7 +5153,14 @@ static int TranslateKey(UINT message, WPARAM wParam, LPARAM lParam,
 	    return p - output;
 	}
 	if (wParam == VK_SPACE && shift_state == 3) {	/* Ctrl-Shift-Space */
-	    *p++ = 160;
+	    // CYGTERM patch
+	    p = output; /* don't also pass escape */
+	    *p++ = 160; /* Latin1 NBSP */
+	    return p - output;
+	}
+	// CYGTERM patch
+	if (wParam == '/' && shift_state == 2) {    /* Ctrl-/ sends ^_ */
+	    *p++ = 037;
 	    return p - output;
 	}
 	if (wParam == VK_CANCEL && shift_state == 2) {	/* Ctrl-Break */
@@ -5144,6 +5188,12 @@ static int TranslateKey(UINT message, WPARAM wParam, LPARAM lParam,
 	}
 	if (shift_state == 3 && wParam == 0xDE) {
 	    *p++ = 0x1E;	       /* Ctrl-~ == Ctrl-^ in xterm at least */
+	    return p - output;
+	}
+	// CYGTERM patch
+	if (wParam == VK_RETURN && shift_state != 0) {  /* Shift-Return, Ctrl-Return */
+	    /* send LINEFEED */
+	    *p++ = 012;
 	    return p - output;
 	}
 	if (shift_state == 0 && wParam == VK_RETURN && term->cr_lf_return) {
@@ -5491,12 +5541,16 @@ static int TranslateKey(UINT message, WPARAM wParam, LPARAM lParam,
 			if (ldisc)
 			    luni_send(ldisc, cbuf+!left_alt, 1+!!left_alt, 1);
 		    } else {
+			// CYGTERM patch
 			WCHAR cbuf[2];
 			cbuf[0] = '\033';
-			cbuf[1] = wch;
+			cbuf[1] = wch | ((left_alt & conf_get_int(conf,CONF_alt_metabit)) << 7);
 			term_seen_key_event(term);
 			if (ldisc)
-			    luni_send(ldisc, cbuf +!left_alt, 1+!!left_alt, 1);
+			    luni_send(ldisc,
+				      cbuf + !(left_alt & !conf_get_int(conf,CONF_alt_metabit)),
+				      1 + !!(left_alt & !conf_get_int(conf,CONF_alt_metabit)),
+				      1);
 		    }
 		}
 		show_mouseptr(0);

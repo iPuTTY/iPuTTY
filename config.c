@@ -10,6 +10,9 @@
 #include "dialog.h"
 #include "storage.h"
 
+// CYGTERM patch
+int cygterm_get_flag( void );
+
 #define PRINTER_DISABLED_STRING "None (printing disabled)"
 
 #define HOST_BOX_TITLE "Host Name (or IP address)"
@@ -187,6 +190,10 @@ static void config_host_handler(union control *ctrl, void *dlg,
 	     */
 	    dlg_label_change(ctrl, dlg, "Serial line");
 	    dlg_editbox_set(ctrl, dlg, conf_get_str(conf, CONF_serline));
+	// CYGTERM patch
+	} else if (conf_get_int(conf, CONF_protocol) == PROT_CYGTERM) {
+	    dlg_label_change(ctrl, dlg, "Command (use - for login shell)");
+	    dlg_editbox_set(ctrl, dlg, conf_get_str(conf, CONF_cygcmd));
 	} else {
 	    dlg_label_change(ctrl, dlg, HOST_BOX_TITLE);
 	    dlg_editbox_set(ctrl, dlg, conf_get_str(conf, CONF_host));
@@ -195,6 +202,11 @@ static void config_host_handler(union control *ctrl, void *dlg,
 	char *s = dlg_editbox_get(ctrl, dlg);
 	if (conf_get_int(conf, CONF_protocol) == PROT_SERIAL)
 	    conf_set_str(conf, CONF_serline, s);
+	// CYGTERM patch
+	else if (conf_get_int(conf, CONF_protocol) == PROT_CYGTERM) {
+	    char *s = dlg_editbox_get(ctrl, dlg);
+	    conf_set_str(conf, CONF_cygcmd, s);
+	}
 	else
 	    conf_set_str(conf, CONF_host, s);
 	sfree(s);
@@ -220,6 +232,10 @@ static void config_port_handler(union control *ctrl, void *dlg,
 	     */
 	    dlg_label_change(ctrl, dlg, "Speed");
 	    sprintf(buf, "%d", conf_get_int(conf, CONF_serspeed));
+	// CYGTERM patch
+	} else if (conf_get_int(conf, CONF_protocol) == PROT_CYGTERM) {
+	    dlg_label_change(ctrl, dlg, "Port (ignored)");
+	    strcpy(buf, "-");
 	} else {
 	    dlg_label_change(ctrl, dlg, PORT_BOX_TITLE);
 	    if (conf_get_int(conf, CONF_port) != 0)
@@ -236,6 +252,7 @@ static void config_port_handler(union control *ctrl, void *dlg,
 
 	if (conf_get_int(conf, CONF_protocol) == PROT_SERIAL)
 	    conf_set_int(conf, CONF_serspeed, i);
+	else if (conf_get_int(conf, CONF_protocol) == PROT_CYGTERM) { ; } // CYGTERM patch
 	else
 	    conf_set_int(conf, CONF_port, i);
     }
@@ -1556,6 +1573,8 @@ void setup_config_box(struct controlbox *b, int midsession,
 				sessionsaver_handler, P(ssd));
     ssd->listbox->generic.column = 0;
     ssd->listbox->listbox.height = 7;
+    // CYGTERM patch
+    if (cygterm_get_flag()) ssd->listbox->listbox.height--;
     if (!midsession) {
 	ssd->loadbutton = ctrl_pushbutton(s, "Load", 'l',
 					  HELPCTX(session_saved),

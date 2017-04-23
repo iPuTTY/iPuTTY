@@ -296,6 +296,7 @@ TERMINAL = terminal wcwidth ldiscucs logging tree234 minibidi
 # GUI front end and terminal emulator (putty, puttytel).
 GUITERM  = TERMINAL window windlg winctrls sizetip winucs winprint
          + winutils wincfg sercfg winhelp winjump miscucs urlhack regexp PickIconDialog
+         + cygcfg config
 
 # Same thing on Unix.
 UXTERM   = TERMINAL uxcfg sercfg uxucs uxprint timing callback miscucs
@@ -342,11 +343,11 @@ BE_NOSSH = be_nossh nocproxy
 BE_SSH   = be_ssh cproxy
 BE_NONE  = be_none nocproxy
 # More backend sets, with the additional Windows serial-port module.
-W_BE_ALL = be_all_s winser cproxy
-W_BE_NOSSH = be_nos_s winser nocproxy
+W_BE_ALL = be_all_s winser cproxy cygterm
+W_BE_NOSSH = be_nos_s winser nocproxy cygterm
 # And with the Unix serial-port module.
-U_BE_ALL = be_all_s uxser cproxy
-U_BE_NOSSH = be_nos_s uxser nocproxy
+U_BE_ALL = be_all_s uxser cproxy cygterm
+U_BE_NOSSH = be_nos_s uxser nocproxy cygterm
 
 # ------------------------------------------------------------
 # Definitions of actual programs. The program name, followed by a

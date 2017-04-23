@@ -136,6 +136,10 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, int has_help,
     ctrl_checkbox(s, "Control-Alt is different from AltGr", 'd',
 		  HELPCTX(keyboard_ctrlalt),
 		  conf_checkbox_handler, I(CONF_ctrlaltkeys));
+    // CYGTERM patch
+    ctrl_checkbox(s, "Set meta bit on alt (instead of escape)", NO_SHORTCUT,
+		  HELPCTX(no_help),
+		  conf_checkbox_handler, I(CONF_alt_metabit));
 
     /*
      * Windows allows an arbitrary .WAV to be played as a bell, and
@@ -527,6 +531,12 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, int has_help,
 		     HELPCTX(ssh_tunnels_xauthority),
 		     conf_filesel_handler, I(CONF_xauthfile));
     }
+    // CYGTERM patch
+    /*
+     * cygterm back end is available on Windows.
+     */
+    if (!midsession || (protocol == PROT_CYGTERM))
+	cygterm_setup_config_box(b, midsession);
 }
 
 // vim: ts=8 sts=4 sw=4 noet cino=\:2\=2(0u0

@@ -354,6 +354,7 @@ enum {
 enum {
     /* Protocol back ends. (CONF_protocol) */
     PROT_RAW, PROT_TELNET, PROT_RLOGIN, PROT_SSH,
+    PROT_CYGTERM, // CYGTERM patch
     /* PROT_SERIAL is supported on a subset of platforms, but it doesn't
      * hurt to define it globally. */
     PROT_SERIAL
@@ -796,6 +797,12 @@ void cleanup_exit(int);
     X(INT, NONE, serstopbits) \
     X(INT, NONE, serparity) \
     X(INT, NONE, serflow) \
+    /* CYGTERM patch */ \
+    /* cygterm options */ \
+    X(INT, NONE, cygautopath) \
+    X(INT, NONE, cygterm64) \
+    X(STR, NONE, cygcmd) \
+    X(INT, NONE, alt_metabit) /* set meta instead of escape */ \
     /* Keyboard options */ \
     X(INT, NONE, bksp_is_delete) \
     X(INT, NONE, rxvt_homeend) \
@@ -1190,6 +1197,13 @@ extern Backend telnet_backend;
  */
 extern Backend ssh_backend;
 
+// CYGTERM patch
+/*
+ * Exports from cygterm.c.
+ */
+extern Backend cygterm_backend;
+void cygterm_setup_config_box(struct controlbox *b, int midsession);
+
 /*
  * Exports from ldisc.c.
  */
@@ -1436,7 +1450,7 @@ void conf_filesel_handler(union control *ctrl, void *dlg,
 void conf_fontsel_handler(union control *ctrl, void *dlg,
 			  void *data, int event);
 void setup_config_box(struct controlbox *b, int midsession,
-		      int protocol, int protcfginfo);
+		      int protocol, int protcfginfo, int session_storagetype);
 
 /*
  * Exports from minibidi.c.

@@ -755,6 +755,12 @@ void save_open_settings(void *sesskey, Conf *conf)
     write_setting_filename(sesskey, "HyperlinkBrowser", conf_get_filename(conf, CONF_url_browser));
     write_setting_s(sesskey, "HyperlinkRegularExpression", conf_get_str(conf, CONF_url_regex));
 #endif
+
+// CYGTERM patch
+    write_setting_i(sesskey, "CygtermAltMetabit", conf_get_int(conf, CONF_alt_metabit));
+    write_setting_i(sesskey, "CygtermAutoPath", conf_get_int(conf, CONF_cygautopath));
+    write_setting_i(sesskey, "Cygterm64", conf_get_int(conf, CONF_cygterm64));
+    write_setting_s(sesskey, "CygtermCommand", conf_get_str(conf, CONF_cygcmd));
 }
 
 void load_settings(const char *section, Conf *conf)
@@ -1240,6 +1246,12 @@ void load_open_settings(void *sesskey, Conf *conf)
     gppfile(sesskey, "HyperlinkBrowser", conf, CONF_url_browser);
     gpps(sesskey, "HyperlinkRegularExpression", urlhack_default_regex, conf, CONF_url_regex);
 #endif
+
+    // CYGTERM patch
+    gppi(sesskey, "CygtermAltMetabit", 0, conf, CONF_alt_metabit);
+    gppi(sesskey, "CygtermAutoPath", 1, conf, CONF_cygautopath);
+    gppi(sesskey, "Cygterm64", 0, conf, CONF_cygterm64);
+    gpps(sesskey, "CygtermCommand", "", conf, CONF_cygcmd);
 }
 
 void do_defaults(const char *session, Conf *conf)

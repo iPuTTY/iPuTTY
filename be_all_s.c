@@ -14,7 +14,7 @@
  * have tiny little source modules containing nothing but
  * declarations of appname, for as long as I can...
  */
-const char *const appname = "iPuTTY";
+const char *const appname = "iPuTTY(cygterm)";
 
 #ifdef TELNET_DEFAULT
 const int be_default_protocol = PROT_TELNET;
@@ -28,5 +28,6 @@ Backend *backends[] = {
     &rlogin_backend,
     &raw_backend,
     &serial_backend,
+	&cygterm_backend, // CYGTERM patch
     NULL
 };
