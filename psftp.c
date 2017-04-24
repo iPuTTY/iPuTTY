@@ -67,7 +67,7 @@ char *toUTF8 (char *ansi) {
     if (len < 1)
 	return dupstr(ansi);
     unicode = SysAllocStringLen(NULL, len);
-    MultiByteToWideChar(CP_ACP, 0, ansi, lstrlen (ansi), unicode, len);
+    MultiByteToWideChar(CP_ACP, 0, ansi, lstrlen (ansi) + 1, unicode, len);
 
     len = WideCharToMultiByte(CP_UTF8, 0, unicode, -1, utf8, 0, NULL, NULL);
     if (len < 1) {
