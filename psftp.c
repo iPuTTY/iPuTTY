@@ -28,52 +28,59 @@ const char *const appname = "PSFTP";
 char isUTF8 = 1;
 
 char *toCP949 (char *utf8str) {
-    WCHAR *unicode = NULL;
-    char *ansi = NULL;
+    BSTR unicode;
+    char *ansi;
     int len;
 
     if (!isUTF8)
-        return strdup(utf8str);
+        return dupstr(utf8str);
 
-    unicode = (WCHAR*) calloc (1, strlen(utf8str)*2);
-    len = MultiByteToWideChar(CP_UTF8, 0, utf8str, -1, unicode, strlen(utf8str)*2);
+    len = MultiByteToWideChar(CP_UTF8, 0, utf8str, lstrlen(utf8str) + 1, NULL, NULL);
+    if (len < 1)
+	return dupstr(utf8str);
+    unicode = SysAllocStringLen(NULL, len);
+    MultiByteToWideChar(CP_UTF8, 0, utf8str, lstrlen(utf8str) + 1, unicode, len);
 
+    len = WideCharToMultiByte(CP_ACP, 0, unicode, -1, NULL, 0, NULL, NULL);
     if (len < 1) {
-        sfree (unicode);
-        return strdup(utf8str);
+	SysFreeString (unicode);
+	return dupstr(utf8str);
     }
 
-    ansi = (char*)calloc(1, len*2);
-    len = WideCharToMultiByte(CP_ACP, 0, unicode, -1, ansi, len*2, NULL, NULL);
+    ansi = (char *) smalloc (len + 1);
+    memset (ansi, 0, len + 1);
+    WideCharToMultiByte(CP_ACP, 0, unicode, -1, ansi, len, NULL, NULL);
+    SysFreeString (unicode);
 
-    //  why error?
-    //free (unicode);
-
-    return (len < 1) ? strdup(utf8str) : ansi;
+    return ansi;
 }
 
 char *toUTF8 (char *ansi) {
-    WCHAR *unicode = NULL;
+    BSTR unicode;
     char *utf8 = NULL;
     int len;
 
     if (!isUTF8)
-        return strdup(ansi);
+        return dupstr(ansi);
 
-    unicode = (WCHAR*) calloc (1, strlen(ansi)*2);
-    len = MultiByteToWideChar(CP_ACP, 0, ansi, -1, unicode, strlen(ansi)*2);
+    len = MultiByteToWideChar(CP_ACP, 0, ansi, lstrlen(ansi) + 1, NULL, NULL);
+    if (len < 1)
+	return dupstr(ansi);
+    unicode = SysAllocStringLen(NULL, len);
+    MultiByteToWideChar(CP_ACP, 0, ansi, lstrlen (ansi) + 1, unicode, len);
 
+    len = WideCharToMultiByte(CP_UTF8, 0, unicode, -1, utf8, 0, NULL, NULL);
     if (len < 1) {
-        sfree(unicode);
-        return strdup(ansi);
+	SysFreeString (unicode);
+	return dupstr(ansi);
     }
 
-    utf8 = (char*) calloc(1, len*2+1);
-    len = WideCharToMultiByte(CP_UTF8, 0, unicode, -1, utf8, len*2+1, NULL, NULL);
+    utf8 = (char *) smalloc (len + 1);
+    memset (utf8, 0, len + 1);
+    WideCharToMultiByte(CP_UTF8, 0, unicode, -1, utf8, len, NULL, NULL);
+    SysFreeString (unicode);
 
-    //free (unicode);
-
-    return (len < 1) ? strdup(ansi) : utf8;
+    return utf8;
 }
 #endif
 
@@ -2899,6 +2906,8 @@ static void usage(void)
     printf("  -sshlog file\n");
     printf("  -sshrawlog file\n");
     printf("            log protocol details to a file\n");
+    printf("  -utf8 [on|off]\n");
+    printf("            utf8 mode swtich. default is on\n");
     cleanup_exit(1);
 }
 
@@ -3172,6 +3181,16 @@ int psftp_main(int argc, char *argv[])
         } else if (strcmp(argv[i], "-pgpfp") == 0) {
             pgp_fingerprints();
             return 1;
+	} else if (strcmp(argv[i], "-utf8") == 0) {
+	    char *uopt = argv[++i];
+
+	    if ( strcmp(uopt, "on") == 0 ||
+		 strcmp(uopt, "oN") == 0 ||
+		 strcmp(uopt, "On") == 0 ||
+		 strcmp(uopt, "ON") == 0 ) {
+		isUTF8 = 1;
+	    } else
+		isUTF8 = 0;
 	} else if (strcmp(argv[i], "-V") == 0 ||
                    strcmp(argv[i], "--version") == 0) {
 	    version();
@@ -3204,8 +3223,11 @@ int psftp_main(int argc, char *argv[])
 	userhost = dupstr(conf_get_str(conf, CONF_host));
     }
 
-#if defined(_WIN);
-    printf("psftp: If charset of server side is not UTF8, then use command 'utf8 off'\n");
+#if defined(_WIN)
+    if ( isUTF8 )
+	printf("psftp: If charset of server side is not UTF8, then use command 'utf8 off'\n");
+    else
+	printf("psftp: If charset of server side is UTF8, then use command 'utf8 on'\n");
 #endif
 
     /*
@@ -3241,3 +3263,6 @@ int psftp_main(int argc, char *argv[])
 
     return ret;
 }
+
+
+// vim: ts=8 sts=4 sw=4 noet cino=\=2\:2(0u0
