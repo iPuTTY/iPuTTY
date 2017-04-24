@@ -77,7 +77,7 @@ char *toUTF8 (char *ansi) {
 
     utf8 = (char *) smalloc (len + 1);
     memset (utf8, 0, len + 1);
-    WideCharToMultiByte(CP_ACP, 0, unicode, -1, utf8, len, NULL, NULL);
+    WideCharToMultiByte(CP_UTF8, 0, unicode, -1, utf8, len, NULL, NULL);
     SysFreeString (unicode);
 
     return utf8;
