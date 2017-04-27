@@ -79,11 +79,11 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, int has_help,
 	 * Add the About and Help buttons to the standard panel.
 	 */
 	s = ctrl_getset(b, "", "", "");
-	c = ctrl_pushbutton(s, "About", 'a', HELPCTX(no_help),
+	c = ctrl_pushbutton(s, "정보", 'a', HELPCTX(no_help),
 			    about_handler, P(hwndp));
 	c->generic.column = 0;
 	if (has_help) {
-	    c = ctrl_pushbutton(s, "Help", 'h', HELPCTX(no_help),
+	    c = ctrl_pushbutton(s, "도움말", 'h', HELPCTX(no_help),
 				help_handler, P(hwndp));
 	    c->generic.column = 1;
 	}
@@ -128,8 +128,8 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, int has_help,
      * Windows has the AltGr key, which has various Windows-
      * specific options.
      */
-    s = ctrl_getset(b, "Terminal/Keyboard", "features",
-		    "Enable extra keyboard features:");
+    s = ctrl_getset(b, "터미널/키보드", "features",
+		    "추가 키보드 요소:");
     ctrl_checkbox(s, "AltGr acts as Compose key", 't',
 		  HELPCTX(keyboard_compose),
 		  conf_checkbox_handler, I(CONF_compose_key));
@@ -158,7 +158,7 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, int has_help,
      * the interface, and template creation code is under no actual
      * obligation to use them.
      */
-    s = ctrl_getset(b, "Terminal/Bell", "style", "Set the style of bell");
+    s = ctrl_getset(b, "터미널/벨", "style", "벨 스타일 설정");
     {
 	int i;
 	for (i = 0; i < s->ncontrols; i++) {
@@ -170,9 +170,9 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, int has_help,
 		c->radio.buttons =
 		    sresize(c->radio.buttons, c->radio.nbuttons, char *);
 		c->radio.buttons[c->radio.nbuttons-1] =
-		    dupstr("Play a custom sound file");
+		    dupstr("사용자 정의 벨소리 파일 실행");
 		c->radio.buttons[c->radio.nbuttons-2] =
-		    dupstr("Beep using the PC speaker");
+		    dupstr("PC 스피커 비프음 사용");
 		c->radio.buttondata =
 		    sresize(c->radio.buttondata, c->radio.nbuttons, intorptr);
 		c->radio.buttondata[c->radio.nbuttons-1] = I(BELL_WAVEFILE);
@@ -187,8 +187,8 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, int has_help,
 	    }
 	}
     }
-    ctrl_filesel(s, "Custom sound file to play as a bell:", NO_SHORTCUT,
-		 FILTER_WAVE_FILES, FALSE, "Select bell sound file",
+    ctrl_filesel(s, "사용자 정의 벨소리 파일 지정:", NO_SHORTCUT,
+		 FILTER_WAVE_FILES, FALSE, "벨소리 파일 선택",
 		 HELPCTX(bell_style),
 		 conf_filesel_handler, I(CONF_bell_wavefile));
 
@@ -196,11 +196,11 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, int has_help,
      * While we've got this box open, taskbar flashing on a bell is
      * also Windows-specific.
      */
-    ctrl_radiobuttons(s, "Taskbar/caption indication on bell:", 'i', 3,
+    ctrl_radiobuttons(s, "벨의 작업 표시줄/캡션 표시:", 'i', 3,
 		      HELPCTX(bell_taskbar),
 		      conf_radiobutton_handler,
 		      I(CONF_beep_ind),
-		      "Disabled", I(B_IND_DISABLED),
+		      "사용 안함", I(B_IND_DISABLED),
 		      "Flashing", I(B_IND_FLASH),
 		      "Steady", I(B_IND_STEADY), NULL);
 

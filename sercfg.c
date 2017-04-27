@@ -139,8 +139,8 @@ void ser_setup_config_box(struct controlbox *b, int midsession,
 	 * Add the serial back end to the protocols list at the
 	 * top of the config box.
 	 */
-	s = ctrl_getset(b, "Session", "hostport",
-			"Specify the destination you want to connect to");
+	s = ctrl_getset(b, "세션", "hostport",
+			"연결할 대상 지정");
 
         for (i = 0; i < s->ncontrols; i++) {
             c = s->ctrls[i];

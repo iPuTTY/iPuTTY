@@ -981,45 +981,45 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 	    m = popup_menus[j].menu;
 
 	    AppendMenu(m, MF_SEPARATOR, 0, 0);
-	    AppendMenu(m, MF_ENABLED, IDM_SHOWLOG, "&Event Log");
+	    AppendMenu(m, MF_ENABLED, IDM_SHOWLOG, "이벤트 로그(&E)");
 	    AppendMenu(m, MF_SEPARATOR, 0, 0);
-	    AppendMenu(m, MF_ENABLED, IDM_NEWSESS, "Ne&w Session...");
-	    AppendMenu(m, MF_ENABLED, IDM_DUPSESS, "&Duplicate Session");
+	    AppendMenu(m, MF_ENABLED, IDM_NEWSESS, "새로운 세션(&w)...");
+	    AppendMenu(m, MF_ENABLED, IDM_DUPSESS, "세션 복제(&D)");
 	    AppendMenu(m, MF_POPUP | MF_ENABLED, (UINT_PTR) savedsess_menu,
-		       "Sa&ved Sessions");
-	    AppendMenu(m, MF_ENABLED, IDM_RECONF, "Chan&ge Settings...");
+		       "세션 저장(&v)");
+	    AppendMenu(m, MF_ENABLED, IDM_RECONF, "설정 변경(&g)...");
 	    AppendMenu(m, MF_SEPARATOR, 0, 0);
-	    AppendMenu(m, MF_ENABLED | (strncmp(conf_get_str(conf, CONF_line_codepage), "UTF-8", 6) ? 0 : MF_CHECKED), IDM_UNICODE, "&Unicode Mode");
+	    AppendMenu(m, MF_ENABLED | (strncmp(conf_get_str(conf, CONF_line_codepage), "UTF-8", 6) ? 0 : MF_CHECKED), IDM_UNICODE, "유니코드 모드(&U)");
 	    AppendMenu(m, MF_SEPARATOR, 0, 0);
-	    AppendMenu(m, MF_ENABLED, IDM_COPYALL, "C&opy All to Clipboard");
-	    AppendMenu(m, MF_ENABLED, IDM_CLRSB, "C&lear Scrollback");
-	    AppendMenu(m, MF_ENABLED, IDM_RESET, "Rese&t Terminal");
+	    AppendMenu(m, MF_ENABLED, IDM_COPYALL, "클립모드로 모두 복사(&o)");
+	    AppendMenu(m, MF_ENABLED, IDM_CLRSB, "스크롤백 초기화(&l)");
+	    AppendMenu(m, MF_ENABLED, IDM_RESET, "터미널 초기화(&t)");
 	    AppendMenu(m, MF_SEPARATOR, 0, 0);
 	    AppendMenu(m, (conf_get_int(conf, CONF_resize_action)
 			   == RESIZE_DISABLED) ? MF_GRAYED : MF_ENABLED,
-		       IDM_FULLSCREEN, "&Full Screen");
+		       IDM_FULLSCREEN, "전체 화면(&F)");
 
 	    /*
 	     * HACK: PuttyTray / Always on top
 	     */
 	    if (conf_get_int(conf, CONF_alwaysontop)) {
-		AppendMenu(m, MF_ENABLED | MF_CHECKED, IDM_VISIBLE, "Alwa&ys on top");
+		AppendMenu(m, MF_ENABLED | MF_CHECKED, IDM_VISIBLE, "항상 창을 맨 앞으로(&y)");
 	    } else {
-		AppendMenu(m, MF_ENABLED | MF_UNCHECKED, IDM_VISIBLE, "Alwa&ys on top");
+		AppendMenu(m, MF_ENABLED | MF_UNCHECKED, IDM_VISIBLE, "항상 창을 맨 앞으로(&y)");
 	    }
-	    AppendMenu(m, MF_ENABLED, IDM_NEXTWINDOW, "Next &Window\tCtrl+Tab");
+	    AppendMenu(m, MF_ENABLED, IDM_NEXTWINDOW, "다음 창(&W)\tCtrl+Tab");
 
 	    AppendMenu(m, MF_SEPARATOR, 0, 0);
 	    if (has_help())
-		AppendMenu(m, MF_ENABLED, IDM_HELP, "&Help");
-	    str = dupprintf("&About %s", appname);
+		AppendMenu(m, MF_ENABLED, IDM_HELP, "도움말(&H)");
+	    str = dupprintf("%s 정보(&A)", appname);
 	    AppendMenu(m, MF_ENABLED, IDM_ABOUT, str);
 	    sfree(str);
 	}
     }
 
     if (restricted_acl) {
-	logevent(NULL, "Running with restricted process ACL");
+	logevent(NULL, "제한된 프로세스 ACL로 실행");
     }
 
     start_backend();

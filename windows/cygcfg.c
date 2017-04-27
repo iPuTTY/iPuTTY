@@ -52,8 +52,8 @@ void cygterm_setup_config_box(struct controlbox *b, int midsession)
 	if( !CygTermFlag ) return ;
 
 	struct controlset *s;
-	s = ctrl_getset(b, "Session", "hostport",
-			"Specify the destination you want to connect to");
+	s = ctrl_getset(b, "세션", "hostport",
+			"연결할 대상 지정");
 	for (i = 0; i < s->ncontrols; i++) {
 		c = s->ctrls[i];
 		if (c->generic.type == CTRL_RADIO &&
@@ -75,17 +75,17 @@ void cygterm_setup_config_box(struct controlbox *b, int midsession)
 	}
 	if (!midsession) {
 		ctrl_settitle(b, "Connection/Cygterm",
-				"Options controlling Cygterm sessions");
+				"Cygterm 세션 제어 옵션");
 		s = ctrl_getset(b, "Connection/Cygterm", "cygterm",
-				"Configure Cygwin paths");
-		ctrl_checkbox(s, "Autodetect Cygwin installation", 'd',
+				"Cygwin 경로 설정");
+		ctrl_checkbox(s, "Cygwin 설치 자동 감지", 'd',
 			HELPCTX(no_help),
 			conf_checkbox_handler/*dlg_stdcheckbox_handler*/,
 			I(CONF_cygautopath)
 		);
 		if( is64Bits() )
 		{
-			ctrl_checkbox(s, "Use Cygwin64", 'u',
+			ctrl_checkbox(s, "Cygwin64 사용", 'u',
 					HELPCTX(no_help),
 					conf_checkbox_handler,
 					I(CONF_cygterm64));

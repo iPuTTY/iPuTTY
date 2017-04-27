@@ -15,8 +15,8 @@ int cygterm_get_flag( void );
 
 #define PRINTER_DISABLED_STRING "None (printing disabled)"
 
-#define HOST_BOX_TITLE "Host Name (or IP address)"
-#define PORT_BOX_TITLE "Port"
+#define HOST_BOX_TITLE "호스트 이름(또는 IP 주소)"
+#define PORT_BOX_TITLE "포트"
 
 #ifdef PUTTY_WINSTUFF_H
 /*
@@ -188,11 +188,11 @@ static void config_host_handler(union control *ctrl, void *dlg,
 	     * This label text is carefully chosen to contain an n,
 	     * since that's the shortcut for the host name control.
 	     */
-	    dlg_label_change(ctrl, dlg, "Serial line");
+	    dlg_label_change(ctrl, dlg, "시리얼 라인");
 	    dlg_editbox_set(ctrl, dlg, conf_get_str(conf, CONF_serline));
 	// CYGTERM patch
 	} else if (conf_get_int(conf, CONF_protocol) == PROT_CYGTERM) {
-	    dlg_label_change(ctrl, dlg, "Command (use - for login shell)");
+	    dlg_label_change(ctrl, dlg, "명령 (login shell은 - 를 사용)");
 	    dlg_editbox_set(ctrl, dlg, conf_get_str(conf, CONF_cygcmd));
 	} else {
 	    dlg_label_change(ctrl, dlg, HOST_BOX_TITLE);
@@ -230,11 +230,11 @@ static void config_port_handler(union control *ctrl, void *dlg,
 	     * This label text is carefully chosen to contain a p,
 	     * since that's the shortcut for the port control.
 	     */
-	    dlg_label_change(ctrl, dlg, "Speed");
+	    dlg_label_change(ctrl, dlg, "속도");
 	    sprintf(buf, "%d", conf_get_int(conf, CONF_serspeed));
 	// CYGTERM patch
 	} else if (conf_get_int(conf, CONF_protocol) == PROT_CYGTERM) {
-	    dlg_label_change(ctrl, dlg, "Port (ignored)");
+	    dlg_label_change(ctrl, dlg, "포트 (무시)");
 	    strcpy(buf, "-");
 	} else {
 	    dlg_label_change(ctrl, dlg, PORT_BOX_TITLE);
@@ -707,7 +707,7 @@ static int load_selected_session(struct sessionsaver_data *ssd,
 	dlg_beep(dlg);
 	return 0;
     }
-    isdef = !strcmp(ssd->sesslist.sessions[i], "Default Settings");
+    isdef = !strcmp(ssd->sesslist.sessions[i], "기본 설정");
     load_settings(ssd->sesslist.sessions[i], conf);
     sfree(ssd->savedsession);
     ssd->savedsession = dupstr(isdef ? "" : ssd->sesslist.sessions[i]);
@@ -795,14 +795,14 @@ static void sessionsaver_handler(union control *ctrl, void *dlg,
 		dlg_end(dlg, 1);       /* it's all over, and succeeded */
 	    }
 	} else if (ctrl == ssd->savebutton) {
-	    int isdef = !strcmp(ssd->savedsession, "Default Settings");
+	    int isdef = !strcmp(ssd->savedsession, "기본 설정");
 	    if (!ssd->savedsession[0]) {
 		int i = dlg_listbox_index(ssd->listbox, dlg);
 		if (i < 0) {
 		    dlg_beep(dlg);
 		    return;
 		}
-		isdef = !strcmp(ssd->sesslist.sessions[i], "Default Settings");
+		isdef = !strcmp(ssd->sesslist.sessions[i], "기본 설정");
                 sfree(ssd->savedsession);
                 ssd->savedsession = dupstr(isdef ? "" :
                                            ssd->sesslist.sessions[i]);
@@ -1490,13 +1490,13 @@ void setup_config_box(struct controlbox *b, int midsession,
     s = ctrl_getset(b, "", "", "");
     ctrl_columns(s, 5, 20, 20, 20, 20, 20);
     ssd->okbutton = ctrl_pushbutton(s,
-				    (midsession ? "Apply" : "Open"),
+				    (midsession ? "적용" : "열기"),
 				    (char)(midsession ? 'a' : 'o'),
 				    HELPCTX(no_help),
 				    sessionsaver_handler, P(ssd));
     ssd->okbutton->button.isdefault = TRUE;
     ssd->okbutton->generic.column = 3;
-    ssd->cancelbutton = ctrl_pushbutton(s, "Cancel", 'c', HELPCTX(no_help),
+    ssd->cancelbutton = ctrl_pushbutton(s, "취소", 'c', HELPCTX(no_help),
 					sessionsaver_handler, P(ssd));
     ssd->cancelbutton->button.iscancel = TRUE;
     ssd->cancelbutton->generic.column = 4;
@@ -1506,16 +1506,16 @@ void setup_config_box(struct controlbox *b, int midsession,
     /*
      * The Session panel.
      */
-    str = dupprintf("Basic options for your %s session", appname);
-    ctrl_settitle(b, "Session", str);
+    str = dupprintf("%s 세션 기본 옵션", appname);
+    ctrl_settitle(b, "세션", str);
     sfree(str);
 
     if (!midsession) {
 	struct hostport *hp = (struct hostport *)
 	    ctrl_alloc(b, sizeof(struct hostport));
 
-	s = ctrl_getset(b, "Session", "hostport",
-			"Specify the destination you want to connect to");
+	s = ctrl_getset(b, "세션", "hostport",
+			"연결할 대상 지정");
 	ctrl_columns(s, 2, 75, 25);
 	c = ctrl_editbox(s, HOST_BOX_TITLE, 'n', 100,
 			 HELPCTX(session_hostname),
@@ -1530,7 +1530,7 @@ void setup_config_box(struct controlbox *b, int midsession,
 	ctrl_columns(s, 1, 100);
 
 	if (!backend_from_proto(PROT_SSH)) {
-	    ctrl_radiobuttons(s, "Connection type:", NO_SHORTCUT, 3,
+	    ctrl_radiobuttons(s, "연결 형식:", NO_SHORTCUT, 3,
 			      HELPCTX(session_hostname),
 			      config_protocolbuttons_handler, P(hp),
 			      "Raw", 'w', I(PROT_RAW),
@@ -1538,7 +1538,7 @@ void setup_config_box(struct controlbox *b, int midsession,
 			      "Rlogin", 'i', I(PROT_RLOGIN),
 			      NULL);
 	} else {
-	    ctrl_radiobuttons(s, "Connection type:", NO_SHORTCUT, 4,
+	    ctrl_radiobuttons(s, "연결 형식:", NO_SHORTCUT, 4,
 			      HELPCTX(session_hostname),
 			      config_protocolbuttons_handler, P(hp),
 			      "Raw", 'w', I(PROT_RAW),
@@ -1552,15 +1552,15 @@ void setup_config_box(struct controlbox *b, int midsession,
     /*
      * The Load/Save panel is available even in mid-session.
      */
-    s = ctrl_getset(b, "Session", "savedsessions",
-		    midsession ? "Save the current session settings" :
-		    "Load, save or delete a stored session");
+    s = ctrl_getset(b, "세션", "savedsessions",
+		    midsession ? "현재 세션 설정을 저장" :
+		    "불러오기, 저장, 저장된 세션 삭제");
     ctrl_columns(s, 2, 75, 25);
 
 #ifdef PUTTY_WINSTUFF_H
     current_storagetype = get_sesslist(&ssd->sesslist, TRUE, (midsession ? session_storagetype : (session_storagetype + 2))); // HACK: PuttyTray / PuTTY File - The +2 triggers storagetype autoswitching
 #endif
-    ssd->editbox = ctrl_editbox(s, "Saved Sessions", 'e', 100,
+    ssd->editbox = ctrl_editbox(s, "저장된 세션", 'e', 100,
 				HELPCTX(session_saved),
 				sessionsaver_handler, P(ssd), P(NULL));
     ssd->editbox->generic.column = 0;
@@ -1576,7 +1576,7 @@ void setup_config_box(struct controlbox *b, int midsession,
     // CYGTERM patch
     if (cygterm_get_flag()) ssd->listbox->listbox.height--;
     if (!midsession) {
-	ssd->loadbutton = ctrl_pushbutton(s, "Load", 'l',
+	ssd->loadbutton = ctrl_pushbutton(s, "불러오기", 'l',
 					  HELPCTX(session_saved),
 					  sessionsaver_handler, P(ssd));
 	ssd->loadbutton->generic.column = 1;
@@ -1588,12 +1588,12 @@ void setup_config_box(struct controlbox *b, int midsession,
 	ssd->loadbutton = NULL;
     }
     /* "Save" button is permitted mid-session. */
-    ssd->savebutton = ctrl_pushbutton(s, "Save", 'v',
+    ssd->savebutton = ctrl_pushbutton(s, "저장", 'v',
 				      HELPCTX(session_saved),
 				      sessionsaver_handler, P(ssd));
     ssd->savebutton->generic.column = 1;
     if (!midsession) {
-	ssd->delbutton = ctrl_pushbutton(s, "Delete", 'd',
+	ssd->delbutton = ctrl_pushbutton(s, "삭제", 'd',
 					 HELPCTX(session_saved),
 					 sessionsaver_handler, P(ssd));
 	ssd->delbutton->generic.column = 1;
@@ -1617,31 +1617,31 @@ void setup_config_box(struct controlbox *b, int midsession,
 	c = ctrl_radiobuttons(s, NULL, 'w', 2,
 			      HELPCTX(no_help),
 			      storagetype_handler,
-			      P(ssd), "Sessions from registry", I(0), "Sessions from file", I(1), NULL);
+			      P(ssd), "레지스트리에 관리", I(0), "파일로 관리", I(1), NULL);
     } else {
 	c = ctrl_radiobuttons(s, NULL, 'w', 2,
 			      HELPCTX(no_help),
 			      storagetype_handler,
-			      P(ssd), "Sessions from file", I(1), "Sessions from registry", I(0), NULL);
+			      P(ssd), "파일로 관리", I(1), "레지스트리에 관리", I(0), NULL);
     }
     /** HACK: END **/
 #endif
 
-    s = ctrl_getset(b, "Session", "otheropts", NULL);
-    ctrl_radiobuttons(s, "Close window on exit:", 'x', 4,
+    s = ctrl_getset(b, "세션", "otheropts", NULL);
+    ctrl_radiobuttons(s, "종료시 윈도우 닫기:", 'x', 4,
                       HELPCTX(session_coe),
                       conf_radiobutton_handler,
                       I(CONF_close_on_exit),
-                      "Always", I(FORCE_ON),
-                      "Never", I(FORCE_OFF),
-                      "Only on clean exit", I(AUTO), NULL);
+                      "항상", I(FORCE_ON),
+                      "안함", I(FORCE_OFF),
+                      "명확한 종료 시에만", I(AUTO), NULL);
 
     /*
      * The Session/Logging panel.
      */
-    ctrl_settitle(b, "Session/Logging", "Options controlling session logging");
+    ctrl_settitle(b, "세션/로깅", "세션 로깅 조절 설정");
 
-    s = ctrl_getset(b, "Session/Logging", "main", NULL);
+    s = ctrl_getset(b, "세션/로깅", "main", NULL);
     /*
      * The logging buttons change depending on whether SSH packet
      * logging can sensibly be available.
@@ -1650,48 +1650,48 @@ void setup_config_box(struct controlbox *b, int midsession,
 	const char *sshlogname, *sshrawlogname;
 	if ((midsession && protocol == PROT_SSH) ||
 	    (!midsession && backend_from_proto(PROT_SSH))) {
-	    sshlogname = "SSH packets";
-	    sshrawlogname = "SSH packets and raw data";
+	    sshlogname = "SSH 패킷";
+	    sshrawlogname = "SSH 패킷과 raw 데이타";
         } else {
 	    sshlogname = NULL;	       /* this will disable both buttons */
 	    sshrawlogname = NULL;      /* this will just placate optimisers */
         }
-	ctrl_radiobuttons(s, "Session logging:", NO_SHORTCUT, 2,
+	ctrl_radiobuttons(s, "세션 로깅:", NO_SHORTCUT, 2,
 			  HELPCTX(logging_main),
 			  loggingbuttons_handler,
 			  I(CONF_logtype),
-			  "None", 't', I(LGTYP_NONE),
-			  "Printable output", 'p', I(LGTYP_ASCII),
-			  "All session output", 'l', I(LGTYP_DEBUG),
+			  "안함", 't', I(LGTYP_NONE),
+			  "읽을 수 있는 출력만", 'p', I(LGTYP_ASCII),
+			  "세션의 모든 출력", 'l', I(LGTYP_DEBUG),
 			  sshlogname, 's', I(LGTYP_PACKETS),
 			  sshrawlogname, 'r', I(LGTYP_SSHRAW),
 			  NULL);
     }
-    ctrl_filesel(s, "Log file name:", 'f',
-		 NULL, TRUE, "Select session log file name",
+    ctrl_filesel(s, "로그 파일 이름:", 'f',
+		 NULL, TRUE, "로그 파일 이름 선택",
 		 HELPCTX(logging_filename),
 		 conf_filesel_handler, I(CONF_logfilename));
-    ctrl_text(s, "(Log file name can contain &Y, &M, &D for date,"
-	      " &T for time, &H for host name, and &P for port number)",
+    ctrl_text(s, "(로그 파일 이름에 날자(&Y, &M, &D),"
+	      " 시간(&T), 호스트 이름(&H), 포트(&P)를 포함할 수 있습니다.)",
 	      HELPCTX(logging_filename));
-    ctrl_radiobuttons(s, "What to do if the log file already exists:", 'e', 1,
+    ctrl_radiobuttons(s, "로그 파일이 이미 존재할 경우:", 'e', 1,
 		      HELPCTX(logging_exists),
 		      conf_radiobutton_handler, I(CONF_logxfovr),
-		      "Always overwrite it", I(LGXF_OVR),
-		      "Always append to the end of it", I(LGXF_APN),
-		      "Ask the user every time", I(LGXF_ASK), NULL);
-    ctrl_checkbox(s, "Flush log file frequently", 'u',
+		      "항상 덮어쓰기", I(LGXF_OVR),
+		      "항상 파일의 끝에 덧붙이기", I(LGXF_APN),
+		      "매번 물어보기", I(LGXF_ASK), NULL);
+    ctrl_checkbox(s, "로그 파일을 자주 비우기", 'u',
 		 HELPCTX(logging_flush),
 		 conf_checkbox_handler, I(CONF_logflush));
 
     if ((midsession && protocol == PROT_SSH) ||
 	(!midsession && backend_from_proto(PROT_SSH))) {
-	s = ctrl_getset(b, "Session/Logging", "ssh",
-			"Options specific to SSH packet logging");
-	ctrl_checkbox(s, "Omit known password fields", 'k',
+	s = ctrl_getset(b, "세션/로깅", "ssh",
+			"SSH 패킷 로깅 관련 옵션");
+	ctrl_checkbox(s, "알려진 암호 필드 생략", 'k',
 		      HELPCTX(logging_ssh_omit_password),
 		      conf_checkbox_handler, I(CONF_logomitpass));
-	ctrl_checkbox(s, "Omit session data", 'd',
+	ctrl_checkbox(s, "세션 데이타 생략", 'd',
 		      HELPCTX(logging_ssh_omit_data),
 		      conf_checkbox_handler, I(CONF_logomitdata));
     }
@@ -1699,32 +1699,32 @@ void setup_config_box(struct controlbox *b, int midsession,
     /*
      * The Terminal panel.
      */
-    ctrl_settitle(b, "Terminal", "Options controlling the terminal emulation");
+    ctrl_settitle(b, "터미널", "터미널 에뮬레이션 제어 옵션");
 
-    s = ctrl_getset(b, "Terminal", "general", "Set various terminal options");
-    ctrl_checkbox(s, "Auto wrap mode initially on", 'w',
+    s = ctrl_getset(b, "터미널", "general", "다양한 터미널 옵션 설정");
+    ctrl_checkbox(s, "처음에 자동 줄 바꿈 모드 사용", 'w',
 		  HELPCTX(terminal_autowrap),
 		  conf_checkbox_handler, I(CONF_wrap_mode));
     ctrl_checkbox(s, "DEC Origin Mode initially on", 'd',
 		  HELPCTX(terminal_decom),
 		  conf_checkbox_handler, I(CONF_dec_om));
-    ctrl_checkbox(s, "Implicit CR in every LF", 'r',
+    ctrl_checkbox(s, "모든 LF를 CR로 간주", 'r',
 		  HELPCTX(terminal_lfhascr),
 		  conf_checkbox_handler, I(CONF_lfhascr));
-    ctrl_checkbox(s, "Implicit LF in every CR", 'f',
+    ctrl_checkbox(s, "모든 CR을 LF로 간주", 'f',
 		  HELPCTX(terminal_crhaslf),
 		  conf_checkbox_handler, I(CONF_crhaslf));
-    ctrl_checkbox(s, "Use background colour to erase screen", 'e',
+    ctrl_checkbox(s, "배경색을 사용하여 화면 지우기", 'e',
 		  HELPCTX(terminal_bce),
 		  conf_checkbox_handler, I(CONF_bce));
-    ctrl_checkbox(s, "Enable blinking text", 'n',
+    ctrl_checkbox(s, "깜빡이는 글자 사용", 'n',
 		  HELPCTX(terminal_blink),
 		  conf_checkbox_handler, I(CONF_blinktext));
     ctrl_editbox(s, "Answerback to ^E:", 's', 100,
 		 HELPCTX(terminal_answerback),
 		 conf_editbox_handler, I(CONF_answerback), I(1));
 
-    s = ctrl_getset(b, "Terminal", "ldisc", "Line discipline options");
+    s = ctrl_getset(b, "터미널", "ldisc", "Line discipline 옵션");
     ctrl_radiobuttons(s, "Local echo:", 'l', 3,
 		      HELPCTX(terminal_localecho),
 		      conf_radiobutton_handler,I(CONF_localecho),
@@ -1738,7 +1738,7 @@ void setup_config_box(struct controlbox *b, int midsession,
 		      "Force on", I(FORCE_ON),
 		      "Force off", I(FORCE_OFF), NULL);
 
-    s = ctrl_getset(b, "Terminal", "printing", "Remote-controlled printing");
+    s = ctrl_getset(b, "터미널", "printing", "Remote-controlled printing");
     ctrl_combobox(s, "Printer to send ANSI printer output to:", 'p', 100,
 		  HELPCTX(terminal_printing),
 		  printerbox_handler, P(NULL), P(NULL));
@@ -1746,70 +1746,70 @@ void setup_config_box(struct controlbox *b, int midsession,
     /*
      * The Terminal/Keyboard panel.
      */
-    ctrl_settitle(b, "Terminal/Keyboard",
-		  "Options controlling the effects of keys");
+    ctrl_settitle(b, "터미널/키보드",
+		  "키 효과 제어 옵션");
 
-    s = ctrl_getset(b, "Terminal/Keyboard", "mappings",
-		    "Change the sequences sent by:");
-    ctrl_radiobuttons(s, "The Backspace key", 'b', 2,
+    s = ctrl_getset(b, "터미널/키보드", "mappings",
+		    "시퀀스 변경 제어:");
+    ctrl_radiobuttons(s, "백스페이스 키", 'b', 2,
 		      HELPCTX(keyboard_backspace),
 		      conf_radiobutton_handler,
 		      I(CONF_bksp_is_delete),
 		      "Control-H", I(0), "Control-? (127)", I(1), NULL);
-    ctrl_radiobuttons(s, "The Home and End keys", 'e', 2,
+    ctrl_radiobuttons(s, "Home 및 End 키", 'e', 2,
 		      HELPCTX(keyboard_homeend),
 		      conf_radiobutton_handler,
 		      I(CONF_rxvt_homeend),
-		      "Standard", I(0), "rxvt", I(1), NULL);
-    ctrl_radiobuttons(s, "The Function keys and keypad", 'f', 3,
+		      "표준", I(0), "rxvt", I(1), NULL);
+    ctrl_radiobuttons(s, "펑션키 및 키패드", 'f', 3,
 		      HELPCTX(keyboard_funkeys),
 		      conf_radiobutton_handler,
 		      I(CONF_funky_type),
 		      "ESC[n~", I(0), "Linux", I(1), "Xterm R6", I(2),
 		      "VT400", I(3), "VT100+", I(4), "SCO", I(5), NULL);
 
-    s = ctrl_getset(b, "Terminal/Keyboard", "appkeypad",
-		    "Application keypad settings:");
-    ctrl_radiobuttons(s, "Initial state of cursor keys:", 'r', 3,
+    s = ctrl_getset(b, "터미널/키보드", "appkeypad",
+		    "응용 프로그램 키패드 상태:");
+    ctrl_radiobuttons(s, "커서 키의 처음 상태:", 'r', 3,
 		      HELPCTX(keyboard_appcursor),
 		      conf_radiobutton_handler,
 		      I(CONF_app_cursor),
-		      "Normal", I(0), "Application", I(1), NULL);
-    ctrl_radiobuttons(s, "Initial state of numeric keypad:", 'n', 3,
+		      "Normal", I(0), "응용 프로그램", I(1), NULL);
+    ctrl_radiobuttons(s, "숫자 키패드의 처음 상태:", 'n', 3,
 		      HELPCTX(keyboard_appkeypad),
 		      numeric_keypad_handler, P(NULL),
-		      "Normal", I(0), "Application", I(1), "NetHack", I(2),
+		      "일반", I(0), "응용 프로그램", I(1), "NetHack", I(2),
 		      NULL);
 
     /*
      * The Terminal/Bell panel.
      */
-    ctrl_settitle(b, "Terminal/Bell",
-		  "Options controlling the terminal bell");
+    ctrl_settitle(b, "터미널/벨",
+		  "터미널 벨 제어 옵션");
 
-    s = ctrl_getset(b, "Terminal/Bell", "style", "Set the style of bell");
-    ctrl_radiobuttons(s, "Action to happen when a bell occurs:", 'b', 1,
+    s = ctrl_getset(b, "터미널/벨", "style", "벨 스타일 설정");
+    ctrl_radiobuttons(s, "벨소리 발생 시 작업:", 'b', 1,
 		      HELPCTX(bell_style),
 		      conf_radiobutton_handler, I(CONF_beep),
-		      "None (bell disabled)", I(BELL_DISABLED),
-		      "Make default system alert sound", I(BELL_DEFAULT),
-		      "Visual bell (flash window)", I(BELL_VISUAL), NULL);
+		      "없음 (벨소리 끔)", I(BELL_DISABLED),
+		      "시스템 기본 경고 소리 출력", I(BELL_DEFAULT),
+		      "비주얼 벨(flash window)", I(BELL_VISUAL), NULL);
 
-    s = ctrl_getset(b, "Terminal/Bell", "overload",
-		    "Control the bell overload behaviour");
-    ctrl_checkbox(s, "Bell is temporarily disabled when over-used", 'd',
+    s = ctrl_getset(b, "터미널/벨", "overload",
+		    "벨 오버로드 동작 제어");
+    ctrl_checkbox(s, "과도하게 사용될 경우 일시적으로 사용 중지", 'd',
 		  HELPCTX(bell_overload),
 		  conf_checkbox_handler, I(CONF_bellovl));
-    ctrl_editbox(s, "Over-use means this many bells...", 'm', 20,
+    ctrl_editbox(s, "과도한 벨소리 사용 회수 임계치...", 'm', 20,
 		 HELPCTX(bell_overload),
 		 conf_editbox_handler, I(CONF_bellovl_n), I(-1));
-    ctrl_editbox(s, "... in this many seconds", 't', 20,
+    ctrl_editbox(s, "... 지정한 댜음 초당", 't', 20,
 		 HELPCTX(bell_overload),
 		 conf_editbox_handler, I(CONF_bellovl_t),
 		 I(-TICKSPERSEC));
-    ctrl_text(s, "The bell is re-enabled after a few seconds of silence.",
+    ctrl_text(s, "꺼진 후, 다시 원복되기 까지의 시간.",
 	      HELPCTX(bell_overload));
-    ctrl_editbox(s, "Seconds of silence required", 's', 20,
+    ctrl_editbox(s, "벨소리 꺼짐을 유지할 시간(초)", 's', 20,
 		 HELPCTX(bell_overload),
 		 conf_editbox_handler, I(CONF_bellovl_s),
 		 I(-TICKSPERSEC));
@@ -1817,10 +1817,10 @@ void setup_config_box(struct controlbox *b, int midsession,
     /*
      * The Terminal/Features panel.
      */
-    ctrl_settitle(b, "Terminal/Features",
-		  "Enabling and disabling advanced terminal features");
+    ctrl_settitle(b, "터미널/기능",
+		  "고급 터미널 기능 활성화 및 비활성화");
 
-    s = ctrl_getset(b, "Terminal/Features", "main", NULL);
+    s = ctrl_getset(b, "터미널/기능", "main", NULL);
     ctrl_checkbox(s, "Disable application cursor keys mode", 'u',
 		  HELPCTX(features_application),
 		  conf_checkbox_handler, I(CONF_no_applic_c));
@@ -2169,11 +2169,11 @@ void setup_config_box(struct controlbox *b, int midsession,
 	    }
 
 	    s = ctrl_getset(b, "Connection/Data", "term",
-			    "Terminal details");
-	    ctrl_editbox(s, "Terminal-type string", 't', 50,
+			    "터미널 세부 사항");
+	    ctrl_editbox(s, "터미널 형식 문자열", 't', 50,
 			 HELPCTX(connection_termtype),
 			 conf_editbox_handler, I(CONF_termtype), I(1));
-	    ctrl_editbox(s, "Terminal speeds", 's', 50,
+	    ctrl_editbox(s, "터미널 속도", 's', 50,
 			 HELPCTX(connection_termspeed),
 			 conf_editbox_handler, I(CONF_termspeed), I(1));
 
@@ -2630,22 +2630,22 @@ void setup_config_box(struct controlbox *b, int midsession,
 	    /*
 	     * The Connection/SSH/TTY panel.
 	     */
-	    ctrl_settitle(b, "Connection/SSH/TTY", "Remote terminal settings");
+	    ctrl_settitle(b, "Connection/SSH/TTY", "원격 터미널 설정");
 
 	    s = ctrl_getset(b, "Connection/SSH/TTY", "sshtty", NULL);
-	    ctrl_checkbox(s, "Don't allocate a pseudo-terminal", 'p',
+	    ctrl_checkbox(s, "의사(pseudo) 터미널에 할당 안함", 'p',
 			  HELPCTX(ssh_nopty),
 			  conf_checkbox_handler,
 			  I(CONF_nopty));
 
 	    s = ctrl_getset(b, "Connection/SSH/TTY", "ttymodes",
-			    "Terminal modes");
+			    "터미널 모드");
 	    td = (struct ttymodes_data *)
 		ctrl_alloc(b, sizeof(struct ttymodes_data));
 	    ctrl_columns(s, 2, 75, 25);
-	    c = ctrl_text(s, "Terminal modes to send:", HELPCTX(ssh_ttymodes));
+	    c = ctrl_text(s, "터미널 전송 모드:", HELPCTX(ssh_ttymodes));
 	    c->generic.column = 0;
-	    td->rembutton = ctrl_pushbutton(s, "Remove", 'r',
+	    td->rembutton = ctrl_pushbutton(s, "제거", 'r',
 					    HELPCTX(ssh_ttymodes),
 					    ttymodes_handler, P(td));
 	    td->rembutton->generic.column = 1;
@@ -2662,11 +2662,11 @@ void setup_config_box(struct controlbox *b, int midsession,
 	    td->listbox->listbox.percentages[1] = 60;
 	    ctrl_tabdelay(s, td->rembutton);
 	    ctrl_columns(s, 2, 75, 25);
-	    td->modelist = ctrl_droplist(s, "Mode:", 'm', 67,
+	    td->modelist = ctrl_droplist(s, "모드:", 'm', 67,
 					 HELPCTX(ssh_ttymodes),
 					 ttymodes_handler, P(td));
 	    td->modelist->generic.column = 0;
-	    td->addbutton = ctrl_pushbutton(s, "Add", 'd',
+	    td->addbutton = ctrl_pushbutton(s, "추가", 'd',
 					    HELPCTX(ssh_ttymodes),
 					    ttymodes_handler, P(td));
 	    td->addbutton->generic.column = 1;
@@ -2675,13 +2675,13 @@ void setup_config_box(struct controlbox *b, int midsession,
 	    /* Bit of a hack to get the value radio buttons and
 	     * edit-box on the same row. */
 	    ctrl_columns(s, 3, 25, 50, 25);
-	    c = ctrl_text(s, "Value:", HELPCTX(ssh_ttymodes));
+	    c = ctrl_text(s, "값:", HELPCTX(ssh_ttymodes));
 	    c->generic.column = 0;
 	    td->valradio = ctrl_radiobuttons(s, NULL, NO_SHORTCUT, 2,
 					     HELPCTX(ssh_ttymodes),
 					     ttymodes_handler, P(td),
-					     "Auto", NO_SHORTCUT, P(NULL),
-					     "This:", NO_SHORTCUT, P(NULL),
+					     "자동", NO_SHORTCUT, P(NULL),
+					     "지정값:", NO_SHORTCUT, P(NULL),
 					     NULL);
 	    td->valradio->generic.column = 1;
 	    td->valbox = ctrl_editbox(s, NULL, NO_SHORTCUT, 100,
