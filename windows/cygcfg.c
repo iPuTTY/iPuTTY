@@ -74,9 +74,9 @@ void cygterm_setup_config_box(struct controlbox *b, int midsession)
 		}
 	}
 	if (!midsession) {
-		ctrl_settitle(b, "Connection/Cygterm",
+		ctrl_settitle(b, "연결/Cygterm",
 				"Cygterm 세션 제어 옵션");
-		s = ctrl_getset(b, "Connection/Cygterm", "cygterm",
+		s = ctrl_getset(b, "연결/Cygterm", "cygterm",
 				"Cygwin 경로 설정");
 		ctrl_checkbox(s, "Cygwin 설치 자동 감지", 'd',
 			HELPCTX(no_help),
