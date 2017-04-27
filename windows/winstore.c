@@ -151,7 +151,7 @@ void *open_settings_w(const char *sessionname, char **errmsg)
 /*
  * STORAGETYPE SWITCHER
  */
-void reg_write_setting_s(void *handle, const char *key, const char *value)
+void write_setting_s(void *handle, const char *key, const char *value)
 {
     if (storagetype == 1) {
 	file_write_setting_s(handle, key, value);
@@ -163,7 +163,7 @@ void reg_write_setting_s(void *handle, const char *key, const char *value)
 /*
  * STORAGETYPE SWITCHER
  */
-void reg_write_setting_i(void *handle, const char *key, int value)
+void write_setting_i(void *handle, const char *key, int value)
 {
     if (storagetype == 1) {
 	file_write_setting_i(handle, key, value);
@@ -199,7 +199,7 @@ void write_setting_fontspec(void *handle, const char *name, FontSpec *font)
 /*
  * STORAGETYPE SWITCHER
  */
-void reg_close_settings_w(void *handle)
+void close_settings_w(void *handle)
 {
     if (storagetype == 1) {
 	file_close_settings_w(handle);
@@ -227,7 +227,7 @@ void reg_close_settings_w(void *handle)
  *
  * STORAGETYPE SWITCHER
  */
-void *reg_open_settings_r(const char *sessionname)
+void *open_settings_r(const char *sessionname)
 {
     if (storagetype == 1) {
 	return file_open_settings_r(sessionname);
@@ -1629,26 +1629,26 @@ void *reg_open_settings_w(const char *sessionname, char **errmsg)
     return (void *) sesskey;
 }
 
-void write_setting_s(void *handle, const char *key, const char *value)
+void reg_write_setting_s(void *handle, const char *key, const char *value)
 {
     if (handle)
 	RegSetValueEx((HKEY) handle, key, 0, REG_SZ, (CONST BYTE *)value,
 		      1 + strlen(value));
 }
 
-void write_setting_i(void *handle, const char *key, int value)
+void reg_write_setting_i(void *handle, const char *key, int value)
 {
     if (handle)
 	RegSetValueEx((HKEY) handle, key, 0, REG_DWORD,
 		      (CONST BYTE *) &value, sizeof(value));
 }
 
-void close_settings_w(void *handle)
+void reg_close_settings_w(void *handle)
 {
     RegCloseKey((HKEY) handle);
 }
 
-void *open_settings_r(const char *sessionname)
+void *reg_open_settings_r(const char *sessionname)
 {
     HKEY subkey1, sesskey;
     char *p;
