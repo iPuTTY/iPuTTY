@@ -38,7 +38,7 @@ void modalfatalbox(const char *fmt, ...)
     va_start(ap, fmt);
     stuff = dupvprintf(fmt, ap);
     va_end(ap);
-    MessageBox(NULL, stuff, "PuTTYgen Fatal Error",
+    MessageBox(NULL, stuff, "PuTTYgen 치명적 오류",
 	       MB_SYSTEMMODAL | MB_ICONERROR | MB_OK);
     sfree(stuff);
     exit(1);
@@ -55,7 +55,7 @@ void nonfatal(const char *fmt, ...)
     va_start(ap, fmt);
     stuff = dupvprintf(fmt, ap);
     va_end(ap);
-    MessageBox(NULL, stuff, "PuTTYgen Error",
+    MessageBox(NULL, stuff, "PuTTYgen 오류",
 	       MB_SYSTEMMODAL | MB_ICONERROR | MB_OK);
     sfree(stuff);
 }
@@ -216,11 +216,11 @@ static int prompt_keyfile(HWND hwnd, char *dlgtitle,
     memset(&of, 0, sizeof(of));
     of.hwndOwner = hwnd;
     if (ppk) {
-	of.lpstrFilter = "PuTTY Private Key Files (*.ppk)\0*.ppk\0"
-	    "All Files (*.*)\0*\0\0\0";
+	of.lpstrFilter = "PuTTY 개인키 파일 (*.ppk)\0*.ppk\0"
+	    "모든 파일 (*.*)\0*\0\0\0";
 	of.lpstrDefExt = ".ppk";
     } else {
-	of.lpstrFilter = "All Files (*.*)\0*\0\0\0";
+	of.lpstrFilter = "모든 파일 (*.*)\0*\0\0\0";
     }
     of.lpstrCustomFilter = NULL;
     of.nFilterIndex = 1;
@@ -400,7 +400,7 @@ static void setupbigedit1(HWND hwnd, int id, int idstatic, struct RSAKey *key)
     char *buffer = ssh1_pubkey_str(key);
     SetDlgItemText(hwnd, id, buffer);
     SetDlgItemText(hwnd, idstatic,
-		   "&Public key for pasting into authorized_keys file:");
+		   "authorized_keys에 붙여넣기를 할 공개키 파일(&P):");
     sfree(buffer);
 }
 
@@ -409,8 +409,8 @@ static void setupbigedit2(HWND hwnd, int id, int idstatic,
 {
     char *buffer = ssh2_pubkey_openssh_str(key);
     SetDlgItemText(hwnd, id, buffer);
-    SetDlgItemText(hwnd, idstatic, "&Public key for pasting into "
-		   "OpenSSH authorized_keys file:");
+    SetDlgItemText(hwnd, idstatic, "OpenSSH authorized_keys 파일에 "
+		   "붙여넣기를 할 공개키 파일(&P):");
     sfree(buffer);
 }
 
@@ -419,17 +419,16 @@ static void setupbigedit2(HWND hwnd, int id, int idstatic,
  */
 void old_keyfile_warning(void)
 {
-    static const char mbtitle[] = "PuTTY Key File Warning";
+    static const char mbtitle[] = "PuTTY 키 파일 경고";
     static const char message[] =
-	"You are loading an SSH-2 private key which has an\n"
-	"old version of the file format. This means your key\n"
-	"file is not fully tamperproof. Future versions of\n"
-	"PuTTY may stop supporting this private key format,\n"
-	"so we recommend you convert your key to the new\n"
-	"format.\n"
+	"이전 버전의 파일 형식을 가진 SSH-2 개인키를 불러오려\n"
+	"하고 있습니다. 이 의미는 당신의 키 파일을 현재 버전에\n"
+	"맞게 변환을 해야 한다는 의미 입니다.\n"
+	"PuTTY의 향후 버전은 현재 키 파일의 형식을 중단할 수\n"
+	"있으므로, 키를 새 형식으로 변환하는 것을 권장 합니다.\n"
 	"\n"
-	"Once the key is loaded into PuTTYgen, you can perform\n"
-	"this conversion simply by saving it again.";
+	"변환은 간단하게 일단 PuTTYgen에 키를 불러들인 후에,\n"
+	"다시 저장하는 것으로 변환을 할 수 있습니다.";
 
     MessageBox(NULL, message, mbtitle, MB_OK);
 }
@@ -648,9 +647,9 @@ void load_key_file(HWND hwnd, struct MainDlgState *state,
     if (type != SSH_KEYTYPE_SSH1 &&
 	type != SSH_KEYTYPE_SSH2 &&
 	!import_possible(type)) {
-	char *msg = dupprintf("Couldn't load private key (%s)",
+	char *msg = dupprintf("개인키(%s) 파일을 읽을 수 없습니다.",
 			      key_type_to_str(type));
-	message_box(msg, "PuTTYgen Error", MB_OK | MB_ICONERROR,
+	message_box(msg, "PuTTYgen 오류", MB_OK | MB_ICONERROR,
 		    HELPCTXID(errors_cantloadkey));
 	sfree(msg);
 	return;
@@ -712,8 +711,8 @@ void load_key_file(HWND hwnd, struct MainDlgState *state,
     if (comment)
 	sfree(comment);
     if (ret == 0) {
-	char *msg = dupprintf("Couldn't load private key (%s)", errmsg);
-	message_box(msg, "PuTTYgen Error", MB_OK | MB_ICONERROR,
+	char *msg = dupprintf("개인키(%s) 파일을 읽을 수 없습니다.", errmsg);
+	message_box(msg, "PuTTYgen 오류", MB_OK | MB_ICONERROR,
 		    HELPCTXID(errors_cantloadkey));
 	sfree(msg);
     } else if (ret == 1) {
@@ -790,13 +789,13 @@ void load_key_file(HWND hwnd, struct MainDlgState *state,
 	 */
 	if (realtype != type && !was_import_cmd) {
 	    char msg[512];
-	    sprintf(msg, "Successfully imported foreign key\n"
+	    sprintf(msg, "외부키 불러오기를 성공했습니다\n"
 		    "(%s).\n"
-		    "To use this key with PuTTY, you need to\n"
-		    "use the \"Save private key\" command to\n"
-		    "save it in PuTTY's own format.",
+		    "PuTTY에서 이 키를 사용하려면 \"개인키 저장\"\n"
+		    "명령을 사용하여 PuTTY 자체 형식으로 변환하여\n"
+		    "저장해야 합니다.",
 		    key_type_to_str(realtype));
-	    MessageBox(NULL, msg, "PuTTYgen Notice",
+	    MessageBox(NULL, msg, "PuTTYgen 알림",
 		       MB_OK | MB_ICONINFORMATION);
 	}
     }
@@ -810,9 +809,9 @@ static INT_PTR CALLBACK MainDlgProc(HWND hwnd, UINT msg,
 				WPARAM wParam, LPARAM lParam)
 {
     static const char generating_msg[] =
-	"Please wait while a key is generated...";
+	"키가 생성되는 동안 기다려 주십시오...";
     static const char entropy_msg[] =
-	"Please generate some randomness by moving the mouse over the blank area.";
+	"빈 영역 위로 마우스를 움직여 엔트로피(불확실성)를 높이십시오.";
     struct MainDlgState *state;
 
     switch (msg) {
@@ -842,43 +841,43 @@ static INT_PTR CALLBACK MainDlgProc(HWND hwnd, UINT msg,
 	    menu = CreateMenu();
 
 	    menu1 = CreateMenu();
-	    AppendMenu(menu1, MF_ENABLED, IDC_LOAD, "&Load private key");
-	    AppendMenu(menu1, MF_ENABLED, IDC_SAVEPUB, "Save p&ublic key");
-	    AppendMenu(menu1, MF_ENABLED, IDC_SAVE, "&Save private key");
+	    AppendMenu(menu1, MF_ENABLED, IDC_LOAD, "개인키 불러오기(&L)");
+	    AppendMenu(menu1, MF_ENABLED, IDC_SAVEPUB, "공개키 저장(&u)");
+	    AppendMenu(menu1, MF_ENABLED, IDC_SAVE, "개인키 저장(&S)");
 	    AppendMenu(menu1, MF_SEPARATOR, 0, 0);
-	    AppendMenu(menu1, MF_ENABLED, IDC_QUIT, "E&xit");
-	    AppendMenu(menu, MF_POPUP | MF_ENABLED, (UINT_PTR) menu1, "&File");
+	    AppendMenu(menu1, MF_ENABLED, IDC_QUIT, "종료(&x)");
+	    AppendMenu(menu, MF_POPUP | MF_ENABLED, (UINT_PTR) menu1, "파일(&F)");
 	    state->filemenu = menu1;
 
 	    menu1 = CreateMenu();
-	    AppendMenu(menu1, MF_ENABLED, IDC_GENERATE, "&Generate key pair");
+	    AppendMenu(menu1, MF_ENABLED, IDC_GENERATE, "키 쌍 생성(&G)");
 	    AppendMenu(menu1, MF_SEPARATOR, 0, 0);
 	    AppendMenu(menu1, MF_ENABLED, IDC_KEYSSH1, "SSH-&1 key (RSA)");
 	    AppendMenu(menu1, MF_ENABLED, IDC_KEYSSH2RSA, "SSH-2 &RSA key");
 	    AppendMenu(menu1, MF_ENABLED, IDC_KEYSSH2DSA, "SSH-2 &DSA key");
             AppendMenu(menu1, MF_ENABLED, IDC_KEYSSH2ECDSA, "SSH-2 &ECDSA key");
             AppendMenu(menu1, MF_ENABLED, IDC_KEYSSH2ED25519, "SSH-2 ED&25519 key");
-	    AppendMenu(menu, MF_POPUP | MF_ENABLED, (UINT_PTR) menu1, "&Key");
+	    AppendMenu(menu, MF_POPUP | MF_ENABLED, (UINT_PTR) menu1, "키(&K)");
 	    state->keymenu = menu1;
 
 	    menu1 = CreateMenu();
-	    AppendMenu(menu1, MF_ENABLED, IDC_IMPORT, "&Import key");
+	    AppendMenu(menu1, MF_ENABLED, IDC_IMPORT, "키 불러오기(&I)");
 	    AppendMenu(menu1, MF_SEPARATOR, 0, 0);
 	    AppendMenu(menu1, MF_ENABLED, IDC_EXPORT_OPENSSH_AUTO,
-		       "Export &OpenSSH key");
+		       "OpenSSH 키 내보내기(&O)");
 	    AppendMenu(menu1, MF_ENABLED, IDC_EXPORT_OPENSSH_NEW,
-		       "Export &OpenSSH key (force new file format)");
+		       "새 형식으로 OpenSSH 키 내보내기(&O)");
 	    AppendMenu(menu1, MF_ENABLED, IDC_EXPORT_SSHCOM,
-		       "Export &ssh.com key");
+		       "&ssh.com 키 내보내기(&s)");
 	    AppendMenu(menu, MF_POPUP | MF_ENABLED, (UINT_PTR) menu1,
-		       "Con&versions");
+		       "변환(&v)");
 	    state->cvtmenu = menu1;
 
 	    menu1 = CreateMenu();
-	    AppendMenu(menu1, MF_ENABLED, IDC_ABOUT, "&About");
+	    AppendMenu(menu1, MF_ENABLED, IDC_ABOUT, "정보(&A)");
 	    if (has_help())
-		AppendMenu(menu1, MF_ENABLED, IDC_GIVEHELP, "&Help");
-	    AppendMenu(menu, MF_POPUP | MF_ENABLED, (UINT_PTR) menu1, "&Help");
+		AppendMenu(menu1, MF_ENABLED, IDC_GIVEHELP, "도움말(&H)");
+	    AppendMenu(menu, MF_POPUP | MF_ENABLED, (UINT_PTR) menu1, "도움말(&H)");
 
 	    SetMenu(hwnd, menu);
 	}
@@ -915,7 +914,7 @@ static INT_PTR CALLBACK MainDlgProc(HWND hwnd, UINT msg,
 			"authorized_keys 파일로 붙여넣기 할 공개키(&P):",
 			IDC_PKSTATIC, IDC_KEYDISPLAY, 5);
 	    SendDlgItemMessage(hwnd, IDC_KEYDISPLAY, EM_SETREADONLY, 1, 0);
-	    staticedit(&cp, "키 f&ingerprint:", IDC_FPSTATIC,
+	    staticedit(&cp, "키 핑커프린트(&i):", IDC_FPSTATIC,
 		       IDC_FINGERPRINT, 75);
 	    SendDlgItemMessage(hwnd, IDC_FINGERPRINT, EM_SETREADONLY, 1,
 			       0);
@@ -944,7 +943,7 @@ static INT_PTR CALLBACK MainDlgProc(HWND hwnd, UINT msg,
 		      "SSH-&1 (RSA)", IDC_KEYSSH1,
                       NULL);
             cp2 = cp;
-	    staticedit(&cp2, "생성할 키의 bit:",
+	    staticedit(&cp2, "생성할 키 비트:",
 		       IDC_BITSSTATIC, IDC_BITS, 20);
             ymax = cp2.ypos;
             cp2 = cp;
@@ -965,7 +964,7 @@ static INT_PTR CALLBACK MainDlgProc(HWND hwnd, UINT msg,
             }
             ymax = ymax > cp2.ypos ? ymax : cp2.ypos;
             cp2 = cp;
-	    statictext(&cp2, "(nothing to configure for this key type)",
+	    statictext(&cp2, "(이 키 형식으로 구성할 사항이 없음)",
 		       1, IDC_NOTHINGSTATIC);
             ymax = ymax > cp2.ypos ? ymax : cp2.ypos;
             cp.ypos = ymax;
@@ -1030,8 +1029,8 @@ static INT_PTR CALLBACK MainDlgProc(HWND hwnd, UINT msg,
 
 		if (!CreateThread(NULL, 0, generate_key_thread,
 				  params, 0, &threadid)) {
-		    MessageBox(hwnd, "Out of thread resources",
-			       "Key generation error",
+		    MessageBox(hwnd, "쓰레드 리소스가 부족합니다.",
+			       "키 생성 오류",
 			       MB_OK | MB_ICONERROR);
 		    sfree(params);
 		} else {
@@ -1121,8 +1120,8 @@ static INT_PTR CALLBACK MainDlgProc(HWND hwnd, UINT msg,
 		if ((state->keytype == RSA || state->keytype == DSA) &&
                     state->key_bits < 256) {
                     char *message = dupprintf
-                        ("PuTTYgen will not generate a key smaller than 256"
-                         " bits.\nKey length reset to default %d. Continue?",
+                        ("PuTTYgen은 256 비트 보다 작은 키를 생성하지 않습니다.\n"
+                         "키 길이는 기본값(%d)으로 재설정 됩니다. 계속하시겠습니까?",
                          DEFAULT_KEY_BITS);
 		    int ret = MessageBox(hwnd, message, "PuTTYgen 경고",
 					 MB_ICONWARNING | MB_OKCANCEL);
@@ -1134,8 +1133,8 @@ static INT_PTR CALLBACK MainDlgProc(HWND hwnd, UINT msg,
 		} else if ((state->keytype == RSA || state->keytype == DSA) &&
                            state->key_bits < DEFAULT_KEY_BITS) {
                     char *message = dupprintf
-                        ("Keys shorter than %d bits are not recommended. "
-                         "Really generate this key?", DEFAULT_KEY_BITS);
+                        ("%d 비트보다 짧은 키는 권장하지 않습니다. "
+                         "이 키를 정말 생성 하겠습니까?", DEFAULT_KEY_BITS);
 		    int ret = MessageBox(hwnd, message, "PuTTYgen 경고",
 					 MB_ICONWARNING | MB_OKCANCEL);
                     sfree(message);

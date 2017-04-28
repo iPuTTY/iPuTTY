@@ -5,7 +5,7 @@
 #include "rcstuff.h"
 
 #define APPNAME "PuTTYgen"
-#define APPDESC "PuTTY SSH key 샹성 유틸리티"
+#define APPDESC "PuTTY SSH key 생성 유틸리티"
 
 200 ICON "puttygen.ico"
 
@@ -21,7 +21,7 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "PuTTYgen: 패스어구 입력"
 FONT 8, "MS Shell Dlg"
 BEGIN
-    CTEXT "Enter passphrase for key", 100, 10, 6, 120, 8
+    CTEXT "키 암호어구 입력", 100, 10, 6, 120, 8
     CTEXT "", 101, 10, 16, 120, 8
     EDITTEXT 102, 10, 26, 120, 12, ES_PASSWORD | ES_AUTOHSCROLL
     DEFPUSHBUTTON "확인(&K)", IDOK, 20, 42, 40, 14
@@ -40,14 +40,14 @@ BEGIN
 END
 
 /* No accelerators used */
-214 DIALOG DISCARDABLE 50, 50, 326, 231
+214 DIALOG DISCARDABLE 50, 50, 326, 265
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "PuTTY 라이센스"
 FONT 8, "MS Shell Dlg"
 BEGIN
-    DEFPUSHBUTTON "확인", IDOK, 148, 211, 44, 14
+    DEFPUSHBUTTON "확인", IDOK, 148, 242, 44, 14
 
-    EDITTEXT 1000, 10, 10, 306, 192, ES_READONLY | ES_MULTILINE | ES_LEFT, WS_EX_STATICEDGE
+    EDITTEXT 1000, 10, 10, 306, 222, ES_READONLY | ES_MULTILINE | ES_LEFT, WS_EX_STATICEDGE
 END
 
 #include "version.rc2"

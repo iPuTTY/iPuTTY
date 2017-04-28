@@ -47,7 +47,7 @@ static int nevents = 0, negsize = 0;
 
 extern Conf *conf;		       /* defined in window.c */
 
-#define PRINTER_DISABLED_STRING "None (printing disabled)"
+#define PRINTER_DISABLED_STRING "없음 (출력 불가)"
 
 void force_normal(HWND hwnd)
 {
@@ -168,7 +168,7 @@ static INT_PTR CALLBACK LicenceProc(HWND hwnd, UINT msg,
     switch (msg) {
       case WM_INITDIALOG:
 	{
-	    char *str = dupprintf("%s Licence", appname);
+	    char *str = dupprintf("%s 라이센스", appname);
 	    SetWindowText(hwnd, str);
 	    sfree(str);
             SetDlgItemText(hwnd, IDA_TEXT, LICENCE_TEXT("\r\n\r\n"));
@@ -196,7 +196,7 @@ static INT_PTR CALLBACK AboutProc(HWND hwnd, UINT msg,
 
     switch (msg) {
       case WM_INITDIALOG:
-	str = dupprintf("About %s", appname);
+	str = dupprintf("%s 정보", appname);
 	SetWindowText(hwnd, str);
 	sfree(str);
         {
