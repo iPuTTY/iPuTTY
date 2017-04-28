@@ -905,38 +905,38 @@ static INT_PTR CALLBACK MainDlgProc(HWND hwnd, UINT msg,
 	    /* Accelerators used: acglops1rbvde */
 
 	    ctlposinit(&cp, hwnd, 4, 4, 4);
-	    beginbox(&cp, "Key", IDC_BOX_KEY);
+	    beginbox(&cp, "키", IDC_BOX_KEY);
 	    cp2 = cp;
-	    statictext(&cp2, "No key.", 1, IDC_NOKEY);
+	    statictext(&cp2, "키 없음.", 1, IDC_NOKEY);
 	    cp2 = cp;
 	    statictext(&cp2, "", 1, IDC_GENERATING);
 	    progressbar(&cp2, IDC_PROGRESS);
 	    bigeditctrl(&cp,
-			"&Public key for pasting into authorized_keys file:",
+			"authorized_keys 파일로 붙여넣기 할 공개키(&P):",
 			IDC_PKSTATIC, IDC_KEYDISPLAY, 5);
 	    SendDlgItemMessage(hwnd, IDC_KEYDISPLAY, EM_SETREADONLY, 1, 0);
-	    staticedit(&cp, "Key f&ingerprint:", IDC_FPSTATIC,
+	    staticedit(&cp, "키 f&ingerprint:", IDC_FPSTATIC,
 		       IDC_FINGERPRINT, 75);
 	    SendDlgItemMessage(hwnd, IDC_FINGERPRINT, EM_SETREADONLY, 1,
 			       0);
-	    staticedit(&cp, "Key &comment:", IDC_COMMENTSTATIC,
+	    staticedit(&cp, "키 설명(&c):", IDC_COMMENTSTATIC,
 		       IDC_COMMENTEDIT, 75);
-	    staticpassedit(&cp, "Key p&assphrase:", IDC_PASSPHRASE1STATIC,
+	    staticpassedit(&cp, "키 암호어구(&a):", IDC_PASSPHRASE1STATIC,
 			   IDC_PASSPHRASE1EDIT, 75);
-	    staticpassedit(&cp, "C&onfirm passphrase:",
+	    staticpassedit(&cp, "암호어구 확인(&o):",
 			   IDC_PASSPHRASE2STATIC, IDC_PASSPHRASE2EDIT, 75);
 	    endbox(&cp);
-	    beginbox(&cp, "Actions", IDC_BOX_ACTIONS);
-	    staticbtn(&cp, "Generate a public/private key pair",
-		      IDC_GENSTATIC, "&Generate", IDC_GENERATE);
-	    staticbtn(&cp, "Load an existing private key file",
-		      IDC_LOADSTATIC, "&Load", IDC_LOAD);
-	    static2btn(&cp, "Save the generated key", IDC_SAVESTATIC,
-		       "Save p&ublic key", IDC_SAVEPUB,
-		       "&Save private key", IDC_SAVE);
+	    beginbox(&cp, "작업", IDC_BOX_ACTIONS);
+	    staticbtn(&cp, "공개키/개인키 쌍 생성",
+		      IDC_GENSTATIC, "생성(&G)", IDC_GENERATE);
+	    staticbtn(&cp, "개인키 파일 불러오기",
+		      IDC_LOADSTATIC, "불러오기(&L)", IDC_LOAD);
+	    static2btn(&cp, "생성된 키 저장", IDC_SAVESTATIC,
+		       "공개키 저장(&u)", IDC_SAVEPUB,
+		       "개인키 저장(&S)", IDC_SAVE);
 	    endbox(&cp);
-	    beginbox(&cp, "Parameters", IDC_BOX_PARAMS);
-	    radioline(&cp, "Type of key to generate:", IDC_TYPESTATIC, 5,
+	    beginbox(&cp, "매개변수", IDC_BOX_PARAMS);
+	    radioline(&cp, "생성할 키 형식:", IDC_TYPESTATIC, 5,
 		      "&RSA", IDC_KEYSSH2RSA,
                       "&DSA", IDC_KEYSSH2DSA,
                       "&ECDSA", IDC_KEYSSH2ECDSA,
@@ -944,11 +944,11 @@ static INT_PTR CALLBACK MainDlgProc(HWND hwnd, UINT msg,
 		      "SSH-&1 (RSA)", IDC_KEYSSH1,
                       NULL);
             cp2 = cp;
-	    staticedit(&cp2, "Number of &bits in a generated key:",
+	    staticedit(&cp2, "생성할 키의 bit:",
 		       IDC_BITSSTATIC, IDC_BITS, 20);
             ymax = cp2.ypos;
             cp2 = cp;
-	    staticddl(&cp2, "Cur&ve to use for generating this key:",
+	    staticddl(&cp2, "이 키를 생성하는데 사용할 곡선(&v):",
                       IDC_CURVESTATIC, IDC_CURVE, 20);
             SendDlgItemMessage(hwnd, IDC_CURVE, CB_RESETCONTENT, 0, 0);
             {
@@ -1124,7 +1124,7 @@ static INT_PTR CALLBACK MainDlgProc(HWND hwnd, UINT msg,
                         ("PuTTYgen will not generate a key smaller than 256"
                          " bits.\nKey length reset to default %d. Continue?",
                          DEFAULT_KEY_BITS);
-		    int ret = MessageBox(hwnd, message, "PuTTYgen Warning",
+		    int ret = MessageBox(hwnd, message, "PuTTYgen 경고",
 					 MB_ICONWARNING | MB_OKCANCEL);
                     sfree(message);
 		    if (ret != IDOK)
@@ -1136,7 +1136,7 @@ static INT_PTR CALLBACK MainDlgProc(HWND hwnd, UINT msg,
                     char *message = dupprintf
                         ("Keys shorter than %d bits are not recommended. "
                          "Really generate this key?", DEFAULT_KEY_BITS);
-		    int ret = MessageBox(hwnd, message, "PuTTYgen Warning",
+		    int ret = MessageBox(hwnd, message, "PuTTYgen 경고",
 					 MB_ICONWARNING | MB_OKCANCEL);
                     sfree(message);
 		    if (ret != IDOK)
@@ -1208,11 +1208,11 @@ static INT_PTR CALLBACK MainDlgProc(HWND hwnd, UINT msg,
                 if (type != realtype &&
                     import_target_type(type) != realtype) {
                     char msg[256];
-                    sprintf(msg, "Cannot export an SSH-%d key in an SSH-%d"
-                            " format", (state->ssh2 ? 2 : 1),
-                            (state->ssh2 ? 1 : 2));
+                    sprintf(msg, "SSH-%d 형식에서 SSH-%d 키를 내보내기 할 수"
+                            " 없습니다.", (state->ssh2 ? 1 : 2),
+                            (state->ssh2 ? 2 : 1));
 		    MessageBox(hwnd, msg,
-                               "PuTTYgen Error", MB_OK | MB_ICONERROR);
+                               "PuTTYgen 오류", MB_OK | MB_ICONERROR);
 		    break;
                 }
 
@@ -1220,8 +1220,8 @@ static INT_PTR CALLBACK MainDlgProc(HWND hwnd, UINT msg,
 		passphrase2 = GetDlgItemText_alloc(hwnd, IDC_PASSPHRASE2EDIT);
 		if (strcmp(passphrase, passphrase2)) {
 		    MessageBox(hwnd,
-			       "The two passphrases given do not match.",
-			       "PuTTYgen Error", MB_OK | MB_ICONERROR);
+			       "두 암호어구가 일치하지 않습니다.",
+			       "PuTTYgen 오류", MB_OK | MB_ICONERROR);
                     burnstr(passphrase);
                     burnstr(passphrase2);
 		    break;
@@ -1230,25 +1230,25 @@ static INT_PTR CALLBACK MainDlgProc(HWND hwnd, UINT msg,
 		if (!*passphrase) {
 		    int ret;
 		    ret = MessageBox(hwnd,
-				     "Are you sure you want to save this key\n"
-				     "without a passphrase to protect it?",
-				     "PuTTYgen Warning",
+				     "암호어구로 보호하지 않은 채 이 키를\n"
+					 "저장하겠습니까?",
+				     "PuTTYgen 경고",
 				     MB_YESNO | MB_ICONWARNING);
 		    if (ret != IDYES) {
                         burnstr(passphrase);
                         break;
                     }
 		}
-		if (prompt_keyfile(hwnd, "Save private key as:",
+		if (prompt_keyfile(hwnd, "다른 이름으로 개인키 저장:",
 				   filename, 1, (type == realtype))) {
 		    int ret;
 		    FILE *fp = fopen(filename, "r");
 		    if (fp) {
 			char *buffer;
 			fclose(fp);
-			buffer = dupprintf("Overwrite existing file\n%s?",
+			buffer = dupprintf("다음 파일을 덮어쓰겠습니까?\n%s",
 					   filename);
-			ret = MessageBox(hwnd, buffer, "PuTTYgen Warning",
+			ret = MessageBox(hwnd, buffer, "PuTTYgen 경고",
 					 MB_YESNO | MB_ICONWARNING);
 			sfree(buffer);
 			if (ret != IDYES) {
@@ -1278,8 +1278,8 @@ static INT_PTR CALLBACK MainDlgProc(HWND hwnd, UINT msg,
                         filename_free(fn);
 		    }
 		    if (ret <= 0) {
-			MessageBox(hwnd, "Unable to save key file",
-				   "PuTTYgen Error", MB_OK | MB_ICONERROR);
+			MessageBox(hwnd, "키 파일을 저장할 수 없습니다.",
+				   "PuTTYgen 오류", MB_OK | MB_ICONERROR);
 		    }
 		}
                 burnstr(passphrase);
@@ -1292,16 +1292,16 @@ static INT_PTR CALLBACK MainDlgProc(HWND hwnd, UINT msg,
 		(struct MainDlgState *) GetWindowLongPtr(hwnd, GWLP_USERDATA);
 	    if (state->key_exists) {
 		char filename[FILENAME_MAX];
-		if (prompt_keyfile(hwnd, "Save public key as:",
+		if (prompt_keyfile(hwnd, "공개키 다른 이름으로 저장:",
 				   filename, 1, 0)) {
 		    int ret;
 		    FILE *fp = fopen(filename, "r");
 		    if (fp) {
 			char *buffer;
 			fclose(fp);
-			buffer = dupprintf("Overwrite existing file\n%s?",
+			buffer = dupprintf("다음 파일을 덮어쓰겠습니까?\n%s",
 					   filename);
-			ret = MessageBox(hwnd, buffer, "PuTTYgen Warning",
+			ret = MessageBox(hwnd, buffer, "PuTTYgen 경고",
 					 MB_YESNO | MB_ICONWARNING);
 			sfree(buffer);
 			if (ret != IDYES)
@@ -1309,8 +1309,8 @@ static INT_PTR CALLBACK MainDlgProc(HWND hwnd, UINT msg,
 		    }
                     fp = fopen(filename, "w");
                     if (!fp) {
-                        MessageBox(hwnd, "Unable to open key file",
-                                   "PuTTYgen Error", MB_OK | MB_ICONERROR);
+                        MessageBox(hwnd, "키 파일을 열 수 없습니다.",
+                                   "PuTTYgen 오류", MB_OK | MB_ICONERROR);
                     } else {
                         if (state->ssh2) {
                             int bloblen;
@@ -1324,8 +1324,8 @@ static INT_PTR CALLBACK MainDlgProc(HWND hwnd, UINT msg,
                             ssh1_write_pubkey(fp, &state->key);
                         }
                         if (fclose(fp) < 0) {
-                            MessageBox(hwnd, "Unable to save key file",
-                                       "PuTTYgen Error", MB_OK | MB_ICONERROR);
+                            MessageBox(hwnd, "키 파일을 저장할 수 없습니다.",
+                                       "PuTTYgen 오류", MB_OK | MB_ICONERROR);
                         }
                     }
 		}
@@ -1339,7 +1339,7 @@ static INT_PTR CALLBACK MainDlgProc(HWND hwnd, UINT msg,
 		(struct MainDlgState *) GetWindowLongPtr(hwnd, GWLP_USERDATA);
 	    if (!state->generation_thread_exists) {
 		char filename[FILENAME_MAX];
-		if (prompt_keyfile(hwnd, "Load private key:",
+		if (prompt_keyfile(hwnd, "개인키 불러오기:",
 				   filename, 0, LOWORD(wParam)==IDC_LOAD)) {
                     Filename *fn = filename_from_str(filename);
 		    load_key_file(hwnd, state, fn, LOWORD(wParam) != IDC_LOAD);

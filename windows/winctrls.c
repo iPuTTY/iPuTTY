@@ -940,7 +940,7 @@ void prefslist(struct prefslist *hdl, struct ctlpos *cp, int lines,
             doctl(cp, r, "BUTTON",
                   BS_NOTIFY | WS_CHILD | WS_VISIBLE |
 		  WS_TABSTOP | BS_PUSHBUTTON,
-                  0, "위로(U)", upbid);
+                  0, "위로(&U)", upbid);
 
             r.left = left; r.right = wid;
             r.top = cp->ypos + buttonpos + PUSHBTNHEIGHT + GAPBETWEEN;
@@ -948,7 +948,7 @@ void prefslist(struct prefslist *hdl, struct ctlpos *cp, int lines,
             doctl(cp, r, "BUTTON",
                   BS_NOTIFY | WS_CHILD | WS_VISIBLE |
 		  WS_TABSTOP | BS_PUSHBUTTON,
-                  0, "아래로(D)", dnbid);
+                  0, "아래로(&D)", dnbid);
 
             break;
 
@@ -1666,7 +1666,7 @@ void winctrl_layout(struct dlgparam *dp, struct winctrls *wc,
 				      ctrl->fileselect.shortcut);
 	    shortcuts[nshortcuts++] = ctrl->fileselect.shortcut;
 	    editbutton(&pos, escaped, base_id, base_id+1,
-		       "찾기(w)...", base_id+2);
+		       "찾기(&w)...", base_id+2);
 	    shortcuts[nshortcuts++] = 'w';
 	    sfree(escaped);
 	    break;

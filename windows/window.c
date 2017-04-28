@@ -355,8 +355,8 @@ static void start_backend(void)
      */
     back = backend_from_proto(conf_get_int(conf, CONF_protocol));
     if (back == NULL) {
-	char *str = dupprintf("%s Internal Error", appname);
-	MessageBox(NULL, "Unsupported protocol number found",
+	char *str = dupprintf("%s 내부 오류", appname);
+	MessageBox(NULL, "알수 없는 프로토콜 번호 입니다.",
 		   str, MB_OK | MB_ICONEXCLAMATION);
 	sfree(str);
 	cleanup_exit(1);
@@ -370,8 +370,8 @@ static void start_backend(void)
 		       conf_get_int(conf, CONF_tcp_keepalives));
     back->provide_logctx(backhandle, logctx);
     if (error) {
-	char *str = dupprintf("%s Error", appname);
-	sprintf(msg, "Unable to open connection to\n"
+	char *str = dupprintf("%s 오류", appname);
+	sprintf(msg, "연결을 살 수 없음 - \n"
 		"%.800s\n" "%s", conf_dest(conf), error);
 	MessageBox(NULL, msg, str, MB_ICONERROR | MB_OK);
 	sfree(str);
@@ -446,7 +446,7 @@ static void close_session(void *ignored_context)
     for (i = 0; i < lenof(popup_menus); i++) {
 	DeleteMenu(popup_menus[i].menu, IDM_RESTART, MF_BYCOMMAND);
 	InsertMenu(popup_menus[i].menu, IDM_DUPSESS, MF_BYCOMMAND | MF_ENABLED,
-		   IDM_RESTART, "&Restart Session");
+		   IDM_RESTART, "세션 재시작(&R)");
     }
 }
 
@@ -491,8 +491,8 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 
     if (!init_winver())
     {
-	char *str = dupprintf("%s Fatal Error", appname);
-	MessageBox(NULL, "Windows refuses to report a version",
+	char *str = dupprintf("%s 치명적 오류", appname);
+	MessageBox(NULL, "Windows가 버전 보고를 거부했습니다.",
 		   str, MB_OK | MB_ICONEXCLAMATION);
 	sfree(str);
 	return 1;
@@ -519,8 +519,8 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
      */
     hr = CoInitialize(NULL);
     if (hr != S_OK && hr != S_FALSE) {
-	char *str = dupprintf("%s Fatal Error", appname);
-	MessageBox(NULL, "Failed to initialize COM subsystem",
+	char *str = dupprintf("%s 치명적 오류", appname);
+	MessageBox(NULL, "COM subsystem 초기화 실패",
 		   str, MB_OK | MB_ICONEXCLAMATION);
 	sfree(str);
 	return 1;
@@ -967,7 +967,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 
 	popup_menus[SYSMENU].menu = GetSystemMenu(hwnd, FALSE);
 	popup_menus[CTXMENU].menu = CreatePopupMenu();
-	AppendMenu(popup_menus[CTXMENU].menu, MF_ENABLED, IDM_PASTE, "&Paste");
+	AppendMenu(popup_menus[CTXMENU].menu, MF_ENABLED, IDM_PASTE, "붙여넣기(&P)");
 
 	savedsess_menu = CreateMenu();
 	/*
@@ -1244,13 +1244,13 @@ char *do_select(SOCKET skt, int startup)
 	msg = events = 0;
     }
     if (!hwnd)
-	return "do_select(): internal error (hwnd==NULL)";
+	return "do_select(): 내부 오류 (hwnd==NULL)";
     if (p_WSAAsyncSelect(skt, hwnd, msg, events) == SOCKET_ERROR) {
 	switch (p_WSAGetLastError()) {
 	  case WSAENETDOWN:
-	    return "Network is down";
+	    return "Network이 다운되어 있습니다.";
 	  default:
-	    return "WSAAsyncSelect(): unknown error";
+	    return "WSAAsyncSelect(): 알 수 없는 오류";
 	}
     }
     return NULL;
@@ -1339,7 +1339,7 @@ void update_specials_menu(void *frontend)
 	if (new_menu) {
 	    InsertMenu(popup_menus[j].menu, IDM_SHOWLOG,
 		       MF_BYCOMMAND | MF_POPUP | MF_ENABLED,
-		       (UINT_PTR) new_menu, "S&pecial Command");
+		       (UINT_PTR) new_menu, "특수 명령(&p)");
 	    InsertMenu(popup_menus[j].menu, IDM_SHOWLOG,
 		       MF_BYCOMMAND | MF_SEPARATOR, IDM_SPECIALSEP, 0);
 	}
@@ -1419,14 +1419,14 @@ void connection_fatal(void *frontend, const char *fmt, ...)
 	    Sleep(5000);
 	}
 	last_reconnect = tnow;
-	logevent(NULL, "Lost connection, reconnecting...");
+	logevent(NULL, "연결이 끊어졌습니다. 재접속 중입니다...");
 	term_pwron(term, FALSE);
 	start_backend();
     } else {
     va_start(ap, fmt);
     stuff = dupvprintf(fmt, ap);
     va_end(ap);
-    sprintf(morestuff, "%.70s Fatal Error", appname);
+    sprintf(morestuff, "%.70s 치명적 오류", appname);
     MessageBox(hwnd, stuff, morestuff, MB_ICONERROR | MB_OK);
     sfree(stuff);
 	}
@@ -1449,7 +1449,7 @@ void cmdline_error(const char *fmt, ...)
     va_start(ap, fmt);
     stuff = dupvprintf(fmt, ap);
     va_end(ap);
-    sprintf(morestuff, "%.70s Command Line Error", appname);
+    sprintf(morestuff, "%.70s 명령행 오류", appname);
     MessageBox(hwnd, stuff, morestuff, MB_ICONERROR | MB_OK);
     sfree(stuff);
     exit(1);
@@ -2363,7 +2363,7 @@ void notify_remote_exit(void *fe)
 	     * by a fatal error, so an error box will be coming our way and
 	     * we should not generate this informational one. */
 	    if (exitcode != INT_MAX)
-		MessageBox(hwnd, "Connection closed by remote host",
+		MessageBox(hwnd, "원격 호스트의 연결이 종료 되었습니다.",
 			   appname, MB_OK | MB_ICONINFORMATION);
 	}
     }
@@ -2426,10 +2426,10 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message,
 	{
 	    char *str;
 	    show_mouseptr(1);
-	    str = dupprintf("%s Exit Confirmation", appname);
+	    str = dupprintf("%s 종료 확인", appname);
 	    if (session_closed || !conf_get_int(conf, CONF_warn_on_close) ||
 		MessageBox(hwnd,
-			   "Are you sure you want to close this session?",
+			   "이 세션을 종료하시겠습니까?",
 			   str, MB_ICONWARNING | MB_OKCANCEL | MB_DEFBUTTON1)
 		== IDOK)
 		DestroyWindow(hwnd);
@@ -6193,7 +6193,7 @@ void fatalbox(const char *fmt, ...)
     va_start(ap, fmt);
     stuff = dupvprintf(fmt, ap);
     va_end(ap);
-    sprintf(morestuff, "%.70s Fatal Error", appname);
+    sprintf(morestuff, "%.70s 치명적 오류", appname);
     MessageBox(hwnd, stuff, morestuff, MB_ICONERROR | MB_OK);
     sfree(stuff);
     cleanup_exit(1);
@@ -6210,7 +6210,7 @@ void modalfatalbox(const char *fmt, ...)
     va_start(ap, fmt);
     stuff = dupvprintf(fmt, ap);
     va_end(ap);
-    sprintf(morestuff, "%.70s Fatal Error", appname);
+    sprintf(morestuff, "%.70s 치명적 오류", appname);
     MessageBox(hwnd, stuff, morestuff,
 	       MB_SYSTEMMODAL | MB_ICONERROR | MB_OK);
     sfree(stuff);
@@ -6228,7 +6228,7 @@ void nonfatal(const char *fmt, ...)
     va_start(ap, fmt);
     stuff = dupvprintf(fmt, ap);
     va_end(ap);
-    sprintf(morestuff, "%.70s Error", appname);
+    sprintf(morestuff, "%.70s 오류", appname);
     MessageBox(hwnd, stuff, morestuff, MB_ICONERROR | MB_OK);
     sfree(stuff);
 }
@@ -6386,9 +6386,9 @@ void do_beep(void *frontend, int mode)
 		       SND_ASYNC | SND_FILENAME)) {
 	    char buf[sizeof(bell_wavefile->path) + 80];
 	    char otherbuf[100];
-	    sprintf(buf, "Unable to play sound file\n%s\n"
-		    "Using default sound instead", bell_wavefile->path);
-	    sprintf(otherbuf, "%.70s Sound Error", appname);
+	    sprintf(buf, "sound 파일을 사용할  수 없습니다.\n%s\n"
+		    "대신 기본 사운드를 사용 합니다.", bell_wavefile->path);
+	    sprintf(otherbuf, "%.70s Sound 오류", appname);
 	    MessageBox(hwnd, buf, otherbuf,
 		       MB_OK | MB_ICONEXCLAMATION);
 	    conf_set_int(conf, CONF_beep, BELL_DEFAULT);
@@ -6746,8 +6746,8 @@ void tray_updatemenu(BOOL disableMenuItems)
 	DeleteMenu(popup_menus[CTXMENU].menu, IDM_TRAYRESTORE, MF_BYCOMMAND);
 	DeleteMenu(popup_menus[CTXMENU].menu, IDM_TRAYCLOSE, MF_BYCOMMAND);
 	InsertMenu(popup_menus[CTXMENU].menu, -1, MF_BYPOSITION | MF_SEPARATOR, IDM_TRAYSEP, 0);
-	InsertMenu(popup_menus[CTXMENU].menu, -1, MF_BYPOSITION | MF_ENABLED, IDM_TRAYRESTORE, "&Restore Window");
-	InsertMenu(popup_menus[CTXMENU].menu, -1, MF_BYPOSITION | MF_ENABLED, IDM_TRAYCLOSE, "&Exit");
+	InsertMenu(popup_menus[CTXMENU].menu, -1, MF_BYPOSITION | MF_ENABLED, IDM_TRAYRESTORE, "창 복구(R)");
+	InsertMenu(popup_menus[CTXMENU].menu, -1, MF_BYPOSITION | MF_ENABLED, IDM_TRAYCLOSE, "종료(E)");
 
 	// Set X bitmap on close window menuitem
 	mii.fMask = MIIM_BITMAP;

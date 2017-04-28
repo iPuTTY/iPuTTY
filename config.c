@@ -1705,7 +1705,7 @@ void setup_config_box(struct controlbox *b, int midsession,
     ctrl_checkbox(s, "자동 개행 모드 초기 활성화", 'w',
 		  HELPCTX(terminal_autowrap),
 		  conf_checkbox_handler, I(CONF_wrap_mode));
-    ctrl_checkbox(s, "&DEC 위치 모드 초기 활성화(&D)", 'd',
+    ctrl_checkbox(s, "DEC 위치 모드 초기 활성화(&D)", 'd',
 		  HELPCTX(terminal_decom),
 		  conf_checkbox_handler, I(CONF_dec_om));
     ctrl_checkbox(s, "모든 LF문자에 암묵적으로 CR문자 추가", 'r',
