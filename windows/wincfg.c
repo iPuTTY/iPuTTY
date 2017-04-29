@@ -129,15 +129,15 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, int has_help,
      * specific options.
      */
     s = ctrl_getset(b, "터미널/키보드", "features",
-		    "추가 키보드 요소:");
-    ctrl_checkbox(s, "조합 키로 AltGr키 사용", 't',
+		    "키보드 부가 기능:");
+    ctrl_checkbox(s, "회색 Alt(AltGr)키를 조합 키로 사용", 't',
 		  HELPCTX(keyboard_compose),
 		  conf_checkbox_handler, I(CONF_compose_key));
-    ctrl_checkbox(s, "Control-Alt가 AltGr과 다르게 동작", 'd',
+    ctrl_checkbox(s, "Ctrl-Alt를 회색 Alt(AltGr)키와 구분", 'd',
 		  HELPCTX(keyboard_ctrlalt),
 		  conf_checkbox_handler, I(CONF_ctrlaltkeys));
     // CYGTERM patch
-    ctrl_checkbox(s, "(Escape 키 대신) alt키로 meta bit을 설정", NO_SHORTCUT,
+    ctrl_checkbox(s, "(Escape 키 대신) Alt키로 meta bit을 설정", NO_SHORTCUT,
 		  HELPCTX(no_help),
 		  conf_checkbox_handler, I(CONF_alt_metabit));
 
@@ -170,7 +170,7 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, int has_help,
 		c->radio.buttons =
 		    sresize(c->radio.buttons, c->radio.nbuttons, char *);
 		c->radio.buttons[c->radio.nbuttons-1] =
-		    dupstr("사용자 정의 벨소리 파일 실행");
+		    dupstr("다른 사운드 파일 사용");
 		c->radio.buttons[c->radio.nbuttons-2] =
 		    dupstr("PC 스피커 비프음 사용");
 		c->radio.buttondata =
@@ -187,8 +187,8 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, int has_help,
 	    }
 	}
     }
-    ctrl_filesel(s, "사용자 정의 벨소리 파일 지정:", NO_SHORTCUT,
-		 FILTER_WAVE_FILES, FALSE, "벨소리 파일 선택",
+    ctrl_filesel(s, "벨 소리로 사용할 사운드 파일:", NO_SHORTCUT,
+		 FILTER_WAVE_FILES, FALSE, "벨 소리 파일 선택",
 		 HELPCTX(bell_style),
 		 conf_filesel_handler, I(CONF_bell_wavefile));
 
@@ -196,24 +196,24 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, int has_help,
      * While we've got this box open, taskbar flashing on a bell is
      * also Windows-specific.
      */
-    ctrl_radiobuttons(s, "벨의 작업 표시줄/캡션 표시:", 'i', 3,
+    ctrl_radiobuttons(s, "벨이 울리면 작업표시줄에 표시:", 'i', 3,
 		      HELPCTX(bell_taskbar),
 		      conf_radiobutton_handler,
 		      I(CONF_beep_ind),
-		      "사용 안함", I(B_IND_DISABLED),
-		      "반짝이기", I(B_IND_FLASH),
-		      "정적 알림", I(B_IND_STEADY), NULL);
+		      "사용 안 함", I(B_IND_DISABLED),
+		      "깜빡임", I(B_IND_FLASH),
+		      "계속", I(B_IND_STEADY), NULL);
 
     /*
      * The sunken-edge border is a Windows GUI feature.
      */
-    s = ctrl_getset(b, "창/모양새", "border",
+    s = ctrl_getset(b, "창/모양", "border",
 		    "창 테두리 설정");
-    ctrl_checkbox(s, "가라 앉은 듯한 효과의 테두리 (약간 두껍게)", 's',
+    ctrl_checkbox(s, "튀어나온 창틀(좀 더 두터움)", 's',
 		  HELPCTX(appearance_border),
 		  conf_checkbox_handler, I(CONF_sunken_edge));
 
-    s = ctrl_getset(b, "창/모양새", "font",
+    s = ctrl_getset(b, "창/모양", "font",
 		    "폰트 설정");
     /*
      * HACK: iPuTTY
@@ -247,7 +247,7 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, int has_help,
      * platform (at least unless someone fixes it!).
      */
     s = ctrl_getset(b, "창/변환", "tweaks", NULL);
-    ctrl_checkbox(s, "CapsLock을 라틴/키릴 문자 전환에 사용", 's',
+    ctrl_checkbox(s, "CapsLock을 라틴/키릴 전환키로 사용", 's',
 		  HELPCTX(translation_cyrillic),
 		  conf_checkbox_handler,
 		  I(CONF_xlat_capslockcyr));
@@ -257,7 +257,7 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, int has_help,
      * from the operating system. Briefly document this.
      */
     s = ctrl_getset(b, "창/변환", "trans",
-		    "수신한 데이타에 대한 문자셋 변환");
+		    "수신한 데이터의 문자셋");
     ctrl_text(s, "(Windows에서 지원하는 코드페이지 이지만 목록에 없을 수 있습니다. "
 	      "예를 들어 CP866과 같이 직접 입력하여 사용할 수 있습니다.)",
 	      HELPCTX(translation_codepage));
@@ -281,9 +281,9 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, int has_help,
 		c->radio.buttons =
 		    sresize(c->radio.buttons, c->radio.nbuttons, char *);
 		c->radio.buttons[c->radio.nbuttons-3] =
-		    dupstr("XWindow 인코딩 글꼴 사용");
+		    dupstr("X윈도우 인코딩 사용");
 		c->radio.buttons[c->radio.nbuttons-2] =
-		    dupstr("ANSI, OEM 모드 글꼴 둘다 사용");
+		    dupstr("ANSI와 OEM 모드 모두 사용");
 		c->radio.buttons[c->radio.nbuttons-1] =
 		    dupstr("OEM 모드 글꼴만 사용");
 		c->radio.buttondata =
@@ -313,7 +313,7 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, int has_help,
      */
     s = ctrl_getset(b, "창/선택", "format",
 		    "붙여넣기 형식");
-    ctrl_checkbox(s, "RTF도 일반 텍스트 처럼 클립보드에 붙여넣기", 'f',
+    ctrl_checkbox(s, "클립보드로 텍스트와 RTF를 동시에 복사", 'f',
 		  HELPCTX(selection_rtf),
 		  conf_checkbox_handler, I(CONF_rtf_paste));
 
@@ -328,9 +328,9 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, int has_help,
 		      HELPCTX(selection_buttons),
 		      conf_radiobutton_handler,
 		      I(CONF_mouse_is_xterm),
-		      "윈도우 (가운데 확장, 우측 메뉴 팝업)", I(2),
-		      "타혐 (가운데 확장, 우측 붙여넣기)", I(0),
-		      "xterm (우측 확장, 가운데 붙여넣기)", I(1), NULL);
+		      "윈도우 (휠 확장, 우측 메뉴 띄움)", I(2),
+		      "타혐 (휠 확장, 우측 붙여넣기)", I(0),
+		      "xterm (우측 확장, 휠 붙여넣기)", I(1), NULL);
     /*
      * This really ought to go at the _top_ of its box, not the
      * bottom, so we'll just do some shuffling now we've set it
@@ -357,34 +357,34 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, int has_help,
      * Resize-by-changing-font is a Windows insanity.
      */
     s = ctrl_getset(b, "창", "size", "Set the size of the window");
-    ctrl_radiobuttons(s, "창 사이즈 변경시:", 'z', 1,
+    ctrl_radiobuttons(s, "창 크기 변경 시:", 'z', 1,
 		      HELPCTX(window_resize),
 		      conf_radiobutton_handler,
 		      I(CONF_resize_action),
-		      "열과 행 길이 바꾸기", I(RESIZE_TERM),
-		      "폰트 크기 바꾸기", I(RESIZE_FONT),
-		      "폰트 크기 바꾸기", I(RESIZE_EITHER),
-		      "크기 재조정 금지", I(RESIZE_DISABLED), NULL);
+		      "가로 세로 크기 조절", I(RESIZE_TERM),
+		      "글꼴 크기 조절", I(RESIZE_FONT),
+		      "최대화 되었을 때만 글꼴 크리 조정", I(RESIZE_EITHER),
+		      "크기 재조정 안 함", I(RESIZE_DISABLED), NULL);
 
     /*
      * Most of the Window/Behaviour stuff is there to mimic Windows
      * conventions which PuTTY can optionally disregard. Hence,
      * most of these options are Windows-specific.
      */
-    s = ctrl_getset(b, "창/행동", "main", NULL);
-    ctrl_checkbox(s, "ALT-F4 로 창 닫기", '4',
+    s = ctrl_getset(b, "창/특성", "main", NULL);
+    ctrl_checkbox(s, "Alt-F4를 누르면 창을 닫음", '4',
 		  HELPCTX(behaviour_altf4),
 		  conf_checkbox_handler, I(CONF_alt_f4));
-    ctrl_checkbox(s, "ALT-Space 로 시스템 메뉴 열기", 'm',  /* HACK: PuttyTray: Changed shortcut key */
+    ctrl_checkbox(s, "Alt-Space를 누르면 시스템 메뉴 나옴", 'm',  /* HACK: PuttyTray: Changed shortcut key */
 		  HELPCTX(behaviour_altspace),
 		  conf_checkbox_handler, I(CONF_alt_space));
-    ctrl_checkbox(s, "ALT로 시스템 메뉴 열기", 'l',
+    ctrl_checkbox(s, "Alt만 누르면 시스템 메뉴 나옴", 'l',
 		  HELPCTX(behaviour_altonly),
 		  conf_checkbox_handler, I(CONF_alt_only));
-    ctrl_checkbox(s, "항상 맨위로 유지", 'e',
+    ctrl_checkbox(s, "창 항상 맨 위에", 'e',
 		  HELPCTX(behaviour_alwaysontop),
 		  conf_checkbox_handler, I(CONF_alwaysontop));
-    ctrl_checkbox(s, "Alt-Enter 로 전체화면 전환", 'f',
+    ctrl_checkbox(s, "Alt-Enter를 누르면  전체 화면으로 전환", 'f',
 		  HELPCTX(behaviour_altenter),
 		  conf_checkbox_handler,
 		  I(CONF_fullscreenonaltenter));
@@ -400,14 +400,14 @@ void win_setup_config_box(struct controlbox *b, HWND *hwndp, int has_help,
 		      "항상", 'y', I(TRAY_ALWAYS),
 		      "숨김", 'r', I(TRAY_NEVER),
 		      "시작 시", 's', I(TRAY_START), NULL);
-    ctrl_checkbox(s, "트레이 아이콘 클릭시 창 전환", 'm',
+    ctrl_checkbox(s, "트레이 아이콘 클릭 시 창 전환", 'm',
 		  HELPCTX(no_help),
 		  conf_checkbox_handler, I(CONF_tray_restore));
 
     /*
      * HACK: PuttyTray / Session Icon
      */
-    s = ctrl_getset(b, "창/행동", "icon", "아이콘 설정");
+    s = ctrl_getset(b, "창/특성", "icon", "아이콘 설정");
     ctrl_columns(s, 3, 40, 20, 40);
     c = ctrl_text(s, "창 / 트레이 아이콘:", HELPCTX(appearance_title));
     c->generic.column = 0;

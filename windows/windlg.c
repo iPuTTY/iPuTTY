@@ -47,7 +47,7 @@ static int nevents = 0, negsize = 0;
 
 extern Conf *conf;		       /* defined in window.c */
 
-#define PRINTER_DISABLED_STRING "없음 (출력 불가)"
+#define PRINTER_DISABLED_STRING "없음 (프린트 사용 안 함)"
 
 void force_normal(HWND hwnd)
 {
