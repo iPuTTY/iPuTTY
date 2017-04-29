@@ -97,7 +97,7 @@ void fatalbox(const char *fmt, ...)
     va_list ap;
     va_start(ap, fmt);
     str = dupvprintf(fmt, ap);
-    str2 = dupcat("Fatal: ", str, "\n", NULL);
+    str2 = dupcat("치명적 오류: ", str, "\n", NULL);
     sfree(str);
     va_end(ap);
     tell_str(stderr, str2);
@@ -112,7 +112,7 @@ void modalfatalbox(const char *fmt, ...)
     va_list ap;
     va_start(ap, fmt);
     str = dupvprintf(fmt, ap);
-    str2 = dupcat("Fatal: ", str, "\n", NULL);
+    str2 = dupcat("치명적 오류: ", str, "\n", NULL);
     sfree(str);
     va_end(ap);
     tell_str(stderr, str2);
@@ -127,7 +127,7 @@ void nonfatal(const char *fmt, ...)
     va_list ap;
     va_start(ap, fmt);
     str = dupvprintf(fmt, ap);
-    str2 = dupcat("Error: ", str, "\n", NULL);
+    str2 = dupcat("오류: ", str, "\n", NULL);
     sfree(str);
     va_end(ap);
     tell_str(stderr, str2);
@@ -140,7 +140,7 @@ void connection_fatal(void *frontend, const char *fmt, ...)
     va_list ap;
     va_start(ap, fmt);
     str = dupvprintf(fmt, ap);
-    str2 = dupcat("Fatal: ", str, "\n", NULL);
+    str2 = dupcat("치명적 오류: ", str, "\n", NULL);
     sfree(str);
     va_end(ap);
     tell_str(stderr, str2);
@@ -230,7 +230,7 @@ int from_backend_eof(void *frontend)
      */
     if ((using_sftp || uploading) && !sent_eof) {
         connection_fatal(frontend,
-                         "Received unexpected end-of-file from server");
+                         "SFTP 서버로부터 잘못된 EOF(end-of-file)을 전달 받았습니다.");
     }
     return FALSE;
 }
@@ -293,9 +293,9 @@ static void ssh_scp_init(void)
 
     if (verbose) {
 	if (using_sftp)
-	    tell_user(stderr, "Using SFTP");
+	    tell_user(stderr, "SFTP 사용");
 	else
-	    tell_user(stderr, "Using SCP1");
+	    tell_user(stderr, "SCP1 사용");
     }
 }
 
@@ -339,12 +339,12 @@ struct sftp_packet *sftp_wait_for_reply(struct sftp_request *req)
     sftp_register(req);
     pktin = sftp_recv();
     if (pktin == NULL)
-        connection_fatal(NULL, "did not receive SFTP response packet "
-                         "from server");
+        connection_fatal(NULL, "서버로 부터 SFTP 응답 패킷을 받지 "
+                         "못했습니다.");
     rreq = sftp_find_request(pktin);
     if (rreq != req)
-        connection_fatal(NULL, "unable to understand SFTP response packet "
-                         "from server: %s", fxp_error());
+        connection_fatal(NULL, "서버로 부터 SFTP 응답 패킷을 받지 "
+                         "못했습니다: %s", fxp_error());
     return pktin;
 }
 
@@ -358,7 +358,7 @@ static void do_cmd(char *host, char *user, char *cmd)
     void *logctx;
 
     if (host == NULL || host[0] == '\0')
-	bump("Empty host name");
+	bump("호스트 이름을 지정 하십시오.");
 
     /*
      * Remove a colon suffix.
@@ -451,10 +451,10 @@ static void do_cmd(char *host, char *user, char *cmd)
     } else if (conf_get_str(conf, CONF_username)[0] == '\0') {
 	user = get_username();
 	if (!user)
-	    bump("Empty user name");
+	    bump("사용자 이름을 지정 하십시오.");
 	else {
 	    if (verbose)
-		tell_user(stderr, "Guessing user name: %s", user);
+		tell_user(stderr, "추측된 사용자 이름: %s", user);
 	    conf_set_str(conf, CONF_username, user);
 	    sfree(user);
 	}
@@ -530,7 +530,7 @@ static void do_cmd(char *host, char *user, char *cmd)
     back->provide_logctx(backhandle, logctx);
     ssh_scp_init();
     if (verbose && realhost != NULL && errs == 0)
-	tell_user(stderr, "Connected to %s", realhost);
+	tell_user(stderr, "%s에 연결되었습니다.", realhost);
     sfree(realhost);
 }
 
@@ -627,7 +627,7 @@ static int response(void)
     int p;
 
     if (ssh_scp_recv((unsigned char *) &resp, 1) <= 0)
-	bump("Lost connection");
+	bump("연결이 끊어졌습니다.");
 
     p = 0;
     switch (resp) {
@@ -640,7 +640,7 @@ static int response(void)
       case 2:			       /* fatal error */
 	do {
 	    if (ssh_scp_recv((unsigned char *) &ch, 1) <= 0)
-		bump("Protocol error: Lost connection");
+		bump("프로토콜 오류: 연결이 끊어졌습니다.");
 	    rbuf[p++] = ch;
 	} while (p < sizeof(rbuf) && ch != '\n');
 	rbuf[p - 1] = '\0';
@@ -687,7 +687,7 @@ void scp_sftp_listdir(const char *dirname)
     int i;
 
     if (!fxp_init()) {
-	tell_user(stderr, "unable to initialise SFTP: %s", fxp_error());
+	tell_user(stderr, "SFTP 초기화 실패: %s", fxp_error());
 	errs++;
 	return;
     }
@@ -699,7 +699,7 @@ void scp_sftp_listdir(const char *dirname)
     dirh = fxp_opendir_recv(pktin, req);
 
     if (dirh == NULL) {
-		tell_user(stderr, "Unable to open %s: %s\n", dirname, fxp_error());
+		tell_user(stderr, "%s 열기 실패: %s\n", dirname, fxp_error());
 		errs++;
     } else {
 	nnames = namesize = 0;
@@ -714,7 +714,7 @@ void scp_sftp_listdir(const char *dirname)
 	    if (names == NULL) {
 		if (fxp_error_type() == SSH_FX_EOF)
 		    break;
-		printf("Reading directory %s: %s\n", dirname, fxp_error());
+		printf("%s 디렉토리 읽기: %s\n", dirname, fxp_error());
 		break;
 	    }
 	    if (names->nnames == 0) {
@@ -789,7 +789,7 @@ int scp_source_setup(const char *target, int shouldbedir)
 	int ret;
 
 	if (!fxp_init()) {
-	    tell_user(stderr, "unable to initialise SFTP: %s", fxp_error());
+	    tell_user(stderr, "SFTP 초기화 실패: %s", fxp_error());
 	    errs++;
 	    return 1;
 	}
@@ -866,7 +866,7 @@ int scp_send_filename(const char *name, uint64 size, int permissions)
 	scp_sftp_filehandle = fxp_open_recv(pktin, req);
 
 	if (!scp_sftp_filehandle) {
-	    tell_user(stderr, "pscp: unable to open %s: %s",
+	    tell_user(stderr, "pscp: %s 열기 실패: %s",
 		      fullname, fxp_error());
             sfree(fullname);
 	    errs++;
@@ -905,7 +905,7 @@ int scp_send_filedata(char *data, int len)
 	    pktin = sftp_recv();
 	    ret = xfer_upload_gotpkt(scp_sftp_xfer, pktin);
 	    if (ret <= 0) {
-		tell_user(stderr, "error while writing: %s", fxp_error());
+		tell_user(stderr, "쓰기 오류: %s", fxp_error());
                 if (ret == INT_MIN)        /* pktin not even freed */
                     sfree(pktin);
 		errs++;
@@ -948,7 +948,7 @@ int scp_send_finish(void)
 	    pktin = sftp_recv();
 	    ret = xfer_upload_gotpkt(scp_sftp_xfer, pktin);
 	    if (ret <= 0) {
-		tell_user(stderr, "error while writing: %s", fxp_error());
+		tell_user(stderr, "쓰기 오류: %s", fxp_error());
                 if (ret == INT_MIN)        /* pktin not even freed */
                     sfree(pktin);
 		errs++;
@@ -968,7 +968,7 @@ int scp_send_finish(void)
             pktin = sftp_wait_for_reply(req);
 	    ret = fxp_fsetstat_recv(pktin, req);
 	    if (!ret) {
-		tell_user(stderr, "unable to set file times: %s", fxp_error());
+		tell_user(stderr, "파일 시간 설정 실패: %s", fxp_error());
 		errs++;
 	    }
 	}
@@ -1035,7 +1035,7 @@ int scp_send_dirname(const char *name, int modes)
 
 	if (!ret || !(attrs.flags & SSH_FILEXFER_ATTR_PERMISSIONS) ||
 	    !(attrs.permissions & 0040000)) {
-	    tell_user(stderr, "unable to create directory %s: %s",
+	    tell_user(stderr, "%s 디렉토리 생성 실패: %s",
 		      fullname, err);
             sfree(fullname);
 	    errs++;
@@ -1078,7 +1078,7 @@ int scp_sink_setup(const char *source, int preserve, int recursive)
 	char *newsource;
 
 	if (!fxp_init()) {
-	    tell_user(stderr, "unable to initialise SFTP: %s", fxp_error());
+	    tell_user(stderr, "SFTP 초기화 실패: %s", fxp_error());
 	    errs++;
 	    return 1;
 	}
@@ -1127,7 +1127,7 @@ int scp_sink_setup(const char *source, int preserve, int recursive)
 	     */
 	    dirpart = snewn(1+strlen(dupsource), char);
 	    if (!wc_unescape(dirpart, dupsource)) {
-		tell_user(stderr, "%s: multiple-level wildcards unsupported",
+		tell_user(stderr, "%s: 여러개의 별표(astrik)는 지원하지 않습니다.",
 			  source);
 		errs++;
 		sfree(dirpart);
@@ -1315,7 +1315,7 @@ int scp_get_sink_action(struct scp_sink_action *act)
 	    dirhandle = fxp_opendir_recv(pktin, req);
 
 	    if (!dirhandle) {
-		tell_user(stderr, "pscp: unable to open directory %s: %s",
+		tell_user(stderr, "pscp: %s 디렉토리 열기 실패: %s",
 			  fname, fxp_error());
 		if (must_free_fname) sfree(fname);
 		errs++;
@@ -1333,7 +1333,7 @@ int scp_get_sink_action(struct scp_sink_action *act)
 		if (names == NULL) {
 		    if (fxp_error_type() == SSH_FX_EOF)
 			break;
-		    tell_user(stderr, "pscp: reading directory %s: %s",
+		    tell_user(stderr, "pscp: %s 디렉토리 읽기: %s",
 			      fname, fxp_error());
 
                     req = fxp_close_send(dirhandle);
@@ -1362,8 +1362,8 @@ int scp_get_sink_action(struct scp_sink_action *act)
 			 * complaining about.
 			 */
 		    } else if (!vet_filename(names->names[i].filename)) {
-			tell_user(stderr, "ignoring potentially dangerous server-"
-				  "supplied filename '%s'",
+			tell_user(stderr, "잠재적으로 위험한 서버 제공 파일 "
+				  "이름 무시: '%s'",
 				  names->names[i].filename);
 		    } else
 			ournames[nnames++] = names->names[i];
@@ -1451,12 +1451,12 @@ int scp_get_sink_action(struct scp_sink_action *act)
 	    if (ssh_scp_recv((unsigned char *) &ch, 1) <= 0)
 		return 1;
 	    if (ch == '\n')
-		bump("Protocol error: Unexpected newline");
+		bump("프로토콜 오류: 기대하지 않은 줄넘김");
 	    i = 0;
 	    action = ch;
 	    do {
 		if (ssh_scp_recv((unsigned char *) &ch, 1) <= 0)
-		    bump("Lost connection");
+		    bump("연결이 끊어졌습니다");
 		if (i >= bufsize) {
 		    bufsize = i + 128;
 		    act->buf = sresize(act->buf, bufsize, char);
@@ -1482,13 +1482,13 @@ int scp_get_sink_action(struct scp_sink_action *act)
 		    back->send(backhandle, "", 1);
 		    continue;	       /* go round again */
 		}
-		bump("Protocol error: Illegal time format");
+		bump("프로토콜 오류: 잘못된 시간 형식");
 	      case 'C':
 	      case 'D':
 		act->action = (action == 'C' ? SCP_SINK_FILE : SCP_SINK_DIR);
 		break;
 	      default:
-		bump("Protocol error: Expected control record");
+		bump("프로토콜 오류: Expected control record");
 	    }
 	    /*
 	     * We will go round this loop only once, unless we hit
@@ -1506,7 +1506,7 @@ int scp_get_sink_action(struct scp_sink_action *act)
 	
             if (sscanf(act->buf, "%lo %39s %n", &act->permissions,
                        sizestr, &i) != 2)
-		bump("Protocol error: Illegal file descriptor format");
+		bump("프로토콜 오류: 잘못된 파일 디스크립터 형식");
 	    act->size = uint64_from_decimal(sizestr);
 	    act->name = act->buf + i;
 	    return 0;
@@ -1525,7 +1525,7 @@ int scp_accept_filexfer(void)
 	scp_sftp_filehandle = fxp_open_recv(pktin, req);
 
 	if (!scp_sftp_filehandle) {
-	    tell_user(stderr, "pscp: unable to open %s: %s",
+	    tell_user(stderr, "pscp: %s 열기 실패: %s",
 		      scp_sftp_currentname, fxp_error());
 	    errs++;
 	    return 1;
@@ -1552,7 +1552,7 @@ int scp_recv_filedata(char *data, int len)
 	pktin = sftp_recv();
 	ret = xfer_download_gotpkt(scp_sftp_xfer, pktin);
 	if (ret <= 0) {
-	    tell_user(stderr, "pscp: error while reading: %s", fxp_error());
+	    tell_user(stderr, "pscp: 읽기 에러: %s", fxp_error());
             if (ret == INT_MIN)        /* pktin not even freed */
                 sfree(pktin);
 	    errs++;
@@ -1561,7 +1561,7 @@ int scp_recv_filedata(char *data, int len)
 
 	if (xfer_download_data(scp_sftp_xfer, &vbuf, &actuallen)) {
             if (actuallen <= 0) {
-                tell_user(stderr, "pscp: end of file while reading");
+                tell_user(stderr, "pscp: 읽는 동안 파일의 끝에 도달했습니다.");
                 errs++;
                 sfree(vbuf);
                 return -1;
@@ -1686,7 +1686,7 @@ static void source(const char *src)
 	    else
 		rsource(src);
 	} else {
-	    run_err("%s: not a regular file", src);
+	    run_err("%s: 정규 파일이 아닙니다.", src);
 	}
 	return;
     }
@@ -1702,7 +1702,7 @@ static void source(const char *src)
 
     f = open_existing_file(src, &size, &mtime, &atime, &permissions);
     if (f == NULL) {
-	run_err("%s: Cannot open file", src);
+	run_err("%s: 파일 열기 실패", src);
 	return;
     }
     if (preserve) {
@@ -1715,7 +1715,7 @@ static void source(const char *src)
     if (verbose) {
 	char sizestr[40];
 	uint64_decimal(size, sizestr);
-	tell_user(stderr, "Sending file %s, size=%s", last, sizestr);
+	tell_user(stderr, "%s 파일 보내기, 크기=%s", last, sizestr);
     }
     if (scp_send_filename(last, size, permissions)) {
         close_rfile(f);
@@ -1738,10 +1738,10 @@ static void source(const char *src)
 	if ((j = read_from_file(f, transbuf, k)) != k) {
 	    if (statistics)
 		printf("\n");
-	    bump("%s: Read error", src);
+	    bump("%s: 읽기 오류", src);
 	}
 	if (scp_send_filedata(transbuf, k))
-	    bump("%s: Network error occurred", src);
+	    bump("%s: 네트워크 오류 발생", src);
 
 	if (statistics) {
 	    stat_bytes = uint64_add32(stat_bytes, k);
@@ -1782,7 +1782,7 @@ static void rsource(const char *src)
     save_target = scp_save_remotepath();
 
     if (verbose)
-	tell_user(stderr, "Entering directory: %s", last);
+	tell_user(stderr, "디렉토리 이동: %s", last);
     if (scp_send_dirname(last, 0755))
 	return;
 
@@ -1824,7 +1824,7 @@ static void sink(const char *targ, const char *src)
 	targisdir = 1;
 
     if (targetshouldbedirectory && !targisdir)
-	bump("%s: Not a directory", targ);
+	bump("%s: 디렉토리가 아닙니다.", targ);
 
     scp_sink_init();
     while (1) {
@@ -1885,8 +1885,8 @@ static void sink(const char *targ, const char *src)
 	     * appears to interpret those like '..'.
 	     */
 	    if (is_dots(striptarget)) {
-		bump("security violation: remote host attempted to write to"
-		     " a '.' or '..' path!");
+		bump("보안 위반: 원격 호스트가 '.' 또는 '..' 경로에 쓰기를 "
+		     "시도했습니다!");
 	    }
 
 	    if (src) {
@@ -1923,13 +1923,13 @@ static void sink(const char *targ, const char *src)
 
 	if (act.action == SCP_SINK_DIR) {
 	    if (exists && attr != FILE_TYPE_DIRECTORY) {
-		run_err("%s: Not a directory", destfname);
+		run_err("%s: 디렉토리가 아닙니다.", destfname);
                 sfree(destfname);
 		continue;
 	    }
 	    if (!exists) {
 		if (!create_directory(destfname)) {
-		    run_err("%s: Cannot create directory", destfname);
+		    run_err("%s: 디렉토리 생성 실패", destfname);
                     sfree(destfname);
 		    continue;
 		}
@@ -1942,7 +1942,7 @@ static void sink(const char *targ, const char *src)
 
 	f = open_new_file(destfname, act.permissions);
 	if (f == NULL) {
-	    run_err("%s: Cannot create file", destfname);
+	    run_err("%s: 파일 생성 실패", destfname);
             sfree(destfname);
 	    continue;
 	}
@@ -1968,7 +1968,7 @@ static void sink(const char *targ, const char *src)
 	      blksize = uint64_subtract(act.size,received);
 	    read = scp_recv_filedata(transbuf, (int)blksize.lo);
 	    if (read <= 0)
-		bump("Lost connection");
+		bump("연결이 끊어졌습니다.");
 	    if (wrerror) {
                 received = uint64_add32(received, read);
 		continue;
@@ -2000,7 +2000,7 @@ static void sink(const char *targ, const char *src)
 
 	close_wfile(f);
 	if (wrerror) {
-	    run_err("%s: Write error", destfname);
+	    run_err("%s: 쓰기 오류", destfname);
             sfree(destfname);
 	    continue;
 	}
@@ -2050,7 +2050,7 @@ static void toremote(int argc, char *argv[])
 
     if (argc == 2) {
 	if (colon(argv[0]) != NULL)
-	    bump("%s: Remote to remote not supported", argv[0]);
+	    bump("%s: 원격에서 원격으로는 지원하지 않습니다.", argv[0]);
 
 	wc_type = test_wildcard(argv[0], 1);
 	if (wc_type == WCTYPE_NONEXISTENT)
@@ -2073,14 +2073,14 @@ static void toremote(int argc, char *argv[])
     for (i = 0; i < argc - 1; i++) {
 	src = argv[i];
 	if (colon(src) != NULL) {
-	    tell_user(stderr, "%s: Remote to remote not supported\n", src);
+	    tell_user(stderr, "%s: 원격에서 원격으로는 지원하지 않습니다.\n", src);
 	    errs++;
 	    continue;
 	}
 
 	wc_type = test_wildcard(src, 1);
 	if (wc_type == WCTYPE_NONEXISTENT) {
-	    run_err("%s: No such file or directory", src);
+	    run_err("%s: 파일이나 디렉토리가 없습니다.", src);
 	    continue;
 	} else if (wc_type == WCTYPE_FILENAME) {
 	    source(src);
@@ -2091,7 +2091,7 @@ static void toremote(int argc, char *argv[])
 
 	    wc = begin_wildcard_matching(src);
 	    if (wc == NULL) {
-		run_err("%s: No such file or directory", src);
+		run_err("%s: 파일이나 디렉토리가 없습니다.", src);
 		continue;
 	    }
 
@@ -2117,7 +2117,7 @@ static void tolocal(int argc, char *argv[])
     uploading = 0;
 
     if (argc != 2)
-	bump("More than one remote source not supported");
+	bump("둘 이상의 원격 소스는 지원하지 않습니다.");
 
     wsrc = argv[0];
     targ = argv[1];
@@ -2126,7 +2126,7 @@ static void tolocal(int argc, char *argv[])
     host = wsrc;
     wsrc = colon(wsrc);
     if (wsrc == NULL)
-	bump("Local to local copy not supported");
+	bump("로컬에서 로컬로의 복사는 지원하지 않습니다.");
     *wsrc++ = '\0';
     /* Substitute "." for empty filename */
     if (*wsrc == '\0')
@@ -2177,7 +2177,7 @@ static void get_dir_list(int argc, char *argv[])
     host = wsrc;
     wsrc = colon(wsrc);
     if (wsrc == NULL)
-	bump("Local file listing not supported");
+	bump("로컬 파일 목록은 지원하지 않습니다.");
     *wsrc++ = '\0';
     /* Substitute "." for empty filename */
     if (*wsrc == '\0')
@@ -2229,40 +2229,40 @@ static void get_dir_list(int argc, char *argv[])
  */
 static void usage(void)
 {
-    printf("PuTTY Secure Copy client\n");
+    printf("iPuTTY 보안 복사 프로그램\n");
     printf("%s\n", ver);
-    printf("Usage: pscp [options] [user@]host:source target\n");
+    printf("사용법: pscp [options] [user@]host:source target\n");
     printf
-	("       pscp [options] source [source...] [user@]host:target\n");
-    printf("       pscp [options] -ls [user@]host:filespec\n");
-    printf("Options:\n");
-    printf("  -V        print version information and exit\n");
-    printf("  -pgpfp    print PGP key fingerprints and exit\n");
-    printf("  -p        preserve file attributes\n");
-    printf("  -q        quiet, don't show statistics\n");
-    printf("  -r        copy directories recursively\n");
-    printf("  -v        show verbose messages\n");
-    printf("  -load sessname  Load settings from saved session\n");
-    printf("  -P port   connect to specified port\n");
-    printf("  -l user   connect with specified username\n");
-    printf("  -pw passw login with specified password\n");
-    printf("  -1 -2     force use of particular SSH protocol version\n");
-    printf("  -4 -6     force use of IPv4 or IPv6\n");
-    printf("  -C        enable compression\n");
-    printf("  -i key    private key file for user authentication\n");
-    printf("  -noagent  disable use of Pageant\n");
-    printf("  -agent    enable use of Pageant\n");
+	("        pscp [options] source [source...] [user@]host:target\n");
+    printf("        pscp [options] -ls [user@]host:filespec\n");
+    printf("옵션:\n");
+    printf("  -V        버전 정보 출력 후, 종료\n");
+    printf("  -pgpfp    PGP 키 fingerprint 출력 후, 종료\n");
+    printf("  -p        파일 속성 보전\n");
+    printf("  -q        조용히, 통계를 표시하지 않음\n");
+    printf("  -r        재귀적으로 디렉토리 복사\n");
+    printf("  -v        자세한 메시지 출력\n");
+    printf("  -load sessname  저장된 세션의 설정 불러오기\n");
+    printf("  -P port   지정한 포트로 연결\n");
+    printf("  -l user   지정한 사용자 이름으로 연결\n");
+    printf("  -pw passw 지정한 암호로 로그인\n");
+    printf("  -1 -2     특정한 SSH 프로토콜 버전을 사용\n");
+    printf("  -4 -6     IPv4 또는 IPv6를 특정하여 연결\n");
+    printf("  -C        압축 사용\n");
+    printf("  -i key    p인증을 위한 개인키 파일\n");
+    printf("  -noagent  Pagent 사용 안함\n");
+    printf("  -agent    Pagent 사용\n");
     printf("  -hostkey aa:bb:cc:...\n");
-    printf("            manually specify a host key (may be repeated)\n");
-    printf("  -batch    disable all interactive prompts\n");
+    printf("            호스트키 수동 지정 (may be repeated)\n");
+    printf("  -batch    대화형 프롬프트 사용 안함\n");
     printf("  -proxycmd command\n");
-    printf("            use 'command' as local proxy\n");
-    printf("  -unsafe   allow server-side wildcards (DANGEROUS)\n");
-    printf("  -sftp     force use of SFTP protocol\n");
-    printf("  -scp      force use of SCP protocol\n");
+    printf("            로컬 프록시로서 'command' 사용\n");
+    printf("  -unsafe   서버 측면의 astrik 사용을 허가(위험)\n");
+    printf("  -sftp     SFTP 프로토콜을 사용\n");
+    printf("  -scp      SCP 프로토콜을 사용\n");
     printf("  -sshlog file\n");
     printf("  -sshrawlog file\n");
-    printf("            log protocol details to a file\n");
+    printf("            프로토콜 상세 사항을 파일에 기록\n");
 #if 0
     /*
      * -gui is an internal option, used by GUI front ends to get
@@ -2328,7 +2328,7 @@ int psftp_main(int argc, char *argv[])
 	    break;
 	ret = cmdline_process_param(argv[i], i+1<argc?argv[i+1]:NULL, 1, conf);
 	if (ret == -2) {
-	    cmdline_error("option \"%s\" requires an argument", argv[i]);
+	    cmdline_error("\"%s\" 옵션은 옶션값이 있어야 합니다.", argv[i]);
 	} else if (ret == 2) {
 	    i++;	       /* skip next argument */
 	} else if (ret == 1) {
@@ -2365,7 +2365,7 @@ int psftp_main(int argc, char *argv[])
 	    i++;
 	    break;
 	} else {
-	    cmdline_error("unknown option \"%s\"", argv[i]);
+	    cmdline_error("잘못된 옵션 \"%s\"", argv[i]);
 	}
     }
     argc -= i;
