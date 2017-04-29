@@ -3,7 +3,7 @@ iPutty
 
 ## Abstract
 
-***iPuTTY*** 는 ***PuTTY***의 한국어 로컬 버전이며, SSH 터미널 에뮬레이터 입니다. 현재 ***iPuTTY***의 주 타겟 플랫폼은 ***Microsoft Windows 7*** 이상 버전 입니다.
+***iPuTTY*** 는 ***PuTTY*** 의 한국어 로컬 버전이며, SSH 터미널 에뮬레이터 입니다. 현재 ***iPuTTY*** 의 주 타겟 플랫폼은 ***Microsoft Windows 7*** 이상 버전 입니다.
 
 이 저장소는 Official ***iPuTTY*** 저장소가 아닙니다. Official site는 [iPuTTY Official site](https://bitbucket.org/daybreaker/iputty/)를 이용 하십시오. 하지만, 현재 공식 사이트는 2016/05/31 에 개발 중단을 선언한 상태이며, [HPuTTY]( https://github.com/teamnop/HPuTTY)를 이용하라고 권고하고 있습니다.
 
@@ -41,7 +41,7 @@ Semi-transparent windows
 ***Cytwin 32bit*** 의 경우:
 	압축 파일에 포함된 ***cthelper.exe*** 파일을 ***cygwin*** ***/bin*** directory에 저장 합니다.
 
-***cthelper.exe*** 복사가 완료 되었으면, ***iPuTTY*** 를 실행한 후에, connection 정보를 아래와 같이 하여 termanal을 ***iPuTTy***로 띄웁니다.
+***cthelper.exe*** 복사가 완료 되었으면, ***iPuTTY*** 를 실행한 후에, connection 정보를 아래와 같이 하여 termanal을 ***iPuTTy*** 로 띄웁니다.
 
  * Connection Type: Cygterm
  * Host address   : -
