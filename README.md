@@ -28,7 +28,7 @@ Semi-transparent windows
  * Now, ***UTF-8 is the default encoding*** if not configured explicitly. This will be a huge convenience since most Linux servers uses it by default recently.
  * ***Italics font support***: To use it on xterm-256color terminals, have a look at my terminfo generator and related configurations such as vimrc, bashrc, and tmux.conf in the same location.
 
-## Cygterm
+## Cygterm (Cygwin terminal)
 
 이 곳에서 빌드한 ***iPuTTY*** 는 Cygterm patch가 포함이 되어 있습니다. ***Cygterm*** 기능을 사용하기 위해서는 ***cthelper.exe*** 가 필요 합니다. ***cthelper.exe*** 는 https://github.com/Joungkyun/iputty/releases/tag/0.68 에서 배포 합니다.
 
@@ -46,3 +46,8 @@ Semi-transparent windows
  * Connection Type: Cygterm
  * Host address   : -
 
+Cygterm 기능이 포함된 소스코드는 ***iputty-cygterm*** branch를 이용하십시오.
+
+## 한글 번역 버전
+
+한글화가 되어 있는 소스 코드는 ***iputty-cygterm-hangulize*** branch를 이용 하십시오.
