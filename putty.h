@@ -780,6 +780,7 @@ void cleanup_exit(int);
     X(INT, NONE, ssh_no_shell) /* avoid running a shell */ \
     X(STR, NONE, ssh_nc_host) /* host to connect to in `nc' mode */ \
     X(INT, NONE, ssh_nc_port) /* port to connect to in `nc' mode */ \
+    X(INT, NONE, ssh_hostkey_check) \
     /* Telnet options */ \
     X(STR, NONE, termtype) \
     X(STR, NONE, termspeed) \

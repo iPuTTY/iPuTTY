@@ -26,6 +26,7 @@ const char *const appname = "PSFTP";
 
 #if defined(_WIN)
 char isUTF8 = 1;
+static int hostkeychk = 0;
 
 char *toCP949 (char *utf8str) {
     BSTR unicode;
@@ -2909,6 +2910,8 @@ static void usage(void)
     printf("            프로토콜 상세 사항을 파일에 기록\n");
     printf("  -utf8 [on|off]\n");
     printf("            utf8 모드 옵션. 기본값 on\n");
+    printf("  -hkeychk\n");
+    printf("            로그인 중 호스트키 검사를 하지 않음\n");
     cleanup_exit(1);
 }
 
@@ -3084,6 +3087,8 @@ static int psftp_connect(char *userhost, char *user, int portnumber)
 		 "exec sftp-server");
     conf_set_int(conf, CONF_ssh_subsys2, FALSE);
 
+    conf_set_int(conf, CONF_ssh_hostkey_check, hostkeychk ? TRUE : FALSE);
+
     back = &ssh_backend;
 
     logctx = log_init(NULL, conf);
@@ -3192,6 +3197,8 @@ int psftp_main(int argc, char *argv[])
 		isUTF8 = 1;
 	    } else
 		isUTF8 = 0;
+	} else if (strcmp(argv[i], "-hkeychk") == 0 ) {
+	    hostkeychk = 1;
 	} else if (strcmp(argv[i], "-V") == 0 ||
                    strcmp(argv[i], "--version") == 0) {
 	    version();

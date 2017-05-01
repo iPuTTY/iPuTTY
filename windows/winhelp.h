@@ -102,6 +102,7 @@
 #define WINHELP_CTX_ssh_command "ssh.command:config-command"
 #define WINHELP_CTX_ssh_compress "ssh.compress:config-ssh-comp"
 #define WINHELP_CTX_ssh_share "ssh.sharing:config-ssh-sharing"
+#define WINHELP_CTX_ssh_hostkey_check "ssh.hostkey.check:config-ssh-hostkey-check"
 #define WINHELP_CTX_ssh_kexlist "ssh.kex.order:config-ssh-kex-order"
 #define WINHELP_CTX_ssh_hklist "ssh.hostkey.order:config-ssh-hostkey-order"
 #define WINHELP_CTX_ssh_kex_repeat "ssh.kex.repeat:config-ssh-kex-rekey"

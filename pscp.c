@@ -53,6 +53,7 @@ static void rsource(const char *src);
 static void sink(const char *targ, const char *src);
 
 const char *const appname = "PSCP";
+static int hostkeychk = 0;
 
 /*
  * The maximum amount of queued data we accept before we stop and
@@ -512,6 +513,7 @@ static void do_cmd(char *host, char *user, char *cmd)
 	conf_set_int(conf, CONF_ssh_subsys, FALSE);
     }
     conf_set_int(conf, CONF_nopty, TRUE);
+    conf_set_int(conf, CONF_ssh_hostkey_check, hostkeychk ? TRUE : FALSE);
 
     back = &ssh_backend;
 
@@ -2263,6 +2265,8 @@ static void usage(void)
     printf("  -sshlog file\n");
     printf("  -sshrawlog file\n");
     printf("            프로토콜 상세 사항을 파일에 기록\n");
+    printf("  -hkeychk\n");
+    printf("            로그인 중 호스트키 검사를 하지 않음\n");
 #if 0
     /*
      * -gui is an internal option, used by GUI front ends to get
@@ -2361,6 +2365,8 @@ int psftp_main(int argc, char *argv[])
 	    try_scp = 0; try_sftp = 1;
 	} else if (strcmp(argv[i], "-scp") == 0) {
 	    try_scp = 1; try_sftp = 0;
+	} else if (strcmp(argv[i], "-hkeychk") == 0 ) {
+	    hostkeychk = 1;
 	} else if (strcmp(argv[i], "--") == 0) {
 	    i++;
 	    break;

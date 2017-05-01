@@ -2500,6 +2500,14 @@ void setup_config_box(struct controlbox *b, int midsession,
                                             manual_hostkey_handler, P(mh));
             mh->addbutton->generic.column = 1;
             ctrl_columns(s, 1, 100);
+
+	    s = ctrl_getset(b, "Connection/SSH/Host keys", "hostkeychk",
+			    "Server hostkey checking");
+
+	    ctrl_checkbox(s, "Whether checking stric hostkey during login",
+			  'c', HELPCTX(ssh_hostkey_check),
+			  conf_checkbox_handler,
+			  I(CONF_ssh_hostkey_check));
 	}
 
 	if (!midsession || !(protcfginfo == 1 || protcfginfo == -1)) {
