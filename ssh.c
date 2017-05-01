@@ -4206,10 +4206,13 @@ static int do_ssh1_login(Ssh ssh, const unsigned char *in, int inlen,
             crStop(0);
         } else if (s->dlgret < 0) { /* none configured; use standard handling */
             ssh_set_frozen(ssh, 1);
-            s->dlgret = verify_ssh_host_key(ssh->frontend,
-                                            ssh->savedhost, ssh->savedport,
-                                            "rsa", keystr, fingerprint,
-                                            ssh_dialog_callback, ssh);
+	    if (conf_get_int(ssh->conf, CONF_ssh_hostkey_check) == 1)
+		s->dlgret = 1;
+	    else
+		s->dlgret = verify_ssh_host_key(ssh->frontend,
+						ssh->savedhost, ssh->savedport,
+						"rsa", keystr, fingerprint,
+						ssh_dialog_callback, ssh);
             sfree(keystr);
 #ifdef FUZZING
 	    s->dlgret = 1;
@@ -7394,11 +7397,14 @@ static void do_ssh2_transport(Ssh ssh, const void *vin, int inlen,
             crStopV;
         } else if (s->dlgret < 0) { /* none configured; use standard handling */
             ssh_set_frozen(ssh, 1);
-            s->dlgret = verify_ssh_host_key(ssh->frontend,
-                                            ssh->savedhost, ssh->savedport,
-                                            ssh->hostkey->keytype, s->keystr,
-                                            s->fingerprint,
-                                            ssh_dialog_callback, ssh);
+	    if (conf_get_int(ssh->conf, CONF_ssh_hostkey_check) == 1)
+		s->dlgret = 1;
+	    else
+		s->dlgret = verify_ssh_host_key(ssh->frontend,
+						ssh->savedhost, ssh->savedport,
+						ssh->hostkey->keytype, s->keystr,
+						s->fingerprint,
+						ssh_dialog_callback, ssh);
 #ifdef FUZZING
 	    s->dlgret = 1;
 #endif
