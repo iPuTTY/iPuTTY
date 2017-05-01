@@ -741,6 +741,7 @@ void save_open_settings(void *sesskey, Conf *conf)
     write_setting_i(sesskey, "ConnectionSharing", conf_get_int(conf, CONF_ssh_connection_sharing));
     write_setting_i(sesskey, "ConnectionSharingUpstream", conf_get_int(conf, CONF_ssh_connection_sharing_upstream));
     write_setting_i(sesskey, "ConnectionSharingDownstream", conf_get_int(conf, CONF_ssh_connection_sharing_downstream));
+    write_setting_i(sesskey, "SSHHostkeyCheck", conf_get_int(conf, CONF_ssh_hostkey_check));
     wmap(sesskey, "SSHManualHostKeys", conf, CONF_ssh_manual_hostkeys, FALSE);
 
 #ifdef PUTTY_WINSTUFF_H
@@ -1226,6 +1227,7 @@ void load_open_settings(void *sesskey, Conf *conf)
     gppi(sesskey, "ConnectionSharing", 0, conf, CONF_ssh_connection_sharing);
     gppi(sesskey, "ConnectionSharingUpstream", 1, conf, CONF_ssh_connection_sharing_upstream);
     gppi(sesskey, "ConnectionSharingDownstream", 1, conf, CONF_ssh_connection_sharing_downstream);
+    gppi(sesskey, "SSHHostkeyCheck", 0, conf, CONF_ssh_hostkey_check);
     gppmap(sesskey, "SSHManualHostKeys", conf, CONF_ssh_manual_hostkeys);
 
 #ifdef PUTTY_WINSTUFF_H
