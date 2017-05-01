@@ -2501,10 +2501,10 @@ void setup_config_box(struct controlbox *b, int midsession,
             mh->addbutton->generic.column = 1;
             ctrl_columns(s, 1, 100);
 
-	    s = ctrl_getset(b, "Connection/SSH/Host keys", "hostkeychk",
-			    "Server hostkey checking");
+	    s = ctrl_getset(b, "연결/SSH/호스트키", "hostkeychk",
+			    "서버 호스트키 검사");
 
-	    ctrl_checkbox(s, "Whether checking stric hostkey during login",
+	    ctrl_checkbox(s, "로그인 중, 서버의 호스트키 검사 여부",
 			  'c', HELPCTX(ssh_hostkey_check),
 			  conf_checkbox_handler,
 			  I(CONF_ssh_hostkey_check));
