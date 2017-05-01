@@ -51,3 +51,5 @@ Cygterm 기능이 포함된 소스코드는 [***iputty-cygterm*** branch](https:
 ## 한글 번역 버전
 
 한글화가 되어 있는 소스 코드는 [***iputty-cygterm-hangulize*** branch](https://github.com/Joungkyun/iputty/tree/iputty-cygterm-hangulize)를 이용 하십시오.
+
+현재 배포중인 실행파일들은 [***iputty-cygterm*** branch](https://github.com/Joungkyun/iputty/tree/iputty-cygterm)를 빌드한 것으로, 다음 버전은 [***iputty-cygterm-hangulize*** branch](https://github.com/Joungkyun/iputty/tree/iputty-cygterm-hangulize)로 배포할 예정입니다.
