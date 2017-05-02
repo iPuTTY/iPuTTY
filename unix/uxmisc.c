@@ -14,6 +14,8 @@
 #include <sys/stat.h>
 #include <pwd.h>
 
+#include <iconv.h>
+
 #include "putty.h"
 
 unsigned long getticks(void)
@@ -349,3 +351,63 @@ char *make_dir_path(const char *path, mode_t mode)
         pos += strspn(path + pos, "/");
     }
 }
+
+char *toCP949 (char *src, int isUTF8) {
+    iconv_t cd;
+    char *isrc, *ito, *to;
+    size_t ret, flen, tlen;
+
+    if (!isUTF8)
+	return dupstr(utf8str);
+
+    cd = iconv_open("CP949//IGNORE", "UTF-8");
+
+    if (cd == (iconv_t)(-1))
+	return dupstr(utf8str);
+
+    isrc = src;
+
+    flen = strlen(src);
+    tlen = flen + 1;
+
+    to = (char *) malloc(sizeof(char) * tlen);
+    memset (to, 0, sizeo(char) * tlen);
+
+    ito = to;
+    ret = iconv(cd, &isrc, &flen, &ito, &tlen);
+
+    iconv_close(cd);
+
+    return to;
+}
+
+char *toUTF8 (char *src, int isUTF8) {
+    iconv_t cd;
+    char *isrc, *ito, *to;
+    size_t ret, flen, tlen;
+
+    if (!isUTF8)
+	return dupstr(utf8str);
+
+    cd = iconv_open("UTF-8//IGNORE", "CP949");
+
+    if (cd == (iconv_t)(-1))
+	return dupstr(utf8str);
+
+    isrc = src;
+
+    flen = strlen(src);
+    tlen = (flen * 2) + 1;
+
+    to = (char *) malloc(sizeof(char) * tlen);
+    memset (to, 0, sizeo(char) * tlen);
+
+    ito = to;
+    ret = iconv(cd, &isrc, &flen, &ito, &tlen);
+
+    iconv_close(cd);
+
+    return to;
+}
+
+// vim: ts=8 sts=4 sw=4 noet cino=\:2\=2(0u0

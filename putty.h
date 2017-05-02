@@ -1,6 +1,12 @@
 #ifndef PUTTY_PUTTY_H
 #define PUTTY_PUTTY_H
 
+#if defined(_WIN32) || defined(_WIN64)
+	#if !defined(_WIN)
+		#define _WIN
+	#endif
+#endif
+
 #include <stddef.h>		       /* for wchar_t */
 
 /*
@@ -1493,6 +1499,17 @@ char *get_username(void);	       /* return value needs freeing */
 char *get_random_data(int bytes, const char *device); /* used in cmdgen.c */
 char filename_char_sanitise(char c);   /* rewrite special pathname chars */
 
+char *toUTF8 (char *, int);
+char *toCP949 (char *, int);
+
+#ifdef _WIN
+    #define toLocalChar toCP949
+    #define toRemoteChar toUTF8
+#else
+    #define toLocalChar toUTF8
+    #define toRemoteChar toCP949
+#endif
+
 /*
  * Exports and imports from timing.c.
  *
@@ -1659,3 +1676,5 @@ void request_callback_notifications(toplevel_callback_notify_fn_t notify,
     (0x10000 + (((wch1) & 0x3FF) << 10) + ((wch2) & 0x3FF))
 
 #endif
+
+// vim: ts=8 sts=4 sw=4 noet cino=\:2\=2(0u0

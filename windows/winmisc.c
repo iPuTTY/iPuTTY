@@ -627,3 +627,61 @@ FontSpec *fontspec_deserialise(void *vdata, int maxsize, int *used)
                         GET_32BIT_MSB_FIRST(end + 4),
                         GET_32BIT_MSB_FIRST(end + 8));
 }
+
+char *toCP949 (char *src, int isUTF8) {
+    BSTR unicode;
+    char *to;
+    int len;
+
+    if (!isUTF8)
+	return dupstr(src);
+
+    len = MultiByteToWideChar(CP_UTF8, 0, src, lstrlen(src) + 1, NULL, NULL);
+    if (len < 1)
+	return dupstr(src);
+    unicode = SysAllocStringLen(NULL, len);
+    MultiByteToWideChar(CP_UTF8, 0, src, lstrlen(src) + 1, unicode, len);
+
+    len = WideCharToMultiByte(CP_ACP, 0, unicode, -1, NULL, 0, NULL, NULL);
+    if (len < 1) {
+	SysFreeString (unicode);
+	return dupstr(src);
+    }
+
+    to = (char *) smalloc (len + 1);
+    memset (to, 0, len + 1);
+    WideCharToMultiByte(CP_ACP, 0, unicode, -1, to, len, NULL, NULL);
+    SysFreeString (unicode);
+
+    return to;
+}
+
+char *toUTF8 (char *src, int isUTF8) {
+    BSTR unicode;
+    char *to = NULL;
+    int len;
+
+    if (!isUTF8)
+	return dupstr(src);
+
+    len = MultiByteToWideChar(CP_ACP, 0, src, lstrlen(src) + 1, NULL, NULL);
+    if (len < 1)
+	return dupstr(src);
+    unicode = SysAllocStringLen(NULL, len);
+    MultiByteToWideChar(CP_ACP, 0, src, lstrlen (src) + 1, unicode, len);
+
+    len = WideCharToMultiByte(CP_UTF8, 0, unicode, -1, to, 0, NULL, NULL);
+    if (len < 1) {
+	SysFreeString (unicode);
+	return dupstr(src);
+    }
+
+    to = (char *) smalloc (len + 1);
+    memset (to, 0, len + 1);
+    WideCharToMultiByte(CP_UTF8, 0, unicode, -1, to, len, NULL, NULL);
+    SysFreeString (unicode);
+
+    return to;
+}
+
+// vim: ts=8 sts=4 sw=4 noet cino=\:2\=2(0u0
