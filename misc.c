@@ -1231,3 +1231,22 @@ char *buildinfo(const char *newline)
 
     return strbuf_to_str(buf);
 }
+
+int strrncasecmp(char* s1, char* s2, int num) {
+    int len1 = strlen(s1) - 1;
+    int len2 = strlen(s2) - 1;
+    for (; len1 >= 0 && len2 >= 0 && num > 0; len1--, len2--, num--) {
+	// force change lowcase
+	if (s1[len1] > 64 && s1[len1] < 91 ) { // upper case
+	    s1[len1] += 32;
+	}
+	if (s1[len2] > 64 && s1[len2] < 91 ) { // upper case
+	    s1[len2] += 32;
+	}
+	const int d = (int) s1[len1] - (int) s2[len2];
+	if (d != 0) return d;
+    }
+    return 0;
+}
+
+// vim: ts=8 sts=4 sw=4 noet cino=\:2\=2(0u0
