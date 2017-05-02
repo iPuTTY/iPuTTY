@@ -513,7 +513,8 @@ static void do_cmd(char *host, char *user, char *cmd)
 	conf_set_int(conf, CONF_ssh_subsys, FALSE);
     }
     conf_set_int(conf, CONF_nopty, TRUE);
-    conf_set_int(conf, CONF_ssh_hostkey_check, hostkeychk ? TRUE : FALSE);
+    if (conf_get_int(conf, CONF_ssh_hostkey_check) == 0)
+	conf_set_int(conf, CONF_ssh_hostkey_check, hostkeychk ? TRUE : FALSE);
 
     back = &ssh_backend;
 
@@ -2414,3 +2415,4 @@ int psftp_main(int argc, char *argv[])
 }
 
 /* end */
+// vim: ts=8 sts=4 sw=4 noet cino=\=2\:2(0u0
