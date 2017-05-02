@@ -2,6 +2,12 @@
  * psftp.c: (platform-independent) front end for PSFTP.
  */
 
+#if defined(_WIN32) || defined(_WIN64)
+    #if !defined(_WIN)
+	#define _WIN
+    #endif
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -16,82 +22,16 @@
 #include "sftp.h"
 #include "int64.h"
 
-#if defined(_WIN32) || defined(_WIN64)
-    #if !defined(_WIN)
-        #define _WIN
-    #endif
+#if defined(_WIN)
+    #define strcasecmp stricmp
+#else
+    #include <strings.h>
 #endif
 
 const char *const appname = "PSFTP";
 
-#if defined(_WIN)
-char isUTF8 = 1;
-static int hostkeychk = 0;
-
-char *toCP949 (char *utf8str) {
-    BSTR unicode;
-    char *ansi;
-    int len;
-
-    if (!isUTF8)
-        return dupstr(utf8str);
-
-    len = MultiByteToWideChar(CP_UTF8, 0, utf8str, lstrlen(utf8str) + 1, NULL, NULL);
-    if (len < 1)
-	return dupstr(utf8str);
-    unicode = SysAllocStringLen(NULL, len);
-    MultiByteToWideChar(CP_UTF8, 0, utf8str, lstrlen(utf8str) + 1, unicode, len);
-
-    len = WideCharToMultiByte(CP_ACP, 0, unicode, -1, NULL, 0, NULL, NULL);
-    if (len < 1) {
-	SysFreeString (unicode);
-	return dupstr(utf8str);
-    }
-
-    ansi = (char *) smalloc (len + 1);
-    memset (ansi, 0, len + 1);
-    WideCharToMultiByte(CP_ACP, 0, unicode, -1, ansi, len, NULL, NULL);
-    SysFreeString (unicode);
-
-    return ansi;
-}
-
-char *toUTF8 (char *ansi) {
-    BSTR unicode;
-    char *utf8 = NULL;
-    int len;
-
-    if (!isUTF8)
-        return dupstr(ansi);
-
-    len = MultiByteToWideChar(CP_ACP, 0, ansi, lstrlen(ansi) + 1, NULL, NULL);
-    if (len < 1)
-	return dupstr(ansi);
-    unicode = SysAllocStringLen(NULL, len);
-    MultiByteToWideChar(CP_ACP, 0, ansi, lstrlen (ansi) + 1, unicode, len);
-
-    len = WideCharToMultiByte(CP_UTF8, 0, unicode, -1, utf8, 0, NULL, NULL);
-    if (len < 1) {
-	SysFreeString (unicode);
-	return dupstr(ansi);
-    }
-
-    utf8 = (char *) smalloc (len + 1);
-    memset (utf8, 0, len + 1);
-    WideCharToMultiByte(CP_UTF8, 0, unicode, -1, utf8, len, NULL, NULL);
-    SysFreeString (unicode);
-
-    return utf8;
-}
-#endif
-
-#if defined(_WIN)
-    #define cp949 toCP949
-    #define utf8 toUTF8
-#else
-    #define cp949 strdup
-    #define utf8 strdup
-#endif
+static char isUTF8 = 1;
+static char hostkeychk = 0;
 
 /*
  * Since SFTP is a request-response oriented protocol, it requires
@@ -285,7 +225,7 @@ int sftp_get_file(char *fname, char *outfname, int recurse, int restart)
     int ret, shown_err = FALSE;
     struct fxp_attrs attrs;
 
-    char *cpfname = cp949(fname);
+    char *cpfname = toLocalChar(fname, isUTF8);
 
     /*
      * In recursive mode, see if we're dealing with a directory.
@@ -583,7 +523,7 @@ int sftp_put_file(char *fname, char *outfname, int recurse, int restart)
 
     char * outcname;
 
-    outcname = cp949(outfname);
+    outcname = toLocalChar(outfname, isUTF8);
 
     /*
      * In recursive mode, see if we're dealing with a directory.
@@ -982,7 +922,7 @@ int wildcard_iterate(char *filename, int (*func)(void *, char *), void *ctx)
     int is_wc, ret;
 
     ofilename = strdup(filename);
-    filename = utf8(ofilename);
+    filename = toRemoteChar(ofilename, isUTF8);
 
     unwcfname = snewn(strlen(filename)+1, char);
     is_wc = !wc_unescape(unwcfname, filename);
@@ -1116,7 +1056,7 @@ int sftp_cmd_ls(struct sftp_command *cmd)
     if (cmd->nwords < 2)
 	dir = ".";
     else {
-	udir = utf8(cmd->words[1]);
+	udir = toRemoteChar(cmd->words[1], isUTF8);
 	dir = udir;
     }
 
@@ -1170,7 +1110,7 @@ int sftp_cmd_ls(struct sftp_command *cmd)
 	sfile = chk;
     }
 
-    adir = cp949(cdir);
+    adir = toLocalChar(cdir, isUTF8);
     printf("Listing directory %s\n", adir);
     sfree(adir);
 
@@ -1238,7 +1178,7 @@ int sftp_cmd_ls(struct sftp_command *cmd)
 
 	    {
 		char * buf;
-		buf = cp949(ournames[i]->longname);
+		buf = toLocalChar(ournames[i]->longname, isUTF8);
 		printf("%s\n", buf);
 		sfree (buf);
 	    }
@@ -1278,7 +1218,7 @@ int sftp_cmd_cd(struct sftp_command *cmd)
     if (cmd->nwords < 2)
 	dir = dupstr(homedir);
     else {
-	udir = utf8(cmd->words[1]);
+	udir = toRemoteChar(cmd->words[1], isUTF8);
 	dir = canonify(udir);
 	sfree(udir);
     }
@@ -1305,14 +1245,13 @@ int sftp_cmd_cd(struct sftp_command *cmd)
     sfree(pwd);
     pwd = dir;
 
-    adir = cp949(dir);
+    adir = toLocalChar(dir, isUTF8);
     printf("Remote directory is now %s\n", adir);
     sfree(adir);
 
     return 1;
 }
 
-#if defined(_WIN)
 /*
  * Change character set of consoe is set utf8
  */
@@ -1323,10 +1262,7 @@ int sftp_set_utf8(struct sftp_command *cmd)
 	return 0;
     }
 
-    if ( strcmp(cmd->words[1], "on") == 0 ||
-	 strcmp(cmd->words[1], "oN") == 0 ||
-	 strcmp(cmd->words[1], "On") == 0 ||
-	 strcmp(cmd->words[1], "ON") == 0 ) {
+    if ( strcasecmp(cmd->words[1], "on") == 0 ) {
 	isUTF8 = 1;
 	printf ("Console charset is set UTF-8\n");
     } else {
@@ -1336,7 +1272,6 @@ int sftp_set_utf8(struct sftp_command *cmd)
 
     return 1;
 }
-#endif
 
 /*
  * Print current directory. Easy as pie.
@@ -1350,7 +1285,7 @@ int sftp_cmd_pwd(struct sftp_command *cmd)
 	return 0;
     }
 
-    ppwd = cp949(pwd);
+    ppwd = toLocalChar(pwd, isUTF8);
 
     printf("Remote directory is %s\n", ppwd);
     sfree(ppwd);
@@ -1401,7 +1336,7 @@ int sftp_general_get(struct sftp_command *cmd, int restart, int multiple)
     do {
 	SftpWildcardMatcher *swcm;
 
-	origfname = utf8(cmd->words[i++]);
+	origfname = toRemoteChar(cmd->words[i++], isUTF8);
 	unwcfname = snewn(strlen(origfname)+1, char);
 
 	if (multiple && !wc_unescape(unwcfname, origfname)) {
@@ -1439,7 +1374,7 @@ int sftp_general_get(struct sftp_command *cmd, int restart, int multiple)
 	    if (!multiple && i < cmd->nwords)
 		outfname = cmd->words[i++];
 	    else {
-		cpfname = cp949(origwfname);
+		cpfname = toLocalChar(origwfname, isUTF8);
 		outfname = stripslashes(cpfname, 0);
 	    }
 
@@ -1540,9 +1475,9 @@ int sftp_general_put(struct sftp_command *cmd, int restart, int multiple)
 
 	while (wfname) {
 	    if (!multiple && i < cmd->nwords)
-		origoutfname = utf8(cmd->words[i++]);
+		origoutfname = toRemoteChar(cmd->words[i++], isUTF8);
 	    else
-		origoutfname = utf8(stripslashes(wfname, 1));
+		origoutfname = toRemoteChar(stripslashes(wfname, 1), isUTF8);
 
 	    outfname = canonify(origoutfname);
 	    if (!outfname) {
@@ -1610,7 +1545,7 @@ int sftp_cmd_mkdir(struct sftp_command *cmd)
 
     ret = 1;
     for (i = 1; i < cmd->nwords; i++) {
-        char *tdir = utf8(cmd->words[i]);
+        char *tdir = toRemoteChar(cmd->words[i], isUTF8);
 	dir = canonify(tdir);
 	if (!dir) {
 	    printf("%s: canonify: %s\n", tdir, fxp_error());
@@ -1623,7 +1558,7 @@ int sftp_cmd_mkdir(struct sftp_command *cmd)
         pktin = sftp_wait_for_reply(req);
 	result = fxp_mkdir_recv(pktin, req);
 
-        char *cpdir = cp949(dir);
+        char *cpdir = toLocalChar(dir, isUTF8);
 
 	if (!result) {
 	    printf("mkdir %s: %s\n", cpdir, fxp_error());
@@ -1648,7 +1583,7 @@ static int sftp_action_rmdir(void *vctx, char *dir)
     pktin = sftp_wait_for_reply(req);
     result = fxp_rmdir_recv(pktin, req);
 
-    char *cpdir = cp949(dir);
+    char *cpdir = toLocalChar(dir, isUTF8);
 
     if (!result) {
 	printf("rmdir %s: %s\n", cpdir, fxp_error());
@@ -1693,7 +1628,7 @@ static int sftp_action_rm(void *vctx, char *fname)
     pktin = sftp_wait_for_reply(req);
     result = fxp_remove_recv(pktin, req);
 
-    char *cpname = cp949(fname);
+    char *cpname = toLocalChar(fname, isUTF8);
 
     if (!result) {
 	printf("rm %s: %s\n", cpname, fxp_error());
@@ -1787,8 +1722,8 @@ static int sftp_action_mv(void *vctx, char *srcfname)
 
     error = result ? NULL : fxp_error();
 
-    char *cpsrc = cp949(srcfname);
-    char *cpfinal = cp949(finalfname);
+    char *cpsrc = toLocalChar(srcfname, isUTF8);
+    char *cpfinal = toLocalChar(finalfname, isUTF8);
 
     if (error) {
 	printf("mv %s %s: %s\n", cpsrc, cpfinal, error);
@@ -1819,7 +1754,7 @@ int sftp_cmd_mv(struct sftp_command *cmd)
 	return 0;
     }
 
-    char *destname = utf8(cmd->words[cmd->nwords-1]);
+    char *destname = toRemoteChar(cmd->words[cmd->nwords-1], isUTF8);
     char *odest = cmd->words[cmd->nwords-1];
 
     ctx->dstfname = canonify(destname);
@@ -1866,7 +1801,7 @@ static int sftp_action_chmod(void *vctx, char *fname)
     unsigned oldperms, newperms;
     struct sftp_context_chmod *ctx = (struct sftp_context_chmod *)vctx;
 
-    char *cname = cp949(fname);
+    char *cname = toLocalChar(fname, isUTF8);
 
     req = fxp_stat_send(fname);
     pktin = sftp_wait_for_reply(req);
@@ -1875,9 +1810,7 @@ static int sftp_action_chmod(void *vctx, char *fname)
     if (!result || !(attrs.flags & SSH_FILEXFER_ATTR_PERMISSIONS)) {
 	printf("get attrs for %s: %s\n", cname,
 	       result ? "file permissions not provided" : fxp_error());
-#if defined(_WIN)
 	sfree(cname);
-#endif
 	return 0;
     }
 
@@ -1888,9 +1821,7 @@ static int sftp_action_chmod(void *vctx, char *fname)
     newperms = attrs.permissions & 07777;
 
     if (oldperms == newperms) {
-#if defined(_WIN)
 	sfree(cname);
-#endif
 	return 1;		       /* no need to do anything! */
     }
 
@@ -1900,16 +1831,12 @@ static int sftp_action_chmod(void *vctx, char *fname)
 
     if (!result) {
 	printf("set attrs for %s: %s\n", cname, fxp_error());
-#if defined(_WIN)
 	sfree(cname);
-#endif
 	return 0;
     }
 
     printf("%s: %04o -> %04o\n", cname, oldperms, newperms);
-#if defined(_WIN)
 	sfree(cname);
-#endif
 
     return 1;
 }
@@ -2357,14 +2284,12 @@ static struct sftp_cmd_lookup {
 	    "  Wildcards may be used to specify multiple directories.\n",
 	    sftp_cmd_rmdir
     }
-#if defined(_WIN)
     ,{
 	"utf8", TRUE, "set console charset to utf8",
 	    " <on|off>\n"
 	    "  set console charset to utf8\n",
 		sftp_set_utf8
     }
-#endif
 };
 
 const struct sftp_cmd_lookup *lookup_command(const char *name)
@@ -3147,6 +3072,12 @@ int psftp_main(int argc, char *argv[])
     int modeflags = 0;
     char *batchfile = NULL;
 
+#if ! defined(_WIN)
+    char *lang = getenv("LANG");
+    if (strrncasecmp(lang, "utf-8", 5) == 0 || strrncasecmp(lang, "utf8", 4) == 0)
+	isUTF8 = 0;
+#endif
+
     flags = FLAG_STDERR | FLAG_INTERACTIVE
 #ifdef FLAG_SYNCAGENT
 	| FLAG_SYNCAGENT
@@ -3188,15 +3119,7 @@ int psftp_main(int argc, char *argv[])
             pgp_fingerprints();
             return 1;
 	} else if (strcmp(argv[i], "-utf8") == 0) {
-	    char *uopt = argv[++i];
-
-	    if ( strcmp(uopt, "on") == 0 ||
-		 strcmp(uopt, "oN") == 0 ||
-		 strcmp(uopt, "On") == 0 ||
-		 strcmp(uopt, "ON") == 0 ) {
-		isUTF8 = 1;
-	    } else
-		isUTF8 = 0;
+	    isUTF8 = (strcasecmp(argv[++i], "on") == 0) ? 1 : 0;
 	} else if (strcmp(argv[i], "-hkeychk") == 0 ) {
 	    hostkeychk = 1;
 	} else if (strcmp(argv[i], "-V") == 0 ||
@@ -3231,11 +3154,16 @@ int psftp_main(int argc, char *argv[])
 	userhost = dupstr(conf_get_str(conf, CONF_host));
     }
 
-#if defined(_WIN)
+#ifdef _WIN
     if ( isUTF8 )
 	printf("psftp: If charset of server side is not UTF8, then use command 'utf8 off'\n");
     else
 	printf("psftp: If charset of server side is UTF8, then use command 'utf8 on'\n");
+#else
+    if ( isUTF8 )
+	printf("psftp: If charset of server side is UTF8, then use command 'utf8 off'\n");
+    else
+	printf("psftp: If charset of server side is not UTF8, then use command 'utf8 on'\n");
 #endif
 
     /*
