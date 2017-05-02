@@ -3087,7 +3087,8 @@ static int psftp_connect(char *userhost, char *user, int portnumber)
 		 "exec sftp-server");
     conf_set_int(conf, CONF_ssh_subsys2, FALSE);
 
-    conf_set_int(conf, CONF_ssh_hostkey_check, hostkeychk ? TRUE : FALSE);
+    if (conf_get_int(conf, CONF_ssh_hostkey_check) == 0)
+	conf_set_int(conf, CONF_ssh_hostkey_check, hostkeychk ? TRUE : FALSE);
 
     back = &ssh_backend;
 
