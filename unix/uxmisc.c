@@ -18,6 +18,8 @@
 
 #include "putty.h"
 
+static char *lang = NULL;
+
 unsigned long getticks(void)
 {
     /*
@@ -355,44 +357,32 @@ char *make_dir_path(const char *path, mode_t mode)
 char *toCP949 (char *src, int isUTF8) {
     iconv_t cd;
     char *isrc, *ito, *to;
-    size_t ret, flen, tlen;
+    size_t flen, tlen;
+    char *tlang, *flang;
 
-    if (!isUTF8)
-	return dupstr(utf8str);
+    if (lang == NULL )
+	lang = getenv("LANG");
 
-    cd = iconv_open("CP949//IGNORE", "UTF-8");
+    if (strrncasecmp(lang, "utf-8", 5) == 0 || strrncasecmp(lang, "utf8", 4) == 0) {
+	if (isUTF8)
+	    return dupstr(src);
+    } else {
+	if (!isUTF8)
+	    return dupstr(src);
+    }
 
-    if (cd == (iconv_t)(-1))
-	return dupstr(utf8str);
+    if (strrncasecmp(lang, "utf-8", 5) == 0 || strrncasecmp(lang, "utf8", 4) == 0) {
+	tlang = "UTF-8//IGNORE";
+	flang = "CP949";
+    } else {
+	tlang = "CP949//IGNORE";
+	flang = "UTF-8";
+    }	
 
-    isrc = src;
-
-    flen = strlen(src);
-    tlen = flen + 1;
-
-    to = (char *) malloc(sizeof(char) * tlen);
-    memset (to, 0, sizeo(char) * tlen);
-
-    ito = to;
-    ret = iconv(cd, &isrc, &flen, &ito, &tlen);
-
-    iconv_close(cd);
-
-    return to;
-}
-
-char *toUTF8 (char *src, int isUTF8) {
-    iconv_t cd;
-    char *isrc, *ito, *to;
-    size_t ret, flen, tlen;
-
-    if (!isUTF8)
-	return dupstr(utf8str);
-
-    cd = iconv_open("UTF-8//IGNORE", "CP949");
+    cd = iconv_open(tlang, flang);
 
     if (cd == (iconv_t)(-1))
-	return dupstr(utf8str);
+	return dupstr(src);
 
     isrc = src;
 
@@ -400,12 +390,81 @@ char *toUTF8 (char *src, int isUTF8) {
     tlen = (flen * 2) + 1;
 
     to = (char *) malloc(sizeof(char) * tlen);
-    memset (to, 0, sizeo(char) * tlen);
+    memset (to, 0, sizeof(char) * tlen);
 
     ito = to;
-    ret = iconv(cd, &isrc, &flen, &ito, &tlen);
+#if 0
+    size_t ret = iconv(cd, &isrc, &flen, &ito, &tlen);
+    printf ("################ %s : %s : %s : %ld\n", tlang, flang, src, ret);
+#else
+    iconv(cd, &isrc, &flen, &ito, &tlen);
+#endif
 
     iconv_close(cd);
+
+#if 0
+    if (ret != 0) {
+	sfree(to);
+	return dupstr(src);
+    }
+#endif
+
+    return to;
+}
+
+char *toUTF8 (char *src, int isUTF8) {
+    iconv_t cd;
+    char *isrc, *ito, *to;
+    size_t flen, tlen;
+    char *tlang, *flang;
+
+    if (lang == NULL )
+	lang = getenv("LANG");
+
+    if (strrncasecmp(lang, "utf-8", 5) == 0 || strrncasecmp(lang, "utf8", 4) == 0) {
+	if (isUTF8)
+	    return dupstr(src);
+    } else {
+	if (!isUTF8)
+	    return dupstr(src);
+    }
+
+    if (strrncasecmp(lang, "utf-8", 5) == 0 || strrncasecmp(lang, "utf8", 4) == 0) {
+	tlang = "CP949//IGNORE";
+	flang = "UTF-8";
+    } else {
+	tlang = "UTF-8//IGNORE";
+	flang = "CP949";
+    }
+
+    cd = iconv_open(tlang, flang);
+
+    if (cd == (iconv_t)(-1))
+	return dupstr(src);
+
+    isrc = src;
+
+    flen = strlen(src);
+    tlen = (flen * 2) + 1;
+
+    to = (char *) malloc(sizeof(char) * tlen);
+    memset (to, 0, sizeof(char) * tlen);
+
+    ito = to;
+#if 0
+    size_t ret = iconv(cd, &isrc, &flen, &ito, &tlen);
+#else
+    iconv(cd, &isrc, &flen, &ito, &tlen);
+#endif
+
+    iconv_close(cd);
+
+#if 0
+    if (ret != 0) {
+	sfree(to);
+	return dupstr(src);
+    }
+#endif
 
     return to;
 }
