@@ -1502,13 +1502,8 @@ char filename_char_sanitise(char c);   /* rewrite special pathname chars */
 char *toUTF8 (char *, int);
 char *toCP949 (char *, int);
 
-#ifdef _WIN
-    #define toLocalChar toCP949
-    #define toRemoteChar toUTF8
-#else
-    #define toLocalChar toUTF8
-    #define toRemoteChar toCP949
-#endif
+#define toLocalChar toCP949
+#define toRemoteChar toUTF8
 
 /*
  * Exports and imports from timing.c.

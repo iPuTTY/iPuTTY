@@ -3072,10 +3072,12 @@ int psftp_main(int argc, char *argv[])
     int modeflags = 0;
     char *batchfile = NULL;
 
+#if 0
 #if ! defined(_WIN)
     char *lang = getenv("LANG");
     if (strrncasecmp(lang, "utf-8", 5) == 0 || strrncasecmp(lang, "utf8", 4) == 0)
 	isUTF8 = 0;
+#endif
 #endif
 
     flags = FLAG_STDERR | FLAG_INTERACTIVE
@@ -3154,17 +3156,10 @@ int psftp_main(int argc, char *argv[])
 	userhost = dupstr(conf_get_str(conf, CONF_host));
     }
 
-#ifdef _WIN
     if ( isUTF8 )
 	printf("psftp: If charset of server side is not UTF8, then use command 'utf8 off'\n");
     else
 	printf("psftp: If charset of server side is UTF8, then use command 'utf8 on'\n");
-#else
-    if ( isUTF8 )
-	printf("psftp: If charset of server side is UTF8, then use command 'utf8 off'\n");
-    else
-	printf("psftp: If charset of server side is not UTF8, then use command 'utf8 on'\n");
-#endif
 
     /*
      * If a user@host string has already been provided, connect to
