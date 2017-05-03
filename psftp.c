@@ -3073,10 +3073,12 @@ int psftp_main(int argc, char *argv[])
     int modeflags = 0;
     char *batchfile = NULL;
 
+#if 0
 #if ! defined(_WIN)
     char *lang = getenv("LANG");
     if (strrncasecmp(lang, "utf-8", 5) == 0 || strrncasecmp(lang, "utf8", 4) == 0)
 	isUTF8 = 0;
+#endif
 #endif
 
     flags = FLAG_STDERR | FLAG_INTERACTIVE
@@ -3155,17 +3157,10 @@ int psftp_main(int argc, char *argv[])
 	userhost = dupstr(conf_get_str(conf, CONF_host));
     }
 
-#ifdef _WIN
     if ( isUTF8 )
 	printf("psftp: 서버의 문자셋이 UTF8이 아니면, 'utf8 off' 명령을 이용하십시오.\n");
     else
 	printf("psftp: 서버의 문자셋이 UTF8이면, 'utf8 on' 명령을 이용하십시오.\n");
-#else
-    if ( isUTF8 )
-	printf("psftp: 서버의 문자셋이 UTF8이면, 'utf8 off' 명령을 이용하십시오.\n");
-    else
-	printf("psftp: 서버의 문자셋이 UTF8이 아니면, 'utf8 on' 명령을 이용하십시오.\n");
-#endif
 
     /*
      * If a user@host string has already been provided, connect to

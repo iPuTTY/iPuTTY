@@ -120,7 +120,7 @@ int match_ssh_id(int stringlen, const void *string, const char *id);
 
 char *buildinfo(const char *newline);
 
-int strrncmp(char* s1, char* s2, int num);
+int strrncasecmp(char* s1, char* s2, int num);
 
 /*
  * Debugging functions.
