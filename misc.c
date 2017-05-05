@@ -1249,4 +1249,52 @@ int strrncasecmp(char* s1, char* s2, int num) {
     return 0;
 }
 
+int filenaming_rule (const char *name) {
+    int len, tlen;
+    int i, j;
+    char *target = "|?*<\":;>+[]";
+
+    tlen = strlen(target);
+
+    if (name == NULL)
+	return 1;
+
+    len = strlen(name);
+
+    for (i=0; i<len; i++) {
+
+	for (j=0; j<tlen; j++) {
+	    if (name[i] == target[j])
+		return 1;
+	}
+    }
+
+    return 0;
+}
+
+char *unprintable_char(const char *name) {
+    int len, clen;
+    int i;
+    char *buf = NULL, hex[4];
+
+    if (name == NULL)
+	return NULL;
+
+    len = strlen(name);
+    clen = len * 3;
+
+    buf = (char *) malloc(sizeof(char) * clen + 1);
+    memset(buf, 0, sizeof(char) * clen + 1);
+
+    for (i=0; i<len; i++) {
+	if (!(name[i] >= 46 && name[i] <= 57) && !(name[i] >=65 && name[i] <= 90) && name[i] != 92 && !(name[i] >= 97 && name[i] <= 122))
+	    sprintf (hex, "%%%02X", (name[i] & 0x000000ff));
+	else
+	    sprintf (hex, "%c", name[i]);
+	strcat(buf, hex);
+    }
+
+    return buf;
+}
+
 // vim: ts=8 sts=4 sw=4 noet cino=\:2\=2(0u0

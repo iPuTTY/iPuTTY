@@ -156,8 +156,23 @@ WFile *open_new_file(const char *name, long perms)
 
     h = CreateFile(name, GENERIC_WRITE, 0, NULL,
 		   CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
-    if (h == INVALID_HANDLE_VALUE)
-	return NULL;
+    if (h == INVALID_HANDLE_VALUE) {
+	char *nname = NULL;
+
+	nname = toLocalChar(name, 1);
+	h = CreateFile(nname, GENERIC_WRITE, 0, NULL,
+		       CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+	sfree(nname);
+
+	if (h == INVALID_HANDLE_VALUE) {
+	    nname = unprintable_char(name);
+	    h = CreateFile(nname, GENERIC_WRITE, 0, NULL,
+			   CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+	    sfree(nname);
+	    if (h == INVALID_HANDLE_VALUE)
+		return NULL;
+	}
+    }
 
     ret = snew(WFile);
     ret->h = h;
@@ -172,8 +187,22 @@ WFile *open_existing_wfile(const char *name, uint64 *size)
 
     h = CreateFile(name, GENERIC_WRITE, FILE_SHARE_READ, NULL,
 		   OPEN_EXISTING, 0, 0);
-    if (h == INVALID_HANDLE_VALUE)
-	return NULL;
+    if (h == INVALID_HANDLE_VALUE) {
+	char *nname = NULL;
+
+	nname = toLocalChar(name, 1);
+	h = CreateFile(name, GENERIC_WRITE, FILE_SHARE_READ, NULL,
+		       OPEN_EXISTING, 0, 0);
+	sfree(nname);
+
+	if (h == INVALID_HANDLE_VALUE) {
+	    nname = unprintable_char(name);
+	    h = CreateFile(name, GENERIC_WRITE, FILE_SHARE_READ, NULL,
+			   OPEN_EXISTING, 0, 0);
+	    if (h == INVALID_HANDLE_VALUE)
+		return NULL;
+	}
+    }
 
     ret = snew(WFile);
     ret->h = h;
@@ -454,7 +483,27 @@ int vet_filename(const char *name)
 
 int create_directory(const char *name)
 {
-    return CreateDirectory(name, NULL) != 0;
+    char *nname;
+    int ret;
+
+    ret = CreateDirectory(name, NULL);
+
+    if (ret != 0) {
+	nname = toLocalChar(name, 1);
+	ret = CreateDirectory(name, NULL);
+	sfree(nname);
+
+	if (ret != 0) {
+	    nname = unprintable_char(name);
+	    ret = CreateDirectory(name, NULL);
+	    sfree(nname);
+
+	    if (ret != 0)
+		return 1;
+	}
+    }
+
+    return 1;
 }
 
 char *dir_file_cat(const char *dir, const char *file)
@@ -770,3 +819,5 @@ int main(int argc, char *argv[])
 
     return ret;
 }
+
+// vim: ts=8 sts=4 sw=4 noet cino=\=2\:2(0u0
