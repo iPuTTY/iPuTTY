@@ -27,6 +27,12 @@
 #include "storage.h"
 #include "int64.h"
 
+#if defined(_WIN)
+    #define strcasecmp stricmp
+#else
+    #include <strings.h>
+#endif
+
 static int list = 0;
 static int verbose = 0;
 static int recursive = 0;
@@ -52,7 +58,10 @@ static void source(const char *src);
 static void rsource(const char *src);
 static void sink(const char *targ, const char *src);
 
+static int check_is_dir(char *dstfname);
+
 const char *const appname = "PSCP";
+static char isUTF8 = 0;
 static int hostkeychk = 0;
 
 /*
@@ -695,14 +704,37 @@ void scp_sftp_listdir(const char *dirname)
 	return;
     }
 
-    printf("Listing directory %s\n", dirname);
+    char *ldirname = dupstr(dirname);
+    char *rdirname = toRemoteChar(dirname, isUTF8);
+    char *srcfile = NULL;
 
-    req = fxp_opendir_send(dirname);
+    if (!check_is_dir(rdirname) && !strchr(rdirname, '*')) {
+	char *chk = (char *) strrchr(ldirname, '/');
+
+	if (ldirname == chk) {
+	    char *cdirtmp = (char *) malloc(sizeof(char) * strlen(ldirname) + 2);
+	    sprintf(cdirtmp, "/%s", ldirname);
+	    sfree(ldirname);
+	    ldirname = dupstr(cdirtmp);
+	    sfree(cdirtmp);
+	    chk = (char *) strrchr(ldirname, '/');
+	}
+
+	*chk++ = 0;
+	srcfile = chk;
+    }
+
+    printf("Listing directory %s\n", ldirname);
+
+    sfree (rdirname);
+    rdirname = toRemoteChar(ldirname, isUTF8);
+
+    req = fxp_opendir_send(rdirname);
     pktin = sftp_wait_for_reply(req);
     dirh = fxp_opendir_recv(pktin, req);
 
     if (dirh == NULL) {
-		tell_user(stderr, "Unable to open %s: %s\n", dirname, fxp_error());
+		tell_user(stderr, "Unable to open %s: %s\n", ldirname, fxp_error());
 		errs++;
     } else {
 	nnames = namesize = 0;
@@ -717,7 +749,7 @@ void scp_sftp_listdir(const char *dirname)
 	    if (names == NULL) {
 		if (fxp_error_type() == SSH_FX_EOF)
 		    break;
-		printf("Reading directory %s: %s\n", dirname, fxp_error());
+		printf("Reading directory %s: %s\n", ldirname, fxp_error());
 		break;
 	    }
 	    if (names->nnames == 0) {
@@ -739,6 +771,8 @@ void scp_sftp_listdir(const char *dirname)
         pktin = sftp_wait_for_reply(req);
 	fxp_close_recv(pktin, req);
 
+	sfree(rdirname);
+
 	/*
 	 * Now we have our filenames. Sort them by actual file
 	 * name, and then output the longname parts.
@@ -749,10 +783,28 @@ void scp_sftp_listdir(const char *dirname)
 	/*
 	 * And print them.
 	 */
-	for (i = 0; i < nnames; i++)
-	    printf("%s\n", ournames[i].longname);
+	for (i = 0; i < nnames; i++) {
+	    int cx = 0;
+	    char *buf = NULL;
+
+	    if (srcfile != NULL) {
+		buf = toLocalChar(ournames[i].filename, isUTF8);
+		cx = strcmp (srcfile, buf);
+		sfree (buf);
+		if (cx != 0)
+		    continue;
+	    }
+
+	    buf = toLocalChar(ournames[i].longname, isUTF8);
+	    printf("%s\n", buf);
+	    sfree (buf);
+
+	    if (srcfile != NULL && !cx)
+		break;
+	}
 
         sfree(ournames);
+	sfree(ldirname);
     }
 }
 
@@ -1196,9 +1248,12 @@ int scp_get_sink_action(struct scp_sink_action *act)
 		/*
 		 * Simple case: we are only dealing with one file.
 		 */
-		fname = scp_sftp_remotepath;
-		must_free_fname = 0;
+		fname = toRemoteChar(scp_sftp_remotepath, isUTF8);
+		must_free_fname = 1;
 		scp_sftp_donethistarget = 1;
+
+		if ( strcmp("/", strrchr(fname, '/')) == 0 )
+		    fname[strlen(fname)-1] = 0;
 	    } else {
 		/*
 		 * Even simpler case: one file _which we've done_.
@@ -1909,18 +1964,44 @@ static void sink(const char *targ, const char *src)
 		}
 	    }
 
+	    char *sbuf = toLocalChar(striptarget, isUTF8);
+	    if (filenaming_rule(sbuf)) {
+		sfree(sbuf);
+		sbuf = dupstr(striptarget);
+	    }
+	    striptarget = sbuf;
+
 	    if (targ[0] != '\0')
 		destfname = dir_file_cat(targ, striptarget);
 	    else
 		destfname = dupstr(striptarget);
+
+	    sfree(striptarget);
 	} else {
 	    /*
 	     * In this branch of the if, the target area is a
 	     * single file with an explicitly specified name in any
 	     * case, so there's no danger.
 	     */
-	    destfname = dupstr(targ);
+	    destfname = toLocalChar(targ, isUTF8);
+	    if (filenaming_rule(destfname)) {
+		sfree(destfname);
+		destfname = dupstr(targ);
+	    }
 	}
+
+	char *origbuf = dupstr(destfname);
+	char *buf = dupstr(destfname);
+	sfree(destfname);
+	destfname = toLocalChar(buf, isUTF8);
+	sfree(buf);
+
+	if (filenaming_rule(destfname)) {
+	    sfree(destfname);
+	    destfname = origbuf;
+	} else
+	    sfree(origbuf);
+
 	attr = file_type(destfname);
 	exists = (attr != FILE_TYPE_NONEXISTENT);
 
@@ -2266,6 +2347,8 @@ static void usage(void)
     printf("  -sshlog file\n");
     printf("  -sshrawlog file\n");
     printf("            log protocol details to a file\n");
+    printf("  -utf8 [on|off]\n");
+    printf("            utf8 mode swtich. default is on\n");
     printf("  -hkeychk\n");
     printf("            Don't check stric host key during login\n");
 #if 0
@@ -2366,6 +2449,14 @@ int psftp_main(int argc, char *argv[])
 	    try_scp = 0; try_sftp = 1;
 	} else if (strcmp(argv[i], "-scp") == 0) {
 	    try_scp = 1; try_sftp = 0;
+	} else if (strcmp(argv[i], "-utf8") == 0) {
+	    char *optv = argv[++i];
+	    if (strcasecmp(optv, "on") == 0)
+		isUTF8 = 1;
+	    else if (strcasecmp(optv, "off") == 0)
+		isUTF8 = 0;
+	    else
+		cmdline_error("unknown -utf8 option value \"%s\", must be \"on\" or \"off\".", optv);
 	} else if (strcmp(argv[i], "-hkeychk") == 0 ) {
 	    hostkeychk = 1;
 	} else if (strcmp(argv[i], "--") == 0) {
@@ -2412,6 +2503,24 @@ int psftp_main(int argc, char *argv[])
     back = NULL;
     sk_cleanup();
     return (errs == 0 ? 0 : 1);
+}
+
+static int check_is_dir(char *dstfname) {
+    struct sftp_packet *pktin;
+    struct sftp_request *req;
+    struct fxp_attrs attrs;
+    int result;
+
+    req = fxp_stat_send(dstfname);
+    pktin = sftp_wait_for_reply(req);
+    result = fxp_stat_recv(pktin, req, &attrs);
+
+    if (result &&
+	(attrs.flags & SSH_FILEXFER_ATTR_PERMISSIONS) &&
+	(attrs.permissions & 0040000))
+	return TRUE;
+    else
+	return FALSE;
 }
 
 /* end */
