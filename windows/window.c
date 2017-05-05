@@ -3577,6 +3577,16 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message,
 	 * WARNING: Spans over multiple CASEs
 	 */
       case WM_KEYDOWN:
+	// Make Esc key change IMM Status to English(Alpha-Numeric) Mode.
+	// https://github.com/Joungkyun/iputty/issues/12
+	if (wParam == VK_ESCAPE) {
+	    HIMC hImc = ImmGetContext(hwnd);
+	    if (ImmGetOpenStatus(hImc)) {
+		ImmSetConversionStatus(hImc, IME_CMODE_ALPHANUMERIC, IME_SMODE_NONE);
+		ImmReleaseContext(hwnd, hImc);
+		goto KEY_END;
+	    }
+	}
 	if (wParam == VK_CONTROL && conf_get_int(term->conf, CONF_url_ctrl_click)) {
 	    GetCursorPos(&cursor_pt);
 	    ScreenToClient(hwnd, &cursor_pt);
