@@ -2501,7 +2501,7 @@ void setup_config_box(struct controlbox *b, int midsession,
 	    s = ctrl_getset(b, "연결/SSH/호스트키", "hostkeychk",
 			    "서버 호스트키 검사");
 
-	    ctrl_checkbox(s, "로그인 중, 서버의 호스트키 검사 여부",
+	    ctrl_checkbox(s, "로그인 시, 서버의 호스트키 검사하지 않음",
 			  'c', HELPCTX(ssh_hostkey_check),
 			  conf_checkbox_handler,
 			  I(CONF_ssh_hostkey_check));
