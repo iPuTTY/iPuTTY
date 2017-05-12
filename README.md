@@ -76,8 +76,6 @@ VI에서는 다음의 명령으로 변경할 수 있습니다.
  * ***Connection Type:*** Cygterm
  * ***Host address   :*** -
 
-Cygterm 기능이 포함된 소스코드는 [***iputty-cygterm*** branch](https://github.com/Joungkyun/iputty/tree/iputty-cygterm)를 이용하십시오.
-
 ## 한글 번역 버전
 
 0.69 버전 부터는 대부분의 UI 메시지가 한글로 번역이 되어 있으며, 한글화가 되어 있는 소스 코드는 [***iputty-cygterm-hangulize*** branch](https://github.com/Joungkyun/iputty/tree/iputty-cygterm-hangulize)를 이용 하십시오.
