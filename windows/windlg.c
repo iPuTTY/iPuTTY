@@ -47,7 +47,7 @@ static int nevents = 0, negsize = 0;
 
 extern Conf *conf;		       /* defined in window.c */
 
-#define PRINTER_DISABLED_STRING "None (printing disabled)"
+#define PRINTER_DISABLED_STRING "없음 (프린트 사용 안 함)"
 
 void force_normal(HWND hwnd)
 {
@@ -75,7 +75,7 @@ static INT_PTR CALLBACK LogProc(HWND hwnd, UINT msg,
     switch (msg) {
       case WM_INITDIALOG:
 	{
-	    char *str = dupprintf("%s Event Log", appname);
+	    char *str = dupprintf("%s 이벤트 로그", appname);
 	    SetWindowText(hwnd, str);
 	    sfree(str);
 	}
@@ -168,7 +168,7 @@ static INT_PTR CALLBACK LicenceProc(HWND hwnd, UINT msg,
     switch (msg) {
       case WM_INITDIALOG:
 	{
-	    char *str = dupprintf("%s Licence", appname);
+	    char *str = dupprintf("%s 라이센스", appname);
 	    SetWindowText(hwnd, str);
 	    sfree(str);
             SetDlgItemText(hwnd, IDA_TEXT, LICENCE_TEXT("\r\n\r\n"));
@@ -196,7 +196,7 @@ static INT_PTR CALLBACK AboutProc(HWND hwnd, UINT msg,
 
     switch (msg) {
       case WM_INITDIALOG:
-	str = dupprintf("About %s", appname);
+	str = dupprintf("%s 정보", appname);
 	SetWindowText(hwnd, str);
 	sfree(str);
         {
@@ -433,7 +433,7 @@ static INT_PTR CALLBACK GenericMainDlgProc(HWND hwnd, UINT msg,
 	    r.top = 3;
 	    r.bottom = r.top + 10;
 	    MapDialogRect(hwnd, &r);
-	    tvstatic = CreateWindowEx(0, "STATIC", "Cate&gory:",
+	    tvstatic = CreateWindowEx(0, "STATIC", "카테고리:",
 				      WS_CHILD | WS_VISIBLE,
 				      r.left, r.top,
 				      r.right - r.left, r.bottom - r.top,
@@ -695,8 +695,8 @@ int do_config(void)
     winctrl_init(&ctrls_panel);
     dp_add_tree(&dp, &ctrls_base);
     dp_add_tree(&dp, &ctrls_panel);
-    dp.wintitle = dupprintf("%s Configuration", appname);
-    dp.errtitle = dupprintf("%s Error", appname);
+    dp.wintitle = dupprintf("%s 설정", appname);
+    dp.errtitle = dupprintf("%s 오류", appname);
     dp.data = conf;
     dlg_auto_set_fixed_pitch_flag(&dp);
     dp.shortcuts['g'] = TRUE;	       /* the treeview: `Cate&gory' */
@@ -731,8 +731,8 @@ int do_reconfig(HWND hwnd, int protcfginfo)
     winctrl_init(&ctrls_panel);
     dp_add_tree(&dp, &ctrls_base);
     dp_add_tree(&dp, &ctrls_panel);
-    dp.wintitle = dupprintf("%s Reconfiguration", appname);
-    dp.errtitle = dupprintf("%s Error", appname);
+    dp.wintitle = dupprintf("%s 재설정", appname);
+    dp.errtitle = dupprintf("%s 오류", appname);
     dp.data = conf;
     dlg_auto_set_fixed_pitch_flag(&dp);
     dp.shortcuts['g'] = TRUE;	       /* the treeview: `Cate&gory' */
@@ -803,36 +803,31 @@ int verify_ssh_host_key(void *frontend, char *host, int port,
     int ret;
 
     static const char absentmsg[] =
-	"The server's host key is not cached in the registry. You\n"
-	"have no guarantee that the server is the computer you\n"
-	"think it is.\n"
-	"The server's %s key fingerprint is:\n"
-	"%s\n"
-	"If you trust this host, hit Yes to add the key to\n"
-	"%s's cache and carry on connecting.\n"
-	"If you want to carry on connecting just once, without\n"
-	"adding the key to the cache, hit No.\n"
-	"If you do not trust this host, hit Cancel to abandon the\n"
-	"connection.\n";
+	"서버의 호스트키가 레지스트리에 저장되어 있지 않습니다.\n"
+	"이 서버가 당신이 생각하는 컴퓨터라는 보장을 할 수 없습니다.\n\n"
+	"서버의 %s 키의 fingerprint는 다음과 같습니다.:\n"
+	"%s\n\n"
+	"이 호스트를 신뢰할 수 있다면, 예를 눌러 %s 캐쉬에\n"
+	"키를 추가하고 연결을 계속 진행 하십시오.\n"
+	"캐시에 키를 추가하지 않고 일단 한번만 연결을 진행 하고 싶다면, \n"
+	"아니오를 누르십시오.\n\n"
+	"이 호스트를 신뢰할 수 없다면, 취소를 눌러 연결을 취소 하십시오.\n";
 
     static const char wrongmsg[] =
-	"WARNING - POTENTIAL SECURITY BREACH!\n"
+	"경고- 잠재적 보안 위반!\n"
 	"\n"
-	"The server's host key does not match the one %s has\n"
-	"cached in the registry. This means that either the\n"
-	"server administrator has changed the host key, or you\n"
-	"have actually connected to another computer pretending\n"
-	"to be the server.\n"
-	"The new %s key fingerprint is:\n"
+	"서버 호스트키가 레지스트리에 저장되어 있는 %s와 일치하지 않습니다.\n"
+	"이는 서버 관리자가 호스트키를 변경했거나 또는 해당 서버를 가장하고 \n"
+	"있는 다른 컴퓨터에 연결을 했음을 의미합니다.\n\n"
+	"새로운 %s 키의 fingerprint는 다음과 같습니다:\n"
 	"%s\n"
-	"If you were expecting this change and trust the new key,\n"
-	"hit Yes to update %s's cache and continue connecting.\n"
-	"If you want to carry on connecting but without updating\n"
-	"the cache, hit No.\n"
-	"If you want to abandon the connection completely, hit\n"
-	"Cancel. Hitting Cancel is the ONLY guaranteed safe\n" "choice.\n";
+	"새로운 키를 신뢰하고 변경하고 싶다면 예를 눌러 캐시를 갱신한 후에 \n"
+	"연결을 계속 진행 하십시오.\n"
+	"캐시를 업데이트 하지 않고 연결을 진행하고 싶다면 아니오를 누르십시오.\n\n"
+	"연결을 더이상 진행하고 싶지 않다면, 취소를 누르십시오. 확실하지 않다면 "
+	"취소를 누르는 것이 안전 합니다.\n";
 
-    static const char mbtitle[] = "%s Security Alert";
+    static const char mbtitle[] = "%s 보안 경고";
 
     /*
      * Verify the key against the registry.

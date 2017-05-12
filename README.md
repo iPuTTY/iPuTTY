@@ -11,6 +11,7 @@ iPutty-Cygterm
 
 이 저장소는 ***original iPuTTY*** 에 ***PuTTY*** 업데이트를 반영하고 있으며, 원본 ***iPuTTy*** 에서 제공하지 않는다음의 기능 개선이 있습니다.
 
+ * 한글 UI 지원
  * Cygwin terminal 지원 ([#3](https://github.com/Joungkyun/iputty/issues/3))
  * psftp file listing ([#1](https://github.com/Joungkyun/iputty/issues/1))
  * psftp([#2](https://github.com/Joungkyun/iputty/issues/2)) / pscp([#11](https://github.com/Joungkyun/iputty/issues/11)) UTF8 지원 
@@ -20,6 +21,26 @@ iPutty-Cygterm
 ## Warning
 
 Windwos GUI programing 경험이 없기 때문에, 이 곳에 버그를 등록하더라도 해결이 안될 수도 있습니다. 기능 수정이나 버그 픽스에 대한 패치는 환영 하지만, 문제 해결 요구에는 충분히 응대할 수 없습니다.
+
+Linux, Mac OS 또는 cygwin 환경에서 UI를 UTF-8로 출력해야 하는 경우, 다음 파일의 문자셋을 utf-8로 변경해 준 다음 빌드해야 합니다.
+
+ * config.c
+ * sercfg.c
+ * pscp.c
+ * psftp.c
+
+다음 명령을 이용하여 변환할 수 있습니다.
+
+```
+iconv -f cp949 -t utf-8 config.c > config.c.utf8 && mv config.c.utf8 config.c
+```
+
+VI에서는 다음의 명령으로 변경할 수 있습니다.
+
+```
+:set fileencoding=utf8
+```
+
 
 ## Key Additions
 

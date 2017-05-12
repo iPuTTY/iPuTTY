@@ -66,12 +66,12 @@ struct sftp_packet *sftp_wait_for_reply(struct sftp_request *req)
     sftp_register(req);
     pktin = sftp_recv();
     if (pktin == NULL)
-        connection_fatal(NULL, "did not receive SFTP response packet "
-                         "from server");
+        connection_fatal(NULL, "서버로 부터 SFTP 응답 패킷을 "
+                         "받지 못했습니다.");
     rreq = sftp_find_request(pktin);
     if (rreq != req)
-        connection_fatal(NULL, "unable to understand SFTP response packet "
-                         "from server: %s", fxp_error());
+        connection_fatal(NULL, "서버로 부터 SFTP 응답 패킷을 "
+                         "받지 못했습니다: %s", fxp_error());
     return pktin;
 }
 
@@ -208,7 +208,7 @@ static int bare_name_compare(const void *av, const void *bv)
 
 static void not_connected(void)
 {
-    printf("psftp: not connected to a host; use \"open host.name\"\n");
+    printf("psftp: 호스트로 연결이 되지 않았습니다; \"open host.name\" 을 이용하십시오.\n");
 }
 
 /* ----------------------------------------------------------------------
@@ -255,7 +255,7 @@ int sftp_get_file(char *fname, char *outfname, int recurse, int restart)
 	     */
 	    if (file_type(outfname) != FILE_TYPE_DIRECTORY &&
 		!create_directory(outfname)) {
-		printf("%s: Cannot create directory\n", outfname);
+		printf("%s: 디렉토리를 생성할 수 없습니다.\n", outfname);
 		sfree(cpfname);
 		return 0;
 	    }
@@ -269,7 +269,7 @@ int sftp_get_file(char *fname, char *outfname, int recurse, int restart)
 	    dirhandle = fxp_opendir_recv(pktin, req);
 
 	    if (!dirhandle) {
-		printf("%s: unable to open directory: %s\n",
+		printf("%s: 디렉토리 열기 실패: %s\n",
 		       cpfname, fxp_error());
 		sfree(cpfname);
 		return 0;
@@ -286,7 +286,7 @@ int sftp_get_file(char *fname, char *outfname, int recurse, int restart)
 		if (names == NULL) {
 		    if (fxp_error_type() == SSH_FX_EOF)
 			break;
-		    printf("%s: reading directory: %s\n", cpfname, fxp_error());
+		    printf("%s: 디렉토리 읽기: %s\n", cpfname, fxp_error());
 
                     req = fxp_close_send(dirhandle);
                     pktin = sftp_wait_for_reply(req);
@@ -308,8 +308,8 @@ int sftp_get_file(char *fname, char *outfname, int recurse, int restart)
 		    if (strcmp(names->names[i].filename, ".") &&
 			strcmp(names->names[i].filename, "..")) {
 			if (!vet_filename(names->names[i].filename)) {
-			    printf("ignoring potentially dangerous server-"
-				   "supplied filename '%s'\n",
+			    printf("잠재적으로 위험한 서버 제공 파일 "
+				   "이름 무시: '%s'\n",
 				   names->names[i].filename);
 			} else {
 			    ournames[nnames++] =
@@ -417,7 +417,7 @@ int sftp_get_file(char *fname, char *outfname, int recurse, int restart)
     }
 
     if (!file) {
-	printf("local: unable to open %s\n", outfname);
+	printf("local: %s 열기 실패\n", outfname);
 
         req = fxp_close_send(fh);
         pktin = sftp_wait_for_reply(req);
@@ -448,7 +448,7 @@ int sftp_get_file(char *fname, char *outfname, int recurse, int restart)
 	offset = uint64_make(0, 0);
     }
 
-    printf("remote:%s => local:%s\n", cpfname, outfname);
+    printf("원격:%s => 로컬:%s\n", cpfname, outfname);
 
     /*
      * FIXME: we can use FXP_FSTAT here to get the file size, and
@@ -466,7 +466,7 @@ int sftp_get_file(char *fname, char *outfname, int recurse, int restart)
 	ret = xfer_download_gotpkt(xfer, pktin);
 	if (ret <= 0) {
 	    if (!shown_err) {
-		printf("error while reading: %s\n", fxp_error());
+		printf("읽기 오류: %s\n", fxp_error());
 		shown_err = TRUE;
 	    }
             if (ret == INT_MIN)        /* pktin not even freed */
@@ -481,7 +481,7 @@ int sftp_get_file(char *fname, char *outfname, int recurse, int restart)
 	    while (wpos < len) {
 		wlen = write_to_file(file, buf + wpos, len - wpos);
 		if (wlen <= 0) {
-		    printf("error while writing local file\n");
+		    printf("로컬 파일 작성 오류\n");
 		    ret = 0;
 		    xfer_set_error(xfer);
 		    break;
@@ -552,7 +552,7 @@ int sftp_put_file(char *fname, char *outfname, int recurse, int restart)
 	    result = fxp_mkdir_recv(pktin, req);
 
 	    if (!result) {
-		printf("%s: create directory: %s\n",
+		printf("%s: 디렉토리 생성: %s\n",
 		       outcname, fxp_error());
                 sfree(outcname);
 		return 0;
@@ -567,7 +567,7 @@ int sftp_put_file(char *fname, char *outfname, int recurse, int restart)
 
 	dh = open_directory(fname);
 	if (!dh) {
-	    printf("%s: unable to open directory\n", fname);
+	    printf("%s: 디렉토리 열기 실패\n", fname);
 	    return 0;
 	}
 	while ((name = read_filename(dh)) != NULL) {
@@ -652,7 +652,7 @@ int sftp_put_file(char *fname, char *outfname, int recurse, int restart)
 
     file = open_existing_file(fname, NULL, NULL, NULL, &permissions);
     if (!file) {
-	printf("local: unable to open %s\n", fname);
+	printf("로컬: %s 열기 실패\n", fname);
         sfree(outcname);
 	return 0;
     }
@@ -706,7 +706,7 @@ int sftp_put_file(char *fname, char *outfname, int recurse, int restart)
 	offset = uint64_make(0, 0);
     }
 
-    printf("local:%s => remote:%s\n", fname, outcname);
+    printf("로컬:%s => 원격:%s\n", fname, outcname);
     sfree(outcname);
 
     /*
@@ -722,7 +722,7 @@ int sftp_put_file(char *fname, char *outfname, int recurse, int restart)
 	while (xfer_upload_ready(xfer) && !err && !eof) {
 	    len = read_from_file(file, buffer, sizeof(buffer));
 	    if (len == -1) {
-		printf("error while reading local file\n");
+		printf("로컬 파일 읽기 오류\n");
 		err = 1;
 	    } else if (len == 0) {
 		eof = 1;
@@ -738,7 +738,7 @@ int sftp_put_file(char *fname, char *outfname, int recurse, int restart)
                 if (ret == INT_MIN)        /* pktin not even freed */
                     sfree(pktin);
                 if (!err) {
-                    printf("error while writing: %s\n", fxp_error());
+                    printf("쓰기 오류: %s\n", fxp_error());
                     err = 1;
                 }
 	    }
@@ -752,7 +752,7 @@ int sftp_put_file(char *fname, char *outfname, int recurse, int restart)
     pktin = sftp_wait_for_reply(req);
     if (!fxp_close_recv(pktin, req)) {
 	if (!err) {
-	    printf("error while closing: %s", fxp_error());
+	    printf("닫기 오류: %s", fxp_error());
 	    err = 1;
 	}
     }
@@ -801,7 +801,7 @@ SftpWildcardMatcher *sftp_begin_wildcard_matching(char *name)
     sfree(tmpdir);
 
     if (!check) {
-	printf("Multiple-level wildcards are not supported\n");
+	printf("별표(astrik)는 하나만 사용할 수 있습니다.\n");
 	sfree(unwcdir);
 	return NULL;
     }
@@ -819,7 +819,7 @@ SftpWildcardMatcher *sftp_begin_wildcard_matching(char *name)
 	swcm->wildcard = dupstr(wildcard);
 	swcm->prefix = unwcdir;
     } else {
-	printf("Unable to open %s: %s\n", cdir, fxp_error());
+	printf("%s 열기 실패: %s\n", cdir, fxp_error());
 	swcm = NULL;
 	sfree(unwcdir);
     }
@@ -848,7 +848,7 @@ char *sftp_wildcard_get_filename(SftpWildcardMatcher *swcm)
 
 	    if (!swcm->names) {
 		if (fxp_error_type() != SSH_FX_EOF)
-		    printf("%s: reading directory: %s\n", swcm->prefix,
+		    printf("%s: 디렉토리 읽기: %s\n", swcm->prefix,
 			   fxp_error());
 		return NULL;
 	    } else if (swcm->names->nnames == 0) {
@@ -874,8 +874,8 @@ char *sftp_wildcard_get_filename(SftpWildcardMatcher *swcm)
 	    continue;		       /* expected bad filenames */
 
 	if (!vet_filename(name->filename)) {
-	    printf("ignoring potentially dangerous server-"
-		   "supplied filename '%s'\n", name->filename);
+	    printf("잠재적으로 위험한 서버 제공 파일 이름 무시: "
+		   "'%s'\n", name->filename);
 	    continue;		       /* unexpected bad filename */
 	}
 
@@ -954,7 +954,7 @@ int wildcard_iterate(char *filename, int (*func)(void *, char *), void *ctx)
 
 	if (!matched) {
 	    /* Politely warn the user that nothing matched. */
-	    printf("%s: nothing matched\n", filename);
+	    printf("%s: 일치하지 않음\n", filename);
 	}
 
 	sftp_finish_wildcard_matching(swcm);
@@ -1002,7 +1002,7 @@ int sftp_cmd_null(struct sftp_command *cmd)
 
 int sftp_cmd_unknown(struct sftp_command *cmd)
 {
-    printf("psftp: unknown command \"%s\"\n", cmd->words[0]);
+    printf("psftp: 알 수 없는 명령 \"%s\"\n", cmd->words[0]);
     return 0;			       /* failure */
 }
 
@@ -1079,7 +1079,7 @@ int sftp_cmd_ls(struct sftp_command *cmd)
 	check = wc_unescape(tmpdir, unwcdir);
 	sfree(tmpdir);
 	if (!check) {
-	    printf("Multiple-level wildcards are not supported\n");
+	    printf("별표(astrik)는 하나만 사용할 수 있습니다.\n");
 	    sfree(unwcdir);
 	    return 0;
 	}
@@ -1111,7 +1111,7 @@ int sftp_cmd_ls(struct sftp_command *cmd)
     }
 
     adir = toLocalChar(cdir, isUTF8);
-    printf("Listing directory %s\n", adir);
+    printf("디렉토리 리스팅 %s\n", adir);
     sfree(adir);
 
     req = fxp_opendir_send(cdir);
@@ -1119,7 +1119,7 @@ int sftp_cmd_ls(struct sftp_command *cmd)
     dirh = fxp_opendir_recv(pktin, req);
 
     if (dirh == NULL) {
-	printf("Unable to open %s: %s\n", dir, fxp_error());
+	printf("%s 열기 실패: %s\n", dir, fxp_error());
 	return 0;
     } else {
 	nnames = namesize = 0;
@@ -1134,7 +1134,7 @@ int sftp_cmd_ls(struct sftp_command *cmd)
 	    if (names == NULL) {
 		if (fxp_error_type() == SSH_FX_EOF)
 		    break;
-		printf("Reading directory %s: %s\n", dir, fxp_error());
+		printf("%s 디렉토리 읽기: %s\n", dir, fxp_error());
 		break;
 	    }
 	    if (names->nnames == 0) {
@@ -1234,7 +1234,7 @@ int sftp_cmd_cd(struct sftp_command *cmd)
     dirh = fxp_opendir_recv(pktin, req);
 
     if (!dirh) {
-	printf("Directory %s: %s\n", dir, fxp_error());
+	printf("디렉토리 %s: %s\n", dir, fxp_error());
 	sfree(dir);
 	return 0;
     }
@@ -1247,7 +1247,7 @@ int sftp_cmd_cd(struct sftp_command *cmd)
     pwd = dir;
 
     adir = toLocalChar(dir, isUTF8);
-    printf("Remote directory is now %s\n", adir);
+    printf("현재 원격 디렉토리: %s\n", adir);
     sfree(adir);
 
     return 1;
@@ -1259,16 +1259,16 @@ int sftp_cmd_cd(struct sftp_command *cmd)
 int sftp_set_utf8(struct sftp_command *cmd)
 {
     if (cmd->nwords < 2 ) {
-	printf("utf8: expects on or off\n");
+	printf("utf8: on 또는 off만 사용할 수 있습니다.\n");
 	return 0;
     }
 
     if ( strcasecmp(cmd->words[1], "on") == 0 ) {
 	isUTF8 = 1;
-	printf ("Console charset is set UTF-8\n");
+	printf ("Console 문자셋을 UTF-8로 설정 했습니다.\n");
     } else {
 	isUTF8 = 0;
-	printf ("Console charset is set Ansi\n");
+	printf ("Console 문제셋을 Ansi로 설정 했습니다.\n");
     }
 
     return 1;
@@ -1288,7 +1288,7 @@ int sftp_cmd_pwd(struct sftp_command *cmd)
 
     ppwd = toLocalChar(pwd, isUTF8);
 
-    printf("Remote directory is %s\n", ppwd);
+    printf("원격 디렉토리: %s\n", ppwd);
     sfree(ppwd);
     return 1;
 }
@@ -1322,14 +1322,14 @@ int sftp_general_get(struct sftp_command *cmd, int restart, int multiple)
 	} else if (!strcmp(cmd->words[i], "-r")) {
 	    recurse = TRUE;
 	} else {
-	    printf("%s: unrecognised option '%s'\n", cmd->words[0], cmd->words[i]);
+	    printf("%s: 알 수 없는 옵션 '%s'\n", cmd->words[0], cmd->words[i]);
 	    return 0;
 	}
 	i++;
     }
 
     if (i >= cmd->nwords) {
-	printf("%s: expects a filename\n", cmd->words[0]);
+	printf("%s: 전송받을 파일을 지정 하십시오.\n", cmd->words[0]);
 	return 0;
     }
 
@@ -1349,7 +1349,7 @@ int sftp_general_get(struct sftp_command *cmd, int restart, int multiple)
 	    origwfname = sftp_wildcard_get_filename(swcm);
 	    if (!origwfname) {
 		/* Politely warn the user that nothing matched. */
-		printf("%s: nothing matched\n", origfname);
+		printf("%s: 일치하지 않음\n", origfname);
 		sftp_finish_wildcard_matching(swcm);
 		sfree(unwcfname);
 		sfree(origfname);
@@ -1444,14 +1444,14 @@ int sftp_general_put(struct sftp_command *cmd, int restart, int multiple)
 	} else if (!strcmp(cmd->words[i], "-r")) {
 	    recurse = TRUE;
 	} else {
-	    printf("%s: unrecognised option '%s'\n", cmd->words[0], cmd->words[i]);
+	    printf("%s: 잘못된 옵션 '%s'\n", cmd->words[0], cmd->words[i]);
 	    return 0;
 	}
 	i++;
     }
 
     if (i >= cmd->nwords) {
-	printf("%s: expects a filename\n", cmd->words[0]);
+	printf("%s: 전송할 파일을 지정 하십시오.\n", cmd->words[0]);
 	return 0;
     }
 
@@ -1465,7 +1465,7 @@ int sftp_general_put(struct sftp_command *cmd, int restart, int multiple)
 	    wfname = wildcard_get_filename(wcm);
 	    if (!wfname) {
 		/* Politely warn the user that nothing matched. */
-		printf("%s: nothing matched\n", fname);
+		printf("%s: 일치하지 않음\n", fname);
 		finish_wildcard_matching(wcm);
 		continue;
 	    }
@@ -1540,7 +1540,7 @@ int sftp_cmd_mkdir(struct sftp_command *cmd)
     }
 
     if (cmd->nwords < 2) {
-	printf("mkdir: expects a directory\n");
+	printf("mkdir: 생성할 디렉토리를 지정 하십시오.\n");
 	return 0;
     }
 
@@ -1565,7 +1565,7 @@ int sftp_cmd_mkdir(struct sftp_command *cmd)
 	    printf("mkdir %s: %s\n", cpdir, fxp_error());
 	    ret = 0;
 	} else
-	    printf("mkdir %s: OK\n", cpdir);
+	    printf("mkdir %s: 성공\n", cpdir);
 
 	sfree(dir);
 	sfree(cpdir);
@@ -1608,7 +1608,7 @@ int sftp_cmd_rmdir(struct sftp_command *cmd)
     }
 
     if (cmd->nwords < 2) {
-	printf("rmdir: expects a directory\n");
+	printf("rmdir: 삭제할 디렉토리를 지정 하십시오.\n");
 	return 0;
     }
 
@@ -1653,7 +1653,7 @@ int sftp_cmd_rm(struct sftp_command *cmd)
     }
 
     if (cmd->nwords < 2) {
-	printf("rm: expects a filename\n");
+	printf("rm: 삭제할 파일을 지정 하십시오.\n");
 	return 0;
     }
 
@@ -1751,7 +1751,7 @@ int sftp_cmd_mv(struct sftp_command *cmd)
     }
 
     if (cmd->nwords < 3) {
-	printf("mv: expects two filenames\n");
+	printf("mv: 두개의 파일이름이 필요 합니다.\n");
 	return 0;
     }
 
@@ -1772,8 +1772,8 @@ int sftp_cmd_mv(struct sftp_command *cmd)
      */
     ctx->dest_is_dir = check_is_dir(ctx->dstfname);
     if ((cmd->nwords > 3 || is_wildcard(cmd->words[1])) && !ctx->dest_is_dir) {
-	printf("mv: multiple or wildcard arguments require the destination"
-	       " to be a directory\n");
+	printf("mv: 여러개의 인자나 wildcard를 포함한 인자는 이동 대상이 "
+	       "디렉토리 이어야 합니다.\n");
 	sfree(ctx->dstfname);
 	return 0;
     }
@@ -1809,8 +1809,8 @@ static int sftp_action_chmod(void *vctx, char *fname)
     result = fxp_stat_recv(pktin, req, &attrs);
 
     if (!result || !(attrs.flags & SSH_FILEXFER_ATTR_PERMISSIONS)) {
-	printf("get attrs for %s: %s\n", cname,
-	       result ? "file permissions not provided" : fxp_error());
+	printf("%s 속성 얻기: %s\n", cname,
+	       result ? "파일 권한이 없음" : fxp_error());
 	sfree(cname);
 	return 0;
     }
@@ -1831,7 +1831,7 @@ static int sftp_action_chmod(void *vctx, char *fname)
     result = fxp_setstat_recv(pktin, req);
 
     if (!result) {
-	printf("set attrs for %s: %s\n", cname, fxp_error());
+	printf("%s 속성 설정: %s\n", cname, fxp_error());
 	sfree(cname);
 	return 0;
     }
@@ -1854,7 +1854,7 @@ int sftp_cmd_chmod(struct sftp_command *cmd)
     }
 
     if (cmd->nwords < 3) {
-	printf("chmod: expects a mode specifier and a filename\n");
+	printf("chmod: 모드 설정과 파일 이름을 지정해야 합니다.\n");
 	return 0;
     }
 
@@ -1873,8 +1873,8 @@ int sftp_cmd_chmod(struct sftp_command *cmd)
     mode = cmd->words[1];
     if (mode[0] >= '0' && mode[0] <= '9') {
 	if (mode[strspn(mode, "01234567")]) {
-	    printf("chmod: numeric file modes should"
-		   " contain digits 0-7 only\n");
+	    printf("chmod: 숫자로 된 파일 모드는 반드시 0-7 "
+		   "사이의 숫자만 사용해야 합니다.\n");
 	    return 0;
 	}
 	ctx->attrs_clr = 07777;
@@ -1975,19 +1975,19 @@ static int sftp_cmd_open(struct sftp_command *cmd)
     int portnumber;
 
     if (back != NULL) {
-	printf("psftp: already connected\n");
+	printf("psftp: 이미 접속이 되어 있습니다.\n");
 	return 0;
     }
 
     if (cmd->nwords < 2) {
-	printf("open: expects a host name\n");
+	printf("open: 호스트 이름을 지정 하십시오.\n");
 	return 0;
     }
 
     if (cmd->nwords > 2) {
 	portnumber = atoi(cmd->words[2]);
 	if (portnumber == 0) {
-	    printf("open: invalid port number\n");
+	    printf("open: 올바르지 않은 포트 번호\n");
 	    return 0;
 	}
     } else
@@ -2006,19 +2006,19 @@ static int sftp_cmd_lcd(struct sftp_command *cmd)
     char *currdir, *errmsg;
 
     if (cmd->nwords < 2) {
-	printf("lcd: expects a local directory name\n");
+	printf("lcd: 로컬 디렉토리 이름을 지정 하십시오.\n");
 	return 0;
     }
 
     errmsg = psftp_lcd(cmd->words[1]);
     if (errmsg) {
-	printf("lcd: unable to change directory: %s\n", errmsg);
+	printf("lcd: 디렉토리 이동 실패: %s\n", errmsg);
 	sfree(errmsg);
 	return 0;
     }
 
     currdir = psftp_getcwd();
-    printf("New local directory is %s\n", currdir);
+    printf("새 로컬 디렉토리: %s\n", currdir);
     sfree(currdir);
 
     return 1;
@@ -2029,7 +2029,7 @@ static int sftp_cmd_lpwd(struct sftp_command *cmd)
     char *currdir;
 
     currdir = psftp_getcwd();
-    printf("Current local directory is %s\n", currdir);
+    printf("현재 로컬 디렉토리: %s\n", currdir);
     sfree(currdir);
 
     return 1;
@@ -2069,113 +2069,113 @@ static struct sftp_cmd_lookup {
      * in ASCII order.
      */
     {
-	"!", TRUE, "run a local command",
-	    "<command>\n"
+	"!", TRUE, "로컬 명령을 실행",
+	    "<명령>\n"
 	    /* FIXME: this example is crap for non-Windows. */
-	    "  Runs a local command. For example, \"!del myfile\".\n",
+	    "  로컬 명령을 실행. 예를 들어, \"!del myfile\".\n",
 	    sftp_cmd_pling
     },
     {
-	"bye", TRUE, "finish your SFTP session",
+	"bye", TRUE, "SFTP 세션을 종료",
 	    "\n"
-	    "  Terminates your SFTP session and quits the PSFTP program.\n",
+	    "  SFTP 세션을 종료하고, PSFTP 프로그램을 종료한다.\n",
 	    sftp_cmd_quit
     },
     {
-	"cd", TRUE, "change your remote working directory",
-	    " [ <new working directory> ]\n"
-	    "  Change the remote working directory for your SFTP session.\n"
-	    "  If a new working directory is not supplied, you will be\n"
-	    "  returned to your home directory.\n",
+	"cd", TRUE, "원격 작업 디렉토리 변경",
+	    " [ <새 작업 디렉토리> ]\n"
+	    "  SFTP 세션의 원격 작업 디렉토리를 변경 합니다.\n"
+	    "  새로운 작업 디엑토리를 지정하지 않으면, 홈디렉토리로\n"
+	    "  이동하게 됩니다.\n",
 	    sftp_cmd_cd
     },
     {
-	"chmod", TRUE, "change file permissions and modes",
+	"chmod", TRUE, "파일 권한과 모드를 변경",
 	    " <modes> <filename-or-wildcard> [ <filename-or-wildcard>... ]\n"
-	    "  Change the file permissions on one or more remote files or\n"
-	    "  directories.\n"
-	    "  <modes> can be any octal Unix permission specifier.\n"
-	    "  Alternatively, <modes> can include the following modifiers:\n"
-	    "    u+r     make file readable by owning user\n"
-	    "    u+w     make file writable by owning user\n"
-	    "    u+x     make file executable by owning user\n"
-	    "    u-r     make file not readable by owning user\n"
-	    "    [also u-w, u-x]\n"
-	    "    g+r     make file readable by members of owning group\n"
-	    "    [also g+w, g+x, g-r, g-w, g-x]\n"
-	    "    o+r     make file readable by all other users\n"
-	    "    [also o+w, o+x, o-r, o-w, o-x]\n"
-	    "    a+r     make file readable by absolutely everybody\n"
-	    "    [also a+w, a+x, a-r, a-w, a-x]\n"
-	    "    u+s     enable the Unix set-user-ID bit\n"
-	    "    u-s     disable the Unix set-user-ID bit\n"
-	    "    g+s     enable the Unix set-group-ID bit\n"
-	    "    g-s     disable the Unix set-group-ID bit\n"
+	    "  하나 또는 여려개의 원격파일 또는 디렉토리에 있는 파일 권한을\n"
+	    "  변경 합니다.\n"
+	    "  <modes>는 8진수 UNIX 권한 지정자를 사용합니다.\n"
+	    "  또는, <modes>는 다음의 지정자를 사용할 수 있습니다:\n"
+	    "    u+r     소유자에게 읽기 권한을 부여\n"
+	    "    u+w     소유자에게 쓰기 권한을 부여\n"
+	    "    u+x     소유자에게 실행 권한을 부여\n"
+	    "    u-r     소유자에게 읽기 권한을 제한\n"
+	    "    [u-w, u-x 동일]\n"
+	    "    g+r     소유그룹의 멤버에게 읽기 권한을 부여\n"
+	    "    [g+w, g+x, g-r, g-w, g-x 동일]\n"
+	    "    o+r     일반 사용자에게 읽기 권한을 부여\n"
+	    "    [o+w, o+x, o-r, o-w, o-x 동일]\n"
+	    "    a+r     모든 사용자에게 읽기 권한을 부여\n"
+	    "    [a+w, a+x, a-r, a-w, a-x 동일]\n"
+	    "    u+s     Unix set-user-ID bit 설정\n"
+	    "    u-s     Unix set-user-ID bit 제거\n"
+	    "    g+s     Unix set-group-ID bit 설정\n"
+	    "    g-s     Unix set-group-ID bit 제거\n"
 	    "    +t      enable the Unix \"sticky bit\"\n"
-	    "  You can give more than one modifier for the same user (\"g-rwx\"), and\n"
-	    "  more than one user for the same modifier (\"ug+w\"). You can\n"
-	    "  use commas to separate different modifiers (\"u+rwx,g+s\").\n",
+	    "  같은 유저에게 하나 이상의 지정자를 사용할 수 있으며, 같은 지정자로\n"
+	    "  하나 이상의 사용자를 변경할 수 있습니다. 쉽표(,)를 이용하여 서로 다른\n"
+	    "  지정자를 구분할 수 있습니다. (\"u_rwx,g+s\")\n",
 	    sftp_cmd_chmod
     },
     {
-	"close", TRUE, "finish your SFTP session but do not quit PSFTP",
+	"close", TRUE, "PSFTP 프로그램을 종료하지 않고 SFTP 세션 종료",
 	    "\n"
-	    "  Terminates your SFTP session, but does not quit the PSFTP\n"
-	    "  program. You can then use \"open\" to start another SFTP\n"
-	    "  session, to the same server or to a different one.\n",
+	    "  SFTP 세션은 종료하지만, PSFTP 프로그램은 종료하지 않습니다.\n"
+	    "  \"open\" 명령을 이용하여 같은 서버나 다른 서버로 SFTP 세션을\n"
+	    "  연결할 수 있습니다.\n",
 	    sftp_cmd_close
     },
     {
-	"del", TRUE, "delete files on the remote server",
+	"del", TRUE, "원격 서버의 파일 삭제",
 	    " <filename-or-wildcard> [ <filename-or-wildcard>... ]\n"
-	    "  Delete a file or files from the server.\n",
+	    "  서버에 있는 하나 또는 여러개의 파일을 삭제 합니다.\n",
 	    sftp_cmd_rm
     },
     {
 	"delete", FALSE, "del", NULL, sftp_cmd_rm
     },
     {
-	"dir", TRUE, "list remote files",
+	"dir", TRUE, "원격 파일 리스트 보기",
 	    " [ <directory-name> ]/[ <wildcard> ]\n"
-	    "  List the contents of a specified directory on the server.\n"
-	    "  If <directory-name> is not given, the current working directory\n"
-	    "  is assumed.\n"
-	    "  If <wildcard> is given, it is treated as a set of files to\n"
-	    "  list; otherwise, all files are listed.\n",
+	    "  서버에 있는 지정된 디렉토리의 컨텐츠 리스트를 출력합니다.\n"
+	    "  디렉토리 이름이 지정되지 않으면, 현재 디렉토리의 리스트를 출력\n"
+	    "  합니다.\n"
+	    "  별표(astrik)가 주어지면, 출력할 파일 집합으로 간주가 되거나,\n"
+	    "  또는 모든 파일 리스트를 출력 합니다.\n",
 	    sftp_cmd_ls
     },
     {
 	"exit", TRUE, "bye", NULL, sftp_cmd_quit
     },
     {
-	"get", TRUE, "download a file from the server to your local machine",
+	"get", TRUE, "서버의 파일을 로컬 장치로 다운로드",
 	    " [ -r ] [ -- ] <filename> [ <local-filename> ]\n"
-	    "  Downloads a file on the server and stores it locally under\n"
-	    "  the same name, or under a different one if you supply the\n"
-	    "  argument <local-filename>.\n"
-	    "  If -r specified, recursively fetch a directory.\n",
+	    "  서버의 파일을 다운로드 하여, 동일한 이름으로 저장 합니다.\n"
+	    "  <local-filename> 인자를 지정하면, 지정한 이름으로 저장을\n"
+	    "  합니다.\n"
+	    "  -r 을 지정하면, 디렉토리를 재귀적으로 다운로드 합니다.\n",
 	    sftp_cmd_get
     },
     {
-	"help", TRUE, "give help",
+	"help", TRUE, "도움말 출력",
 	    " [ <command> [ <command> ... ] ]\n"
-	    "  Give general help if no commands are specified.\n"
-	    "  If one or more commands are specified, give specific help on\n"
-	    "  those particular commands.\n",
+	    "  commad가 지정되지 않으면, 일반적인 도움말을 출력 합니다.\n"
+	    "  하나 또는 이상의 명령을 지정하면, 특정 명령에 대한 도움말을\n"
+	    "  출력 합니다.\n",
 	    sftp_cmd_help
     },
     {
-	"lcd", TRUE, "change local working directory",
+	"lcd", TRUE, "로컬 작업 디렉토리 변경",
 	    " <local-directory-name>\n"
-	    "  Change the local working directory of the PSFTP program (the\n"
-	    "  default location where the \"get\" command will save files).\n",
+	    "  PSFTP 프로그램의 로컬 작업 디렉토리를 변경 합니다. (\"get\"\n"
+	    "  명령으로 파일을 저장할 기본 경로 입니다.)\n",
 	    sftp_cmd_lcd
     },
     {
-	"lpwd", TRUE, "print local working directory",
+	"lpwd", TRUE, "현재 로컬 작업 디렉토리 출력",
 	    "\n"
-	    "  Print the local working directory of the PSFTP program (the\n"
-	    "  default location where the \"get\" command will save files).\n",
+	    "  PSFTP의 로컬 작업 디렉토리를 출력 합니다. (\"get\" 명령으로\n"
+	    "  파일을 저장할 기본 경로 입니다.)\n",
 	    sftp_cmd_lpwd
     },
     {
@@ -2183,64 +2183,65 @@ static struct sftp_cmd_lookup {
 	    sftp_cmd_ls
     },
     {
-	"mget", TRUE, "download multiple files at once",
+	"mget", TRUE, "한번에 여러개의 파일을 다운로드",
 	    " [ -r ] [ -- ] <filename-or-wildcard> [ <filename-or-wildcard>... ]\n"
-	    "  Downloads many files from the server, storing each one under\n"
-	    "  the same name it has on the server side. You can use wildcards\n"
-	    "  such as \"*.c\" to specify lots of files at once.\n"
-	    "  If -r specified, recursively fetch files and directories.\n",
+	    "  \n"
+	    "  서버에서 많은 파일을 다운로드 하여 서버의 파일 이름과 동일한 이름으로\n"
+	    "  저장을 합니다. \"*.c\"와 같이 별표(astrik)를 사용하면, 한번에 많은\n"
+	    "  파일을 지정할 수 있습니다.\n"
+	    "  -r 을 지정하면, 파일이나 디렉토리를 재귀적으로 저장 합니다.\n",
 	    sftp_cmd_mget
     },
     {
-	"mkdir", TRUE, "create directories on the remote server",
+	"mkdir", TRUE, "원격 서버에 디렉토리 생성",
 	    " <directory-name> [ <directory-name>... ]\n"
-	    "  Creates directories with the given names on the server.\n",
+	    "  서버에 지정한 이름의 디렉토리를 생성 합니다.\n",
 	    sftp_cmd_mkdir
     },
     {
-	"mput", TRUE, "upload multiple files at once",
+	"mput", TRUE, "한번에 여러개의 파일을 업로드",
 	    " [ -r ] [ -- ] <filename-or-wildcard> [ <filename-or-wildcard>... ]\n"
-	    "  Uploads many files to the server, storing each one under the\n"
-	    "  same name it has on the client side. You can use wildcards\n"
-	    "  such as \"*.c\" to specify lots of files at once.\n"
-	    "  If -r specified, recursively store files and directories.\n",
+	    "  서버로 많은 파일을 업로드 하고, 로컬 장치에 있는 동일한 이름으로\n"
+	    "  저장 합니다. \"*.c\"와 같이 별표(astrik)를 사용하면, 한번에 많은\n"
+	    "  파일을 지정할 수 있습니다.\n"
+	    "  -r 을 지정하면, 파일이나 디렉토리를 재귀적으로 저장 합니다.\n",
 	    sftp_cmd_mput
     },
     {
-	"mv", TRUE, "move or rename file(s) on the remote server",
+	"mv", TRUE, "원격 서버의 파일을 이동하거나 파일 이름 변경",
 	    " <source> [ <source>... ] <destination>\n"
-	    "  Moves or renames <source>(s) on the server to <destination>,\n"
-	    "  also on the server.\n"
-	    "  If <destination> specifies an existing directory, then <source>\n"
-	    "  may be a wildcard, and multiple <source>s may be given; all\n"
-	    "  source files are moved into <destination>.\n"
-	    "  Otherwise, <source> must specify a single file, which is moved\n"
-	    "  or renamed so that it is accessible under the name <destination>.\n",
+	    "  서버의 <source>(s)를 <destination>으로 옮기거나 이름을 변경\n"
+	    "  합니다.\n"
+	    "  <destination>을 존재하는 디렉토리로 설정을 하면, <source>는\n"
+	    "  별표(astrik)이거나 또는 여러개의 <source>가 주어질 수 있습니다.\n"
+	    "  모든 소스 파일들이 <destination>으로 이동이 됩니다.\n"
+	    "  그렇지 않으면, <source>는 <destination> 이름으로 접근 할 수 있도록\n"
+	    "  이동 또는 이름이 변경 될 단일 파일 이어야 합니다.\n",
 	    sftp_cmd_mv
     },
     {
 	"on", FALSE, "open", NULL, sftp_cmd_open
     },
     {
-	"open", TRUE, "connect to a host",
+	"open", TRUE, "호스트에 연결",
 	    " [<user>@]<hostname> [<port>]\n"
-	    "  Establishes an SFTP connection to a given host. Only usable\n"
-	    "  when you are not already connected to a server.\n",
+	    "  주어진 호스트에 SFTP 연결을 합니다. 서버에 이미 연결이 되지\n"
+	    "  않았을 경우에만 사용을 할 수 있습니다.\n",
 	    sftp_cmd_open
     },
     {
-	"put", TRUE, "upload a file from your local machine to the server",
+	"put", TRUE, "로컬 장치의 파일을 서버로 업로드",
 	    " [ -r ] [ -- ] <filename> [ <remote-filename> ]\n"
-	    "  Uploads a file to the server and stores it there under\n"
-	    "  the same name, or under a different one if you supply the\n"
-	    "  argument <remote-filename>.\n"
-	    "  If -r specified, recursively store a directory.\n",
+	    "  서버에 파일을 업로드 하고, 로컬 장치에서와 동일한 이름으로\n"
+	    "  저장을 합니다. <remote-filename> 인자를 주면, 이 이름으로\n"
+	    "  저장을 합니다.\n"
+	    "  -r 옵션을 지정하면, 디렉토리를 재귀적으로 저장합니다.\n",
 	    sftp_cmd_put
     },
     {
-	"pwd", TRUE, "print your remote working directory",
+	"pwd", TRUE, "원격 작업 디렉토리 출력",
 	    "\n"
-	    "  Print the current remote working directory for your SFTP session.\n",
+	    "  현재 SFTP 세션의 현재 원격 작업 디렉토리를 출력 합니다.\n",
 	    sftp_cmd_pwd
     },
     {
@@ -2248,12 +2249,12 @@ static struct sftp_cmd_lookup {
 	    sftp_cmd_quit
     },
     {
-	"reget", TRUE, "continue downloading files",
+	"reget", TRUE, "파일 다운로드 계속하기",
 	    " [ -r ] [ -- ] <filename> [ <local-filename> ]\n"
-	    "  Works exactly like the \"get\" command, but the local file\n"
-	    "  must already exist. The download will begin at the end of the\n"
-	    "  file. This is for resuming a download that was interrupted.\n"
-	    "  If -r specified, resume interrupted \"get -r\".\n",
+	    "  \"get\"과 동일하게 동작 하지만, 로컬 파일이 반드시 존재해야\n"
+	    "  합니다. 다운로드는 로컬 파일의 끝 위치에서부터 시작이 됩니다.\n"
+	    "  이 명령은 중단된 다운로드를 다시 시작하기 위한 것 입니다.\n"
+	    "  -r 을 지정하면, 중단된 \"get -r\"을 다시 시작 합니다.\n",
 	    sftp_cmd_reget
     },
     {
@@ -2265,12 +2266,12 @@ static struct sftp_cmd_lookup {
 	    sftp_cmd_mv
     },
     {
-	"reput", TRUE, "continue uploading files",
+	"reput", TRUE, "파일 업로드 계속하기",
 	    " [ -r ] [ -- ] <filename> [ <remote-filename> ]\n"
-	    "  Works exactly like the \"put\" command, but the remote file\n"
-	    "  must already exist. The upload will begin at the end of the\n"
-	    "  file. This is for resuming an upload that was interrupted.\n"
-	    "  If -r specified, resume interrupted \"put -r\".\n",
+	    "  \"put\"과 동일하게 동작 하지만, 원결 파일이 반드시 존재해야\n"
+	    "  합니다. 업로드는 원결 파일의 끝 위치에서부터 시작이 됩니다.\n"
+	    "  이 명령은 중단된 업로드를 다시 시작하기 위한 것 입니다.\n"
+	    "  -r 을 지정하면, 중단된 \"put -r\"을 다시 시작 합니다.\n",
 	    sftp_cmd_reput
     },
     {
@@ -2278,17 +2279,17 @@ static struct sftp_cmd_lookup {
 	    sftp_cmd_rm
     },
     {
-	"rmdir", TRUE, "remove directories on the remote server",
+	"rmdir", TRUE, "원격 서버의 디렉토리를 제거",
 	    " <directory-name> [ <directory-name>... ]\n"
-	    "  Removes the directory with the given name on the server.\n"
-	    "  The directory will not be removed unless it is empty.\n"
-	    "  Wildcards may be used to specify multiple directories.\n",
+	    "  서버에서 지정된 이름의 디렉토리를 삭제 합니다.\n"
+	    "  디렉토리가 비어있지 않을 경우에는 삭제되지 않습니다.\n"
+	    "  별표(astrik)를 여러 디렉토리를 지정하는데 사용할 수 있습니다.\n",
 	    sftp_cmd_rmdir
     }
     ,{
-	"utf8", TRUE, "set console charset to utf8",
+	"utf8", TRUE, "콘솔 문자셋 utf8 스위치",
 	    " <on|off>\n"
-	    "  set console charset to utf8\n",
+	    "  콘솔 문자셋을 on|off 옵션으로 utf8 지정하거나 또는 철회 한다.\n",
 		sftp_set_utf8
     }
 };
@@ -2348,7 +2349,7 @@ static int sftp_cmd_help(struct sftp_command *cmd)
 	    const struct sftp_cmd_lookup *lookup;
 	    lookup = lookup_command(cmd->words[i]);
 	    if (!lookup) {
-		printf("help: %s: command not found\n", cmd->words[i]);
+		printf("help: %s: 명령을 찾을 수 없습니다.\n", cmd->words[i]);
 	    } else {
 		printf("%s", lookup->name);
 		if (lookup->longhelp == NULL)
@@ -2497,7 +2498,7 @@ static int do_sftp_init(void)
      */
     if (!fxp_init()) {
 	fprintf(stderr,
-		"Fatal: unable to initialise SFTP: %s\n", fxp_error());
+		"치명적 오류: SFTP 초기화 실패: %s\n", fxp_error());
 	return 1;		       /* failure */
     }
 
@@ -2510,11 +2511,11 @@ static int do_sftp_init(void)
 
     if (!homedir) {
 	fprintf(stderr,
-		"Warning: failed to resolve home directory: %s\n",
+		"경고: 홈디렉토리를 확인할 수 없습니다: %s\n",
 		fxp_error());
 	homedir = dupstr(".");
     } else {
-	printf("Remote working directory is %s\n", homedir);
+	printf("원격 작업 디렉토리: %s\n", homedir);
     }
     pwd = dupstr(homedir);
     return 0;
@@ -2574,7 +2575,7 @@ int do_sftp(int mode, int modeflags, char *batchfile)
     } else {
         fp = fopen(batchfile, "r");
         if (!fp) {
-	    printf("Fatal: unable to open %s\n", batchfile);
+	    printf("치명적 오류: 열기 실패 - %s\n", batchfile);
 	    return 1;
         }
 	ret = 0;
@@ -2616,7 +2617,7 @@ void fatalbox(const char *fmt, ...)
     va_list ap;
     va_start(ap, fmt);
     str = dupvprintf(fmt, ap);
-    str2 = dupcat("Fatal: ", str, "\n", NULL);
+    str2 = dupcat("치명적 오류: ", str, "\n", NULL);
     sfree(str);
     va_end(ap);
     fputs(str2, stderr);
@@ -2630,7 +2631,7 @@ void modalfatalbox(const char *fmt, ...)
     va_list ap;
     va_start(ap, fmt);
     str = dupvprintf(fmt, ap);
-    str2 = dupcat("Fatal: ", str, "\n", NULL);
+    str2 = dupcat("치명적 오류: ", str, "\n", NULL);
     sfree(str);
     va_end(ap);
     fputs(str2, stderr);
@@ -2656,7 +2657,7 @@ void connection_fatal(void *frontend, const char *fmt, ...)
     va_list ap;
     va_start(ap, fmt);
     str = dupvprintf(fmt, ap);
-    str2 = dupcat("Fatal: ", str, "\n", NULL);
+    str2 = dupcat("치명적 오류: ", str, "\n", NULL);
     sfree(str);
     va_end(ap);
     fputs(str2, stderr);
@@ -2752,7 +2753,7 @@ int from_backend_eof(void *frontend)
      */
     if (!sent_eof) {
         connection_fatal(frontend,
-                         "Received unexpected end-of-file from SFTP server");
+                         "SFTP 서버로부터 잘못된 EOF(end-of-file)을 전달 받았습니다.");
     }
     return FALSE;
 }
@@ -2805,38 +2806,38 @@ int sftp_sendbuffer(void)
  */
 static void usage(void)
 {
-    printf("PuTTY Secure File Transfer (SFTP) client\n");
+    printf("iPuTTY 보안 파일 전송 (SFTP) 프로그램\n");
     printf("%s\n", ver);
-    printf("Usage: psftp [options] [user@]host\n");
-    printf("Options:\n");
-    printf("  -V        print version information and exit\n");
-    printf("  -pgpfp    print PGP key fingerprints and exit\n");
-    printf("  -b file   use specified batchfile\n");
-    printf("  -bc       output batchfile commands\n");
-    printf("  -be       don't stop batchfile processing if errors\n");
-    printf("  -v        show verbose messages\n");
-    printf("  -load sessname  Load settings from saved session\n");
-    printf("  -l user   connect with specified username\n");
-    printf("  -P port   connect to specified port\n");
-    printf("  -pw passw login with specified password\n");
-    printf("  -1 -2     force use of particular SSH protocol version\n");
-    printf("  -4 -6     force use of IPv4 or IPv6\n");
-    printf("  -C        enable compression\n");
-    printf("  -i key    private key file for user authentication\n");
-    printf("  -noagent  disable use of Pageant\n");
-    printf("  -agent    enable use of Pageant\n");
+    printf("사용법: psftp [options] [user@]host\n");
+    printf("옵션:\n");
+    printf("  -V        버전 정보 출력 후 종료\n");
+    printf("  -pgpfp    PGP 키 fingerprint 출력 후 종료\n");
+    printf("  -b file   지정한 배치파일 사용\n");
+    printf("  -bc       배치파일 명령 출력\n");
+    printf("  -be       에러 발생시에도 배치 파일 계속 진행\n");
+    printf("  -v        자세한 메시지 출력\n");
+    printf("  -load sessname  저장된 세션의 설정 이용\n");
+    printf("  -l user   지정한 사용자를 이용하여 연결\n");
+    printf("  -P port   지정한 포트를 이용하여 연결\n");
+    printf("  -pw passw 지정한 암호를 이용하여 연결\n");
+    printf("  -1 -2     특정 SSH 프로토콜을 이용\n");
+    printf("  -4 -6     IPv4 또는 IPv6 연결 선택\n");
+    printf("  -C        압축 사용\n");
+    printf("  -i key    인증에 사용할 개인키 파일\n");
+    printf("  -noagent  Pagent 사용 안 함\n");
+    printf("  -agent    Pagent 사용\n");
     printf("  -hostkey aa:bb:cc:...\n");
-    printf("            manually specify a host key (may be repeated)\n");
-    printf("  -batch    disable all interactive prompts\n");
+    printf("            호스트키 수동 지정 (may be repeated)\n");
+    printf("  -batch    대화형 프롬프트 사용 안함\n");
     printf("  -proxycmd command\n");
-    printf("            use 'command' as local proxy\n");
+    printf("            로컬 프록시로서 'command' 사용\n");
     printf("  -sshlog file\n");
     printf("  -sshrawlog file\n");
-    printf("            log protocol details to a file\n");
+    printf("            프로토콜 상세 사항을 파일에 기록\n");
     printf("  -utf8 [on|off]\n");
-    printf("            utf8 mode swtich. default is on\n");
+    printf("            utf8 모드 옵션. 기본값 on\n");
     printf("  -hkeychk\n");
-    printf("            Don't check stric host key during login\n");
+    printf("            로그인 중 호스트키 검사를 하지 않음\n");
     cleanup_exit(1);
 }
 
@@ -2865,7 +2866,7 @@ static int psftp_connect(char *userhost, char *user, int portnumber)
     } else {
 	*host++ = '\0';
 	if (user) {
-	    printf("psftp: multiple usernames specified; using \"%s\"\n",
+	    printf("psftp: 사용자 이름이 여러번 지정 되었습니다.; \"%s\"를 이용하십시오.\n",
 		   user);
 	} else
 	    user = userhost;
@@ -3036,12 +3037,12 @@ static int psftp_connect(char *userhost, char *user, int portnumber)
 	if (back->exitcode(backhandle) >= 0)
 	    return 1;
 	if (ssh_sftp_loop_iteration() < 0) {
-	    fprintf(stderr, "ssh_init: error during SSH connection setup\n");
+	    fprintf(stderr, "ssh_init: SSH 연결 설정 오류\n");
 	    return 1;
 	}
     }
     if (verbose && realhost != NULL)
-	printf("Connected to %s\n", realhost);
+	printf("%s 연결 중\n", realhost);
     if (realhost != NULL)
 	sfree(realhost);
     return 0;
@@ -3054,7 +3055,7 @@ void cmdline_error(const char *p, ...)
     va_start(ap, p);
     vfprintf(stderr, p, ap);
     va_end(ap);
-    fprintf(stderr, "\n       try typing \"psftp -h\" for help\n");
+    fprintf(stderr, "\n       도움말을 보려면 \"psftp -h\" 를 입력하십시오\n");
     exit(1);
 }
 
@@ -3107,7 +3108,7 @@ int psftp_main(int argc, char *argv[])
 	}
 	ret = cmdline_process_param(argv[i], i+1<argc?argv[i+1]:NULL, 1, conf);
 	if (ret == -2) {
-	    cmdline_error("option \"%s\" requires an argument", argv[i]);
+	    cmdline_error("\"%s\" 옵션은 옵션 값이 필요 합니다.", argv[i]);
 	} else if (ret == 2) {
 	    i++;	       /* skip next argument */
 	} else if (ret == 1) {
@@ -3141,7 +3142,7 @@ int psftp_main(int argc, char *argv[])
 	    i++;
 	    break;
 	} else {
-	    cmdline_error("unknown option \"%s\"", argv[i]);
+	    cmdline_error("잘못된 옵션 \"%s\"", argv[i]);
 	}
     }
     argc -= i;
@@ -3158,9 +3159,9 @@ int psftp_main(int argc, char *argv[])
     }
 
     if ( isUTF8 )
-	printf("psftp: If charset of server side is not UTF8, then use command 'utf8 off'\n");
+	printf("psftp: 서버의 문자셋이 UTF8이 아니면, 'utf8 off' 명령을 이용하십시오.\n");
     else
-	printf("psftp: If charset of server side is UTF8, then use command 'utf8 on'\n");
+	printf("psftp: 서버의 문자셋이 UTF8이면, 'utf8 on' 명령을 이용하십시오.\n");
 
     /*
      * If a user@host string has already been provided, connect to
@@ -3175,8 +3176,8 @@ int psftp_main(int argc, char *argv[])
 	if (do_sftp_init())
 	    return 1;
     } else {
-	printf("psftp: no hostname specified; use \"open host.name\""
-	       " to connect\n");
+	printf("psftp: 호스트가 지정되지 않았습니다; 연결에 \"open host.name\""
+	       " 을 이용하십시오.\n");
     }
 
     ret = do_sftp(mode, modeflags, batchfile);

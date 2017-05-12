@@ -79,7 +79,7 @@ void modalfatalbox(const char *fmt, ...)
     va_start(ap, fmt);
     buf = dupvprintf(fmt, ap);
     va_end(ap);
-    MessageBox(hwnd, buf, "Pageant Fatal Error",
+    MessageBox(hwnd, buf, "Pageant 치명적 오류",
 	       MB_SYSTEMMODAL | MB_ICONERROR | MB_OK);
     sfree(buf);
     exit(1);
@@ -262,17 +262,16 @@ static INT_PTR CALLBACK PassphraseProc(HWND hwnd, UINT msg,
  */
 void old_keyfile_warning(void)
 {
-    static const char mbtitle[] = "PuTTY Key File Warning";
+    static const char mbtitle[] = "PuTTY 키 파일 경고";
     static const char message[] =
-	"You are loading an SSH-2 private key which has an\n"
-	"old version of the file format. This means your key\n"
-	"file is not fully tamperproof. Future versions of\n"
-	"PuTTY may stop supporting this private key format,\n"
-	"so we recommend you convert your key to the new\n"
-	"format.\n"
+	"이전 버전의 파일 형식을 가진 SSH-2 개인키를 불러오려\n"
+	"하고 있습니다. 이 의미는 당신의 키 파일을 현재 버전에\n"
+	"맞게 변환을 해야 한다는 의미 입니다.\n"
+	"PuTTY의 향후 버전은 현재 키 파일의 형식을 중단할 수\n"
+	"있으므로, 키를 새 형식으로 변환하는 것을 권장 합니다.\n"
 	"\n"
-	"You can perform this conversion by loading the key\n"
-	"into PuTTYgen and then saving it again.";
+	"변환은 간단하게 일단 PuTTYgen에 키를 불러들인 후에,\n"
+	"다시 저장하는 것으로 변환을 할 수 있습니다.";
 
     MessageBox(NULL, message, mbtitle, MB_OK);
 }
@@ -484,7 +483,7 @@ static void prompt_add_keyfile(void)
     *filelist = '\0';
     of.nMaxFile = 8192;
     of.lpstrFileTitle = NULL;
-    of.lpstrTitle = "Select Private Key File";
+    of.lpstrTitle = "개인키 파일 선택";
     of.Flags = OFN_ALLOWMULTISELECT | OFN_EXPLORER;
     if (request_file(keypath, &of, TRUE, FALSE)) {
 	if(strlen(filelist) > of.nFileOffset) {
@@ -690,7 +689,7 @@ static BOOL AddTrayIcon(HWND hwnd)
     tnid.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
     tnid.uCallbackMessage = WM_SYSTRAY;
     tnid.hIcon = hicon = LoadIcon(hinst, MAKEINTRESOURCE(201));
-    strcpy(tnid.szTip, "Pageant (PuTTY authentication agent)");
+    strcpy(tnid.szTip, "Pageant (PuTTY 인증 에이전트)");
 
     res = Shell_NotifyIcon(NIM_ADD, &tnid);
 
@@ -849,8 +848,8 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message,
 	  case IDM_PUTTY:
 	    if((INT_PTR)ShellExecute(hwnd, NULL, putty_path, _T(""), _T(""),
 				 SW_SHOW) <= 32) {
-		MessageBox(NULL, "Unable to execute PuTTY!",
-			   "Error", MB_OK | MB_ICONERROR);
+		MessageBox(NULL, "PuTTY를 실행할 수 없습니다!",
+			   "오류", MB_OK | MB_ICONERROR);
 	    }
 	    break;
 	  case IDM_CLOSE:
@@ -916,7 +915,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message,
 		    strcat(param, mii.dwTypeData);
 		    if((INT_PTR)ShellExecute(hwnd, NULL, putty_path, param,
 					 _T(""), SW_SHOW) <= 32) {
-			MessageBox(NULL, "Unable to execute PuTTY!", "Error",
+			MessageBox(NULL, "PuTTY를 실행할 수 없습니다!", "오류",
 				   MB_OK | MB_ICONERROR);
 		    }
 		}
@@ -1091,7 +1090,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
      */
     if (!init_winver())
     {
-	modalfatalbox("Windows refuses to report a version");
+	modalfatalbox("윈도우 버전 보고를 거부 당했습니다.");
     }
     if (osVersion.dwPlatformId == VER_PLATFORM_WIN32_NT) {
 	has_security = TRUE;
@@ -1105,16 +1104,16 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 	 */
         if (!got_advapi()) {
 	    MessageBox(NULL,
-		       "Unable to access security APIs. Pageant will\n"
-		       "not run, in case it causes a security breach.",
-		       "Pageant Fatal Error", MB_ICONERROR | MB_OK);
+		       "보안 API에 접근할 수 없습니다. Pagent는 보안\n"
+		       "위반을 초래할 경우를 대비하여 실행하지 않습니다.",
+		       "Pageant 치명적 오류", MB_ICONERROR | MB_OK);
 	    return 1;
 	}
 #else
 	MessageBox(NULL,
-		   "This program has been compiled for Win9X and will\n"
-		   "not run on NT, in case it causes a security breach.",
-		   "Pageant Fatal Error", MB_ICONERROR | MB_OK);
+		   "이 프로그램은 Win9X용으로 컴파일이 되었으며, 보안\n"
+		   "위반을 초래하여 NT에서는 실행되지 않습니다."
+		   "Pageant 치명적 오류", MB_ICONERROR | MB_OK);
 	return 1;
 #endif
     }
@@ -1214,7 +1213,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
      */
     if (already_running) {
 	if (!command && !added_keys) {
-	    MessageBox(NULL, "Pageant is already running", "Pageant Error",
+	    MessageBox(NULL, "Pageant가 이미 실행 중 입니다.", "Pageant 오류",
 		       MB_ICONERROR | MB_OK);
 	}
 	return 0;
@@ -1249,20 +1248,20 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
     systray_menu = CreatePopupMenu();
     if (putty_path) {
 	session_menu = CreateMenu();
-	AppendMenu(systray_menu, MF_ENABLED, IDM_PUTTY, "&New Session");
+	AppendMenu(systray_menu, MF_ENABLED, IDM_PUTTY, "새 세션(&N)");
 	AppendMenu(systray_menu, MF_POPUP | MF_ENABLED,
-		   (UINT_PTR) session_menu, "&Saved Sessions");
+		   (UINT_PTR) session_menu, "세션 저장(&S)");
 	AppendMenu(systray_menu, MF_SEPARATOR, 0, 0);
     }
     AppendMenu(systray_menu, MF_ENABLED, IDM_VIEWKEYS,
-	   "&View Keys");
-    AppendMenu(systray_menu, MF_ENABLED, IDM_ADDKEY, "Add &Key");
+	   "키 보기(&V)");
+    AppendMenu(systray_menu, MF_ENABLED, IDM_ADDKEY, "키 추가(&K)");
     AppendMenu(systray_menu, MF_SEPARATOR, 0, 0);
     if (has_help())
-	AppendMenu(systray_menu, MF_ENABLED, IDM_HELP, "&Help");
-    AppendMenu(systray_menu, MF_ENABLED, IDM_ABOUT, "&About");
+	AppendMenu(systray_menu, MF_ENABLED, IDM_HELP, "도움말(&H)");
+    AppendMenu(systray_menu, MF_ENABLED, IDM_ABOUT, "정보(&A)");
     AppendMenu(systray_menu, MF_SEPARATOR, 0, 0);
-    AppendMenu(systray_menu, MF_ENABLED, IDM_CLOSE, "E&xit");
+    AppendMenu(systray_menu, MF_ENABLED, IDM_CLOSE, "종료(&x)");
     initial_menuitems_count = GetMenuItemCount(session_menu);
 
     /* Set the default menu item. */

@@ -582,7 +582,7 @@ static void update_jumplist_from_registry(void)
                    (collection, COMPTR(IObjectArray, &array))))
         goto cleanup;
 
-    pCDL->lpVtbl->AppendCategory(pCDL, L"Recent Sessions", array);
+    pCDL->lpVtbl->AppendCategory(pCDL, L"자주 사용하는 세션", array);
 
     /*
      * Create an object collection to form the 'Tasks' category on the

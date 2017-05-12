@@ -139,8 +139,8 @@ void ser_setup_config_box(struct controlbox *b, int midsession,
 	 * Add the serial back end to the protocols list at the
 	 * top of the config box.
 	 */
-	s = ctrl_getset(b, "Session", "hostport",
-			"Specify the destination you want to connect to");
+	s = ctrl_getset(b, "세션", "hostport",
+			"연결할 대상 지정");
 
         for (i = 0; i < s->ncontrols; i++) {
             c = s->ctrls[i];
@@ -168,8 +168,8 @@ void ser_setup_config_box(struct controlbox *b, int midsession,
      * Entirely new Connection/Serial panel for serial port
      * configuration.
      */
-    ctrl_settitle(b, "Connection/Serial",
-		  "Options controlling local serial lines");
+    ctrl_settitle(b, "연결/Serial",
+		  "시리얼 라인 옵션");
 
     if (!midsession) {
 	/*
@@ -177,30 +177,30 @@ void ser_setup_config_box(struct controlbox *b, int midsession,
 	 * midflight, although we do allow all other
 	 * reconfiguration.
 	 */
-	s = ctrl_getset(b, "Connection/Serial", "serline",
-			"Select a serial line");
-	ctrl_editbox(s, "Serial line to connect to", 'l', 40,
+	s = ctrl_getset(b, "연결/Serial", "serline",
+			"시리얼 라인 지정");
+	ctrl_editbox(s, "접속할 시리얼 라인", 'l', 40,
 		     HELPCTX(serial_line),
 		     conf_editbox_handler, I(CONF_serline), I(1));
     }
 
-    s = ctrl_getset(b, "Connection/Serial", "sercfg", "Configure the serial line");
-    ctrl_editbox(s, "Speed (baud)", 's', 40,
+    s = ctrl_getset(b, "연결/Serial", "sercfg", "시리얼 라인 설정");
+    ctrl_editbox(s, "속도 (baud)", 's', 40,
 		 HELPCTX(serial_speed),
 		 conf_editbox_handler, I(CONF_serspeed), I(-1));
-    ctrl_editbox(s, "Data bits", 'b', 40,
+    ctrl_editbox(s, "데이터 비트", 'b', 40,
 		 HELPCTX(serial_databits),
 		 conf_editbox_handler, I(CONF_serdatabits), I(-1));
     /*
      * Stop bits come in units of one half.
      */
-    ctrl_editbox(s, "Stop bits", 't', 40,
+    ctrl_editbox(s, "정지 비트", 't', 40,
 		 HELPCTX(serial_stopbits),
 		 conf_editbox_handler, I(CONF_serstopbits), I(-2));
-    ctrl_droplist(s, "Parity", 'p', 40,
+    ctrl_droplist(s, "패리티", 'p', 40,
 		  HELPCTX(serial_parity),
 		  serial_parity_handler, I(parity_mask));
-    ctrl_droplist(s, "Flow control", 'f', 40,
+    ctrl_droplist(s, "흐름 설정", 'f', 40,
 		  HELPCTX(serial_flow),
 		  serial_flow_handler, I(flow_mask));
 }

@@ -1166,16 +1166,16 @@ char *buildinfo(const char *newline)
     strbuf *buf = strbuf_new();
     extern const char commitid[];      /* in commitid.c */
 
-    strbuf_catf(buf, "Build platform: %d-bit %s",
+    strbuf_catf(buf, "빌드 플랫폼: %d-bit %s",
                 (int)(CHAR_BIT * sizeof(void *)),
                 BUILDINFO_PLATFORM);
 
 #ifdef __clang_version__
-    strbuf_catf(buf, "%sCompiler: clang %s", newline, __clang_version__);
+    strbuf_catf(buf, "%s컴파일러: clang %s", newline, __clang_version__);
 #elif defined __GNUC__ && defined __VERSION__
-    strbuf_catf(buf, "%sCompiler: gcc %s", newline, __VERSION__);
+    strbuf_catf(buf, "%s컴파일러: gcc %s", newline, __VERSION__);
 #elif defined _MSC_VER
-    strbuf_catf(buf, "%sCompiler: Visual Studio", newline);
+    strbuf_catf(buf, "%s컴파일러: Visual Studio", newline);
 #if _MSC_VER == 1910
     strbuf_catf(buf, " 2017 / MSVC++ 14.1");
 #elif _MSC_VER == 1900
@@ -1193,7 +1193,7 @@ char *buildinfo(const char *newline)
 #elif  _MSC_VER == 1310
     strbuf_catf(buf, " 2003 / MSVC++ 7.1");
 #else
-    strbuf_catf(buf, ", unrecognised version");
+    strbuf_catf(buf, ", 버전 알 수 없음");
 #endif
     strbuf_catf(buf, " (_MSC_VER=%d)", (int)_MSC_VER);
 #endif
