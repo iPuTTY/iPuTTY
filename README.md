@@ -22,6 +22,26 @@ iPutty-Cygterm
 
 Windwos GUI programing 경험이 없기 때문에, 이 곳에 버그를 등록하더라도 해결이 안될 수도 있습니다. 기능 수정이나 버그 픽스에 대한 패치는 환영 하지만, 문제 해결 요구에는 충분히 응대할 수 없습니다.
 
+Linux, Mac OS 또는 cygwin 환경에서 UI를 UTF-8로 출력해야 하는 경우, 다음 파일의 문자셋을 utf-8로 변경해 준 다음 빌드해야 합니다.
+
+ * config.c
+ * sercfg.c
+ * pscp.c
+ * psftp.c
+
+다음 명령을 이용하여 변환할 수 있습니다.
+
+```
+iconv -f cp949 -t utf-8 config.c > config.c.utf8 && mv config.c.utf8 config.c
+```
+
+VI에서는 다음의 명령으로 변경할 수 있습니다.
+
+```
+:set fileencoding=utf8
+```
+
+
 ## Key Additions
 
  * ***On-the-spot IME support*** - 한글 음절의 구성을 커서에서 직접 구성 합니다. 단말기 외부에 무작위로 배치되는 IME 구성을 위한 못생긴(?) 회색 상자가 나타나지 않습니다.
