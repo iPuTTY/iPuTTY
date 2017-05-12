@@ -45,12 +45,12 @@ Windwos GUI programing 경험이 없기 때문에, 이 곳에 버그를 등록�
 
 ***Cygwin 64bit*** 의 경우:
   1. 압축 파일에 포함된 ***cthelper64.exe*** 파일을 ***cygwin*** ***/bin*** directory에 저장 합니다.
-  2. iPutty를 실행한 다음, 설정의 ***Connection*** > ***Cygterm*** 에서 ***Use Cygwin64*** 를 선택 합니다.
+  2. ***iPuTTy*** 를 실행한 다음, 설정의 ***Connection*** > ***Cygterm*** 에서 ***Use Cygwin64*** 를 선택 합니다.
 
 ***Cygwin 32bit*** 의 경우:
 	압축 파일에 포함된 ***cthelper.exe*** 파일을 ***cygwin*** ***/bin*** directory에 저장 합니다.
 
-***cthelper.exe*** 복사가 완료 되었으면, ***iPuTTY*** 를 실행한 후에, connection 정보를 아래와 같이 하여 termanal을 ***iPuTTy*** 로 띄웁니다.
+***cthelper.exe*** 복사가 완료 되었으면, ***iPuTTY*** 를 실행한 후에, connection 정보를 아래와 같이 하여 terminal을 ***iPuTTy*** 로 띄웁니다.
 
  * ***Connection Type:*** Cygterm
  * ***Host address   :*** -
