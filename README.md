@@ -64,11 +64,11 @@ VI에서는 다음의 명령으로 변경할 수 있습니다.
 
 ***cthelper-bin.zip*** 을 다운로드 받은 후에 압축을 해제 합니다.
 
-***Cytwin 64bit*** 의 경우:
+***Cygwin 64bit*** 의 경우:
   1. 압축 파일에 포함된 ***cthelper64.exe*** 파일을 ***cygwin*** ***/bin*** directory에 저장 합니다.
   2. iPutty를 실행한 다음, 설정의 ***Connection*** > ***Cygterm*** 에서 ***Use Cygwin64*** 를 선택 합니다.
 
-***Cytwin 32bit*** 의 경우:
+***Cygwin 32bit*** 의 경우:
 	압축 파일에 포함된 ***cthelper.exe*** 파일을 ***cygwin*** ***/bin*** directory에 저장 합니다.
 
 ***cthelper.exe*** 복사가 완료 되었으면, ***iPuTTY*** 를 실행한 후에, connection 정보를 아래와 같이 하여 termanal을 ***iPuTTy*** 로 띄웁니다.
