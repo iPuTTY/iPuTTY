@@ -5,7 +5,17 @@ iPutty-Cygterm
 
 ***iPuTTY*** 는 ***PuTTY*** 의 한국어 로컬 버전이며, SSH 터미널 에뮬레이터 입니다. 현재 ***iPuTTY*** 의 주 타겟 플랫폼은 ***Microsoft Windows 7*** 이상 버전 입니다.
 
-***iPutty-Cygterm*** branch는 ***iPuTTY***에 PuTTyCyg 의 기능을 추가하여, ***iPutty***를 Cygwin termianl로 사용할 수 있게 해 줍니다.
+이 저장소는 Official ***iPuTTY*** 저장소가 아닙니다. Official site는 [iPuTTY Official site](https://bitbucket.org/daybreaker/iputty/)를 이용 하십시오. 하지만, 현재 공식 사이트는 2016/05/31 에 개발 중단을 선언한 상태이며, [HPuTTY]( https://github.com/teamnop/HPuTTY)를 이용하라고 권고하고 있습니다.
+
+원 iPuTTY의 maintainer에게 project 포기 의사 확인 및 maintainer 권한 이양에 대하여 메일로 문의 및 답변을 기다리는 상태이며, 거절시에 프로젝트 이름이 변경될 수 있습니다. (https://bitbucket.org/daybreaker/iputty/issues/11/putty-064 참조)
+
+이 저장소는 original iPuTTY에 PuTTY 업데이트를 반영하고 있으며, 원본 iPuTTy에서 제공하지 않는다음의 기능 개선이 있습니다.
+
+ * Cygwin terminal 지원 ([#3](https://github.com/Joungkyun/iputty/issues/3))
+ * psftp file listing ([#1](https://github.com/Joungkyun/iputty/issues/1))
+ * psftp([#2](https://github.com/Joungkyun/iputty/issues/2)) / pscp([#11](https://github.com/Joungkyun/iputty/issues/11)) UTF8 지원 
+ * 한글 입력 모드에서 escape 키 눌렀을 경우 영문키보드 상태로 전환(like hanterm) ([#12](https://github.com/Joungkyun/iputty/issues/12))
+ * 호스트키 체크 skip 기능 지원 ([#10](https://github.com/Joungkyun/iputty/issues/10))
 
 ## Warning
 
@@ -13,22 +23,23 @@ Windwos GUI programing 경험이 없기 때문에, 이 곳에 버그를 등록�
 
 ## Key Additions
 
- * ***On-the-spot IME support*** - The composition of Hangul syllables happens directly at the cursor. No more ugly gray boxes for IME composition randomly positioned outside the terminal.
- * ***CP949/UTF-8 quick switching menu*** - It provides a quick-fix for legacy Linux servers.
- * ***Separate ANSI/Unicode fonts*** - You can use Consolas for ANSI characters and 돋움 for Unicode characters including Hangul syllables in the same terminal.
-Semi-transparent windows
-   * Transparency can be configured.
-   * Alt+[, Alt+] for quick-change of transparency (among almost transparent, semi-transparent, and completely opaque) - It is great to see webpages and documents through the terminal when you do not have multiple monitors.
-   * Alt+Shift+[, Alt+Shift+] for fine adjustment of transparency
+ * ***On-the-spot IME support*** - 한글 음절의 구성을 커서에서 직접 구성 합니다. 단말기 외부에 무작위로 배치되는 IME 구성을 위한 못생긴(?) 회색 상자가 나타나지 않습니다.
+ * ***CP949/UTF-8 quick switching menu*** - 기본으로 UTF-8 인코딩을 사용합니다. CP949(또는 EUC-KR)을 사용하는 서버를 위하여 빠른 전환을 위한 메뉴를 지원 합니다.
+ * ***Separate ANSI/Unicode fonts*** - 한글 음절을 포함한 유니코드 문자 표시를 위하여 동일한 터미널에서 영문폰트와 한글 폰트를 동시에 사용할 수 있습니다.
+ * ***반투명창 지원***
+   * 투명성을 설정할 수 있습니다.
+   * 투명도를 빠르게 변경하려면 Alt+[, Alt+](거의 투명, 반투명, 불투명)을 이용할 수 있습니다 - 2개 이상의 모니터를 사용하지 않는다면, 이 투명도 설정을 이용하여 웹페이지 및 문서를 볼 수 있습니다.
+   * 투명도를 미세하게 조정하려면 Alt+Shift+[, Alt+Shift+] 를 이용하십시오.
  * ***New keyboard shortcuts***
-   * Ctrl+Tab to switch to other PuTTY windows.
- * ***Version-aware default fonts on Windows*** (Consolas for Windows 7 and Vista, Courier New for Windows XP, for example)
- * Now, ***UTF-8 is the default encoding*** if not configured explicitly. This will be a huge convenience since most Linux servers uses it by default recently.
- * ***Italics font support***: To use it on xterm-256color terminals, have a look at my terminfo generator and related configurations such as vimrc, bashrc, and tmux.conf in the same location.
+   * Ctrl+Tab 을 이용하여 PuTTY 창간에 전환을 할 수 있습니다.
+ * ***Version-aware default fonts on Windows*** (예를 들어, Vista 및 Windwos 7에서는 Consolas, XP 에서는 Courier New)
+ * 이제 명시적으로 설정을 하지 않으면, ***UTF-8 이 기본 문자셋*** 입니다. 최근 대부분의 리눅스 배포본이 UTF-8을 기본값으로 사용하기 때문에 매우 편리할 것입니다.
+ * ***Italics font support***: xterm-256color 터미널에서 이 기능을 사용하려면, terminfo 생성기와 관련된 vimrc, bashrc, tmux.conf 등의 설정 파일을 살펴 보십시오.
+ * ***Skip Hostkey checking*** - openssh의 StrictHostKeyChecking 옵션 처럼 Hostkey 체크 여부를 설정할 수 있습니다.
 
 ## Cygterm (Cygwin terminal)
 
-이 곳에서 빌드한 ***iPuTTY*** 는 Cygterm patch가 포함이 되어 있습니다. ***Cygterm*** 기능을 사용하기 위해서는 ***cthelper.exe*** 가 필요 합니다. ***cthelper.exe*** 는 https://github.com/Joungkyun/iputty/releases/tag/0.68 에서 배포 합니다.
+이 곳에서 배포하는 ***iPuTTY*** 는 Cygterm patch가 포함이 되어 있습니다. ***Cygterm*** 기능을 사용하기 위해서는 ***cthelper.exe*** 가 필요 합니다. ***cthelper.exe*** 는 https://github.com/Joungkyun/iputty/releases/tag/0.68 에서 배포 합니다.
 
 ***cthelper-bin.zip*** 을 다운로드 받은 후에 압축을 해제 합니다.
 
@@ -48,6 +59,5 @@ Cygterm 기능이 포함된 소스코드는 [***iputty-cygterm*** branch](https:
 
 ## 한글 번역 버전
 
-한글화가 되어 있는 소스 코드는 [***iputty-cygterm-hangulize*** branch](https://github.com/Joungkyun/iputty/tree/iputty-cygterm-hangulize)를 이용 하십시오.
+0.69 버전 부터는 대부분의 UI 메시지가 한글로 번역이 되어 있으며, 한글화가 되어 있는 소스 코드는 [***iputty-cygterm-hangulize*** branch](https://github.com/Joungkyun/iputty/tree/iputty-cygterm-hangulize)를 이용 하십시오.
 
-현재 배포중인 실행파일들은 [***iputty-cygterm*** branch](https://github.com/Joungkyun/iputty/tree/iputty-cygterm)를 빌드한 것으로, 다음 버전은 [***iputty-cygterm-hangulize*** branch](https://github.com/Joungkyun/iputty/tree/iputty-cygterm-hangulize)로 배포할 예정입니다.
