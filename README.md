@@ -7,9 +7,9 @@ iPutty
 
 이 저장소는 Official ***iPuTTY*** 저장소가 아닙니다. Official site는 [iPuTTY Official site](https://bitbucket.org/daybreaker/iputty/)를 이용 하십시오. 하지만, 현재 공식 사이트는 2016/05/31 에 개발 중단을 선언한 상태이며, [HPuTTY]( https://github.com/teamnop/HPuTTY)를 이용하라고 권고하고 있습니다.
 
-원 iPuTTY의 maintainer에게 project 포기 의사 확인 및 maintainer 권한 이양에 대하여 메일로 문의 및 답변을 기다리는 상태이며, 거절시에 프로젝트 이름이 변경될 수 있습니다. (https://bitbucket.org/daybreaker/iputty/issues/11/putty-064 참조)
+원 ***iPuTTY*** 의 maintainer에게 project 포기 의사 확인 및 maintainer 권한 이양에 대하여 메일로 문의 및 답변을 기다리는 상태이며, 거절시에 프로젝트 이름이 변경될 수 있습니다. (https://bitbucket.org/daybreaker/iputty/issues/11/putty-064 참조)
 
-이 저장소는 original iPuTTY에 PuTTY 업데이트를 반영하고 있으며, 원본 iPuTTy에서 제공하지 않는다음의 기능 개선이 있습니다.
+이 저장소는 ***original iPuTTY*** 에 ***PuTTY*** 업데이트를 반영하고 있으며, 원본 ***iPuTTy*** 에서 제공하지 않는다음의 기능 개선이 있습니다.
 
  * psftp file listing ([#1](https://github.com/Joungkyun/iputty/issues/1))
  * psftp([#2](https://github.com/Joungkyun/iputty/issues/2)) / pscp([#11](https://github.com/Joungkyun/iputty/issues/11)) UTF8 지원 
@@ -38,7 +38,7 @@ Windwos GUI programing 경험이 없기 때문에, 이 곳에 버그를 등록�
 
 ## Cygterm (Cygwin terminal)
 
-이 곳에서 배포하는 ***iPuTTY*** 는 Cygterm patch가 포함이 되어 있습니다. ***Cygterm*** 기능을 사용하기 위해서는 ***cthelper.exe*** 가 필요 합니다. ***cthelper.exe*** 는 https://github.com/Joungkyun/iputty/releases/tag/0.68 에서 배포 합니다.
+이 곳에서 배포하는 ***iPuTTY*** 는 Cygterm patch가 포함이 되어 있습니다. ***Cygterm*** 기능을 사용하기 위해서는 ***cthelper.exe*** 가 필요 합니다. ***cthelper.exe*** 는 https://github.com/Joungkyun/iputty/releases/tag/0.68-cygterm 에서 배포 합니다.
 
 ***cthelper-bin.zip*** 을 다운로드 받은 후에 압축을 해제 합니다.
 
@@ -51,8 +51,8 @@ Windwos GUI programing 경험이 없기 때문에, 이 곳에 버그를 등록�
 
 ***cthelper.exe*** 복사가 완료 되었으면, ***iPuTTY*** 를 실행한 후에, connection 정보를 아래와 같이 하여 termanal을 ***iPuTTy*** 로 띄웁니다.
 
- * Connection Type: Cygterm
- * Host address   : -
+ * ***Connection Type:*** Cygterm
+ * ***Host address   :*** -
 
 Cygterm 기능이 포함된 소스코드는 [***iputty-cygterm*** branch](https://github.com/Joungkyun/iputty/tree/iputty-cygterm)를 이용하십시오.
 
