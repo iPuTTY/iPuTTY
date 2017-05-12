@@ -15,6 +15,7 @@ iPutty-Cygterm
  * psftp file listing ([#1](https://github.com/Joungkyun/iputty/issues/1))
  * psftp([#2](https://github.com/Joungkyun/iputty/issues/2)) / pscp([#11](https://github.com/Joungkyun/iputty/issues/11)) UTF8 지원 
  * 한글 입력 모드에서 escape 키 눌렀을 경우 영문키보드 상태로 전환(like hanterm) ([#12](https://github.com/Joungkyun/iputty/issues/12))
+ * 호스트키 체크 skip 기능 지원 ([#10](https://github.com/Joungkyun/iputty/issues/10))
 
 ## Warning
 
@@ -34,6 +35,7 @@ Windwos GUI programing 경험이 없기 때문에, 이 곳에 버그를 등록�
  * ***Version-aware default fonts on Windows*** (예를 들어, Vista 및 Windwos 7에서는 Consolas, XP 에서는 Courier New)
  * 이제 명시적으로 설정을 하지 않으면, ***UTF-8 이 기본 문자셋*** 입니다. 최근 대부분의 리눅스 배포본이 UTF-8을 기본값으로 사용하기 때문에 매우 편리할 것입니다.
  * ***Italics font support***: xterm-256color 터미널에서 이 기능을 사용하려면, terminfo 생성기와 관련된 vimrc, bashrc, tmux.conf 등의 설정 파일을 살펴 보십시오.
+ * ***Skip Hostkey checking*** - openssh의 StrictHostKeyChecking 옵션 처럼 Hostkey 체크 여부를 설정할 수 있습니다.
 
 ## Cygterm (Cygwin terminal)
 
