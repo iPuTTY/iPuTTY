@@ -1120,6 +1120,7 @@ int sftp_cmd_ls(struct sftp_command *cmd)
 
     if (dirh == NULL) {
 	printf("Unable to open %s: %s\n", dir, fxp_error());
+	return 0;
     } else {
 	nnames = namesize = 0;
 	ournames = NULL;
