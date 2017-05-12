@@ -11,6 +11,7 @@ iPutty-Cygterm
 
 이 저장소는 original iPuTTY에 PuTTY 업데이트를 반영하고 있으며, 원본 iPuTTy에서 제공하지 않는다음의 기능 개선이 있습니다.
 
+ * 한글 UI 지원
  * Cygwin terminal 지원 ([#3](https://github.com/Joungkyun/iputty/issues/3))
  * psftp file listing ([#1](https://github.com/Joungkyun/iputty/issues/1))
  * psftp([#2](https://github.com/Joungkyun/iputty/issues/2)) / pscp([#11](https://github.com/Joungkyun/iputty/issues/11)) UTF8 지원 
