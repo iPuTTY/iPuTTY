@@ -63,10 +63,15 @@ END
 /*
  * iPuTTY resources
  */
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)
+LANGUAGE LANG_KOREAN, SUBLANG_DEFAULT
+#pragma code_page(949)
+
 /* switch iputty windows with ctrl+tab */
 IDR_ACCELERATOR1 ACCELERATORS
 BEGIN
     VK_TAB, IDM_NEXTWINDOW, VIRTKEY, CONTROL, NOINVERT
 END
+#endif
 
 #include "version.rc2"
