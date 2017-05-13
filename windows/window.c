@@ -1768,6 +1768,18 @@ static void init_fonts(int pick_width, int pick_height)
 		           CLIP_DEFAULT_PRECIS, FONT_QUALITY(quality), \
 			   FIXED_PITCH | FF_DONTCARE, font->name)
 
+    if (kbd_codepage == 949) {
+	if (strncmp(font->name, "³ª´®", 4) == 0 ||
+	    strcmp(font->name, "D2Coding") == 0 ||
+	    strncmp(font->name, "±¼¸²", 4) == 0 ||
+	    strncmp(font->name, "µ¸¿ò", 4) == 0 ||
+	    strncmp(font->name, "±Ã¼­", 4) == 0 ||
+	    strncmp(font->name, "¹ÙÅÁ", 4) == 0) {
+	    font->charset = HANGEUL_CHARSET;
+	} else
+	    font->charset = ANSI_CHARSET;
+    }
+
     f(FONT_NORMAL, font->charset, fw_dontcare, FALSE, FALSE);
     f(FONT_ITALIC, font->charset, fw_dontcare, FALSE, TRUE);
     if (conf_get_int(conf, CONF_use_font_unicode)) {
