@@ -60,4 +60,13 @@ BEGIN
     EDITTEXT IDA_TEXT, 10, 10, 306, 222, ES_READONLY | ES_MULTILINE | ES_LEFT, WS_EX_STATICEDGE
 END
 
+/*
+ * iPuTTY resources
+ */
+/* switch iputty windows with ctrl+tab */
+IDR_ACCELERATOR1 ACCELERATORS
+BEGIN
+    VK_TAB, IDM_NEXTWINDOW, VIRTKEY, CONTROL, NOINVERT
+END
+
 #include "version.rc2"
