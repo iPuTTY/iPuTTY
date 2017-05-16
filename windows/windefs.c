@@ -22,7 +22,7 @@ FontSpec *platform_default_fontspec(const char *name)
 	else
 	    return fontspec_new("Courier New", 0, 10, ANSI_CHARSET);
     } else if (!strcmp(name, "FontUnicode")) {
-	return fontspec_new("³ª´®°íµñÄÚµù", 0, 10, HANGEUL_CHARSET);
+	return fontspec_new("D2Coding", 0, 10, HANGEUL_CHARSET);
     } else {
 	return fontspec_new("", 0, 0, 0);
     }
@@ -47,3 +47,5 @@ int platform_default_i(const char *name, int def)
 {
     return def;
 }
+
+// vim: ts=8 sts=4 sw=4 noet cino=\=2\:2(0u0
