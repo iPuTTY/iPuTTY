@@ -1771,11 +1771,16 @@ static void init_fonts(int pick_width, int pick_height)
     if (kbd_codepage == 949) {
 	if (strncmp(font->name, "³ª´®", 4) == 0 ||
 	    strcmp(font->name, "D2Coding") == 0 ||
-	    strncmp(font->name, "¸¼Àº", 4) == 0 ||
+	    strncmp(font->name, "Noto Sans CJK", 13) == 0 ||
 	    strncmp(font->name, "±¼¸²", 4) == 0 ||
-	    strncmp(font->name, "µ¸¿ò", 4) == 0 ||
 	    strncmp(font->name, "±Ã¼­", 4) == 0 ||
-	    strncmp(font->name, "¹ÙÅÁ", 4) == 0) {
+	    strncmp(font->name, "µ¸¿ò", 4) == 0 ||
+	    strncmp(font->name, "¸¼Àº", 4) == 0 ||
+	    strncmp(font->name, "¹®Á¦ºÎ", 6) == 0 ||
+	    strncmp(font->name, "¹ÙÅÁ", 4) == 0 ||
+	    strcmp(font->name, "»õ±¼¸²",) == 0 ||
+	    strncmp(font->name, "ÇÔÃÊ", 4) == 0 ||
+	    strncmp(font->name, "ÈÞ¸Õ", 4) == 0) {
 	    font->charset = HANGEUL_CHARSET;
 	} else
 	    font->charset = ANSI_CHARSET;
