@@ -1,8 +1,6 @@
 iPuTTY Official site
 ==
 
-공식 배포처인 https://bitbucket.org/daybreaker/ 에서 이전 중 입니다.
-
 자세한 사항은 [wiki](https://github.com/iPuTTY/iPuTTY/wiki) page를 참조 하십시오.
 
 ## Abstract
