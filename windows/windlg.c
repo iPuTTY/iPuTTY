@@ -229,7 +229,7 @@ static INT_PTR CALLBACK AboutProc(HWND hwnd, UINT msg,
 	     * HACK: PuttyTray
 	     * Show different website
 	     */
-	    ShellExecute(hwnd, "open", "https://github.com/joungkyun/iputty/", 0, 0, SW_SHOWDEFAULT);
+	    ShellExecute(hwnd, "open", "https://github.com/iPuTTY/iPuTTY/", 0, 0, SW_SHOWDEFAULT);
 	    return 0;
 	}
 	return 0;
