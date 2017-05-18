@@ -3,7 +3,11 @@
 #include "rcstuff.h"
 
 #define APPNAME "iPuTTY"
+#ifndef SUPPORT_CYGTERM
+#define APPDESC "SSH, Telnet and Rlogin client"
+#else
 #define APPDESC "SSH, Telnet, Cygterm and Rlogin client"
+#endif
 
 #include "win_res.rc2"
 

@@ -760,11 +760,12 @@ void save_open_settings(void *sesskey, Conf *conf)
     write_setting_s(sesskey, "HyperlinkRegularExpression", conf_get_str(conf, CONF_url_regex));
 #endif
 
-// CYGTERM patch
+#ifdef SUPPORT_CYGTERM
     write_setting_i(sesskey, "CygtermAltMetabit", conf_get_int(conf, CONF_alt_metabit));
     write_setting_i(sesskey, "CygtermAutoPath", conf_get_int(conf, CONF_cygautopath));
     write_setting_i(sesskey, "Cygterm64", conf_get_int(conf, CONF_cygterm64));
     write_setting_s(sesskey, "CygtermCommand", conf_get_str(conf, CONF_cygcmd));
+#endif
 }
 
 void load_settings(const char *section, Conf *conf)
@@ -1296,11 +1297,12 @@ void load_open_settings(void *sesskey, Conf *conf)
     gpps(sesskey, "HyperlinkRegularExpression", urlhack_default_regex, conf, CONF_url_regex);
 #endif
 
-    // CYGTERM patch
+#ifdef SUPPORT_CYGTERM
     gppi(sesskey, "CygtermAltMetabit", 0, conf, CONF_alt_metabit);
     gppi(sesskey, "CygtermAutoPath", 1, conf, CONF_cygautopath);
     gppi(sesskey, "Cygterm64", 0, conf, CONF_cygterm64);
     gpps(sesskey, "CygtermCommand", "", conf, CONF_cygcmd);
+#endif
 }
 
 void do_defaults(const char *session, Conf *conf)

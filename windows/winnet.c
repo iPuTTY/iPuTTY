@@ -194,9 +194,10 @@ DECL_WINDOWS_FUNCTION(static, int, WSAIoctl,
 		      (SOCKET, DWORD, LPVOID, DWORD, LPVOID, DWORD,
 		       LPDWORD, LPWSAOVERLAPPED,
 		       LPWSAOVERLAPPED_COMPLETION_ROUTINE));
-// CYGTERM patch
+#ifdef SUPPORT_CYGTERM
 DECL_WINDOWS_FUNCTION(static, int, getsockname,
 		      (SOCKET, const struct sockaddr FAR *, int FAR *));
+#endif
 #ifndef NO_IPV6
 DECL_WINDOWS_FUNCTION(static, int, getaddrinfo,
 		      (const char *nodename, const char *servname,
@@ -336,8 +337,9 @@ void sk_init(void)
     GET_WINDOWS_FUNCTION(winsock_module, getpeername);
     GET_WINDOWS_FUNCTION(winsock_module, recv);
     GET_WINDOWS_FUNCTION(winsock_module, WSAIoctl);
-    // CYGTERM patch
+#ifdef SUPPORT_CYGTERM
     GET_WINDOWS_FUNCTION(winsock_module, getsockname);
+#endif
 
     /* Try to get the best WinSock version we can get */
     if (!sk_startup(2,2) &&
@@ -1451,7 +1453,7 @@ Socket sk_newlistener(const char *srcaddr, int port, Plug plug,
     return (Socket) ret;
 }
 
-// CYGTERM patch
+#ifdef SUPPORT_CYGTERM
 int sk_getport(Socket sock)
 {
     /* I won't even try to get IPv6 working here since it is apparently borken
@@ -1469,6 +1471,7 @@ int sk_getport(Socket sock)
 
     return p_ntohs(a.sin_port);
 }
+#endif
 
 static void sk_tcp_close(Socket sock)
 {

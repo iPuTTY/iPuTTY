@@ -235,6 +235,7 @@ int cmdline_process_param(const char *p, char *value,
 	 * so copy it across */
 	conf_set_str(conf, CONF_serline, conf_get_str(conf, CONF_host));
     }
+#ifdef SUPPORT_CYGTERM
     if (!strcmp(p, "-cygterm")) {
 	RETURN(1);
 	UNAVAILABLE_IN(TOOLTYPE_FILETRANSFER | TOOLTYPE_NONNETWORK);
@@ -243,6 +244,7 @@ int cmdline_process_param(const char *p, char *value,
 	conf_set_int(conf, CONF_protocol, default_protocol) ;
 	return 1;
     }
+#endif
     if (!strcmp(p, "-v")) {
 	RETURN(1);
 	flags |= FLAG_VERBOSE;
@@ -659,3 +661,5 @@ void cmdline_run_saved(Conf *conf)
         saves[pri].nsaved = 0;
     }
 }
+
+// vim: ts=8 sts=4 sw=4 noet cino=\:2\=2(0u0

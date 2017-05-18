@@ -197,7 +197,7 @@ empty.h: $(allsources)
 # Add VER to Windows resource targets, and force them to be rebuilt every
 # time, on the assumption that they will contain version information.
 !begin vc vars
-CFLAGS = $(CFLAGS) /DHAS_GSSAPI /DSECURITY_WIN32 /DONTHESPOT
+CFLAGS = $(CFLAGS) /DHAS_GSSAPI /DSECURITY_WIN32
 RCFLAGS = $(RCFLAGS) $(VER)
 !end
 !begin cygwin vars
@@ -352,8 +352,8 @@ BE_NONE  = be_none nocproxy
 W_BE_ALL = be_all_s winser cproxy cygterm
 W_BE_NOSSH = be_nos_s winser nocproxy cygterm
 # And with the Unix serial-port module.
-U_BE_ALL = be_all_s uxser cproxy cygterm
-U_BE_NOSSH = be_nos_s uxser nocproxy cygterm
+U_BE_ALL = be_all_s uxser cproxy
+U_BE_NOSSH = be_nos_s uxser nocproxy
 
 # ------------------------------------------------------------
 # Definitions of actual programs. The program name, followed by a
