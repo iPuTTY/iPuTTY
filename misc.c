@@ -946,9 +946,10 @@ int conf_launchable(Conf *conf)
 {
     if (conf_get_int(conf, CONF_protocol) == PROT_SERIAL)
 	return conf_get_str(conf, CONF_serline)[0] != 0;
-    // CYGTERM patch
+#ifdef SUPPORT_CYGTERM
     else if (conf_get_int(conf, CONF_protocol) == PROT_CYGTERM)
 	return conf_get_str(conf, CONF_cygcmd)[0] != 0;
+#endif
     else
 	return conf_get_str(conf, CONF_host)[0] != 0;
 }
@@ -957,9 +958,10 @@ char const *conf_dest(Conf *conf)
 {
     if (conf_get_int(conf, CONF_protocol) == PROT_SERIAL)
 	return conf_get_str(conf, CONF_serline);
-    // CYGTERM patch
+#ifdef SUPPORT_CYGTERM
     else if (conf_get_int(conf, CONF_protocol) == PROT_CYGTERM)
 	return conf_get_str(conf, CONF_cygcmd);
+#endif
     else
 	return conf_get_str(conf, CONF_host);
 }

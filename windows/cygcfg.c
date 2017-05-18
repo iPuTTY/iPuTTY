@@ -27,6 +27,8 @@
 #include "putty.h"
 #include "dialog.h"
 
+#ifdef SUPPORT_CYGTERM
+
 static int CygTermFlag = 1 ;
 
 void cygterm_set_flag( int flag ) {
@@ -92,3 +94,5 @@ void cygterm_setup_config_box(struct controlbox *b, int midsession)
 		}
 	}
 }
+
+#endif

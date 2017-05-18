@@ -705,7 +705,7 @@ void scp_sftp_listdir(const char *dirname)
     }
 
     char *ldirname = dupstr(dirname);
-    char *rdirname = toRemoteChar(dirname, isUTF8);
+    char *rdirname = toRemoteChar((char*)dirname, isUTF8);
     char *srcfile = NULL;
 
     if (!check_is_dir(rdirname) && !strchr(rdirname, '*')) {
@@ -727,7 +727,7 @@ void scp_sftp_listdir(const char *dirname)
     printf("Listing directory %s\n", ldirname);
 
     sfree (rdirname);
-    rdirname = toRemoteChar(ldirname, isUTF8);
+    rdirname = toRemoteChar((char*)ldirname, isUTF8);
 
     req = fxp_opendir_send(rdirname);
     pktin = sftp_wait_for_reply(req);

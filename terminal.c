@@ -4129,8 +4129,10 @@ static void term_out(Terminal *term)
 				    ldisc_send(term->ldisc, "\033]L", 3, 0);
 				    ldisc_send(term->ldisc, p, len, 0);
 				    ldisc_send(term->ldisc, "\033\\", 2, 0);
+#ifdef PUTTY_WINSTUFF_H
 				    if (p != EMPTY_WINDOW_TITLE)
 					sfree(p);
+#endif
 				}
 				break;
 			      case 21:
@@ -4151,8 +4153,10 @@ static void term_out(Terminal *term)
 				    ldisc_send(term->ldisc, "\033]l", 3, 0);
 				    ldisc_send(term->ldisc, p, len, 0);
 				    ldisc_send(term->ldisc, "\033\\", 2, 0);
+#ifdef PUTTY_WINSTUFF_H
 				    if (p != EMPTY_WINDOW_TITLE)
 					sfree(p);
+#endif
 				}
 				break;
 			    }

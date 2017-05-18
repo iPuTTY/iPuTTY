@@ -10,8 +10,9 @@
 #include "dialog.h"
 #include "storage.h"
 
-// CYGTERM patch
+#ifdef SUPPORT_CYGTERM
 int cygterm_get_flag( void );
+#endif
 
 #define PRINTER_DISABLED_STRING "없음 (프린트 사용 안 함)"
 
@@ -190,10 +191,11 @@ static void config_host_handler(union control *ctrl, void *dlg,
 	     */
 	    dlg_label_change(ctrl, dlg, "시리얼 라인");
 	    dlg_editbox_set(ctrl, dlg, conf_get_str(conf, CONF_serline));
-	// CYGTERM patch
+#ifdef SUPPORT_CYGTERM
 	} else if (conf_get_int(conf, CONF_protocol) == PROT_CYGTERM) {
 	    dlg_label_change(ctrl, dlg, "명령 (login shell은 - 를 사용)");
 	    dlg_editbox_set(ctrl, dlg, conf_get_str(conf, CONF_cygcmd));
+#endif
 	} else {
 	    dlg_label_change(ctrl, dlg, HOST_BOX_TITLE);
 	    dlg_editbox_set(ctrl, dlg, conf_get_str(conf, CONF_host));
@@ -202,11 +204,12 @@ static void config_host_handler(union control *ctrl, void *dlg,
 	char *s = dlg_editbox_get(ctrl, dlg);
 	if (conf_get_int(conf, CONF_protocol) == PROT_SERIAL)
 	    conf_set_str(conf, CONF_serline, s);
-	// CYGTERM patch
+#ifdef SUPPORT_CYGTERM
 	else if (conf_get_int(conf, CONF_protocol) == PROT_CYGTERM) {
 	    char *s = dlg_editbox_get(ctrl, dlg);
 	    conf_set_str(conf, CONF_cygcmd, s);
 	}
+#endif
 	else
 	    conf_set_str(conf, CONF_host, s);
 	sfree(s);
@@ -232,10 +235,11 @@ static void config_port_handler(union control *ctrl, void *dlg,
 	     */
 	    dlg_label_change(ctrl, dlg, "속도");
 	    sprintf(buf, "%d", conf_get_int(conf, CONF_serspeed));
-	// CYGTERM patch
+#ifdef SUPPORT_CYGTERM
 	} else if (conf_get_int(conf, CONF_protocol) == PROT_CYGTERM) {
 	    dlg_label_change(ctrl, dlg, "포트 (무시)");
 	    strcpy(buf, "-");
+#endif
 	} else {
 	    dlg_label_change(ctrl, dlg, PORT_BOX_TITLE);
 	    if (conf_get_int(conf, CONF_port) != 0)
@@ -252,7 +256,9 @@ static void config_port_handler(union control *ctrl, void *dlg,
 
 	if (conf_get_int(conf, CONF_protocol) == PROT_SERIAL)
 	    conf_set_int(conf, CONF_serspeed, i);
-	else if (conf_get_int(conf, CONF_protocol) == PROT_CYGTERM) { ; } // CYGTERM patch
+#ifdef SUPPORT_CYGTERM
+	else if (conf_get_int(conf, CONF_protocol) == PROT_CYGTERM) { ; }
+#endif
 	else
 	    conf_set_int(conf, CONF_port, i);
     }
@@ -1570,8 +1576,9 @@ void setup_config_box(struct controlbox *b, int midsession,
 				sessionsaver_handler, P(ssd));
     ssd->listbox->generic.column = 0;
     ssd->listbox->listbox.height = 7;
-    // CYGTERM patch
+#ifdef SUPPORT_CYGTERM
     if (cygterm_get_flag()) ssd->listbox->listbox.height--;
+#endif
     if (!midsession) {
 	ssd->loadbutton = ctrl_pushbutton(s, "불러오기", 'l',
 					  HELPCTX(session_saved),

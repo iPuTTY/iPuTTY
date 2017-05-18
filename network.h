@@ -147,8 +147,9 @@ Socket sk_new(SockAddr addr, int port, int privport, int oobinline,
 Socket sk_newlistener(const char *srcaddr, int port, Plug plug,
                       int local_host_only, int address_family);
 
-// CYGTERM patch
+#ifdef SUPPORT_CYGTERM
 int sk_getport(Socket s);
+#endif
 
 #define sk_plug(s,p) (((*s)->plug) (s, p))
 #define sk_close(s) (((*s)->close) (s))

@@ -33,6 +33,9 @@
 #include <limits.h> /* INT_MAX */
 #include <sys/stat.h>
 #include "putty.h"
+
+#ifdef SUPPORT_CYGTERM
+
 #include "cthelper/cthelper.h"
 #include "cthelper/message.h"
 
@@ -679,3 +682,5 @@ spawnChild(char *cmd, Conf *conf, LPPROCESS_INFORMATION ppi, PHANDLE pin)
 
 	return 0;
 }
+
+#endif

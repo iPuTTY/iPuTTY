@@ -28,6 +28,10 @@ Backend *backends[] = {
     &rlogin_backend,
     &raw_backend,
     &serial_backend,
-	&cygterm_backend, // CYGTERM patch
+#ifdef SUPPORT_CYGTERM
+    &cygterm_backend,
+#endif
     NULL
 };
+
+// vim: ts=8 sts=4 sw=4 noet cino=\:2\=2(0u0
