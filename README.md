@@ -1,5 +1,10 @@
 iPuTTY Official site
 ==
+[![GitHub license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/iPuTTY/iPuTTY/blob/master/LICENCE)
+![GitHub download](https://img.shields.io/github/downloads/iPuTTY/iPuTTY/total.svg)
+[![GitHub last release](https://img.shields.io/github/release/iPuTTY/iPuTTY.svg)](https://github.com/iPuTTY/iPuTTY/releases)
+[![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/iPuTTY/iPuTTY.svg)](https://github.com/iPuTTY/iPuTTY/issues?q=is%3Aissue+is%3Aclosed)
+[![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed-raw/iPuTTY/iPuTTY.svg)](https://github.com/iPuTTY/iPuTTY/pulls?q=is%3Apr+is%3Aclosed)
 
 자세한 사항은 [wiki](https://github.com/iPuTTY/iPuTTY/wiki) page를 참조 하십시오.
 
