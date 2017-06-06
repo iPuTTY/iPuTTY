@@ -4,21 +4,21 @@
 
 #include "rcstuff.h"
 
-#define APPNAME "PuTTYgen"
-#define APPDESC "PuTTY SSH key generation utility"
+#define APPNAME "iPuTTYgen"
+#define APPDESC "iPuTTY SSH key generation utility"
 
 200 ICON "puttygen.ico"
 
 201 DIALOG DISCARDABLE 0, 0, 318, 270
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "PuTTY Key Generator"
+CAPTION "iPuTTY Key Generator"
 FONT 8, "MS Shell Dlg"
 BEGIN
 END
 
 210 DIALOG DISCARDABLE 0, 0, 140, 60
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "PuTTYgen: Enter Passphrase"
+CAPTION "iPuTTYgen: Enter Passphrase"
 FONT 8, "MS Shell Dlg"
 BEGIN
     CTEXT "Enter passphrase for key", 100, 10, 6, 120, 8
@@ -31,7 +31,7 @@ END
 /* Accelerators used: cl */
 213 DIALOG DISCARDABLE 140, 40, 270, 106
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "About PuTTYgen"
+CAPTION "About iPuTTYgen"
 FONT 8, "MS Shell Dlg"
 BEGIN
     DEFPUSHBUTTON "&Close", IDOK, 216, 88, 48, 14
@@ -43,7 +43,7 @@ END
 /* No accelerators used */
 214 DIALOG DISCARDABLE 50, 50, 326, 265
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "PuTTY Licence"
+CAPTION "iPuTTY Licence"
 FONT 8, "MS Shell Dlg"
 BEGIN
     DEFPUSHBUTTON "OK", IDOK, 148, 242, 44, 14

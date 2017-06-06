@@ -133,13 +133,18 @@ The PuTTY home web site is
 
     http://www.chiark.greenend.org.uk/~sgtatham/putty/
 
+The iPuTTY home web site is
+
+	https://github.com/iPuTTY/iPuTTY
+
 If you want to send bug reports or feature requests, please read the
 Feedback section of the web site before doing so. Sending one-line
 reports saying `it doesn't work' will waste your time as much as
 ours.
 
-NOTE: This "iPuTTY" branch is maintained by Joongi Kim, so bug reports
-related to extra features included only in iPuTTY should be sent to
-him, use email to me+dev@daybreaker.info.
+NOTE: This "iPuTTY" branch is maintained by iPuTTY project, so bug reports
+related to extra features included only in iPuTTY should be registed at
+https://github.com/iPuTTY/iPuTTY/issues .
+
 
 See the file LICENCE for the licence conditions.

@@ -18,6 +18,6 @@
     parsep \
     "iPuTTY is copyright 2017 iPuTTY project." \
     parsep \
-    "Portions copyright Hyeshik Jang, Arcy J. Kong, Changho Kim, Stania Hwang, Joongi Kim, Hongkee Yoon, JoungKyun Kim and Ian Y. Choi."
+    "Portions copyright Hyeshik Jang, Joongi Kim, JoungKyun Kim, and so on. All contributors can be found at https://github.com/iPuTTY/iPuTTY/wiki/Credit"
 
 #define SHORT_COPYRIGHT_DETAILS "2017 iPuTTY Project"
