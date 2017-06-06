@@ -1306,4 +1306,85 @@ char *unprintable_char(const char *name) {
     return buf;
 }
 
+#ifdef AUTOPASS
+/*
+ * int fixed. use base_encode_r or base_decode_r
+ * return value:
+ *      NULL or malloced string point (need memory free)
+ */
+char *revstr(char *string, size_t len, int fixed) {
+    char *buf;
+    size_t i;
+
+    if (string == NULL || len < 1)
+	return NULL;
+
+    buf = snewn(len+1, char);
+    memset(buf, 0, len+1);
+    for(i=0; i<len; i++) {
+	if (fixed == 1)
+	    buf[i] = (string[len-i-1] == '=') ? '*' : string[len-i-1];
+	else if (fixed == 2)
+	    buf[i] = (string[len-i-1] == '*') ? '=' : string[len-i-1];
+	else
+	    buf[i] = string[len-i-1];
+    }
+
+    return buf;
+}
+
+char *base64_encode_r(char *string, size_t len) {
+    char *buf, *buf1, out[4];
+    size_t msize, move;
+    int n;
+
+    if (string == NULL || len < 1)
+	return NULL;
+
+    msize = (4*(len/3)) + (len%3?4:0) + 1;
+
+    buf = snewn(msize, char);
+    memset(buf, 0, msize);
+
+    move = 0;
+    while (len > 0) {
+	n = (len < 3 ? len : 3);
+	base64_encode_atom(string, n, out);
+	string += n;
+	len -= n;
+	memcpy(buf+move, out, 4);
+	move += 4;
+    }
+
+    buf1 = revstr(buf, strlen(buf), 1);
+    sfree(buf);
+
+    return buf1;
+}
+
+char *base64_decode_r(char *string, size_t len) {
+    char *buf, *nbuf, *buf1;
+    size_t msize, n, r;
+
+    if (string == NULL || len < 1)
+	return NULL;
+
+    buf = revstr(string, len, 2);
+
+    msize = 3 * (len/4);
+    buf1 = snewn(msize, char);
+    memset(buf1, 0, msize);
+
+    n = 0;
+    nbuf = buf;
+    while ((r = base64_decode_atom(nbuf, buf1 + n)) != 0) {
+	n += r;
+	nbuf += 4;
+    }
+    sfree(buf);
+
+    return buf1;
+}
+#endif
+
 // vim: ts=8 sts=4 sw=4 noet cino=\:2\=2(0u0

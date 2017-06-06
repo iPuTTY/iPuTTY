@@ -795,6 +795,7 @@ void cleanup_exit(int);
     X(STR, STR, ttymodes) /* values are "Vvalue" or "A" */ \
     X(STR, STR, environmt) \
     X(STR, NONE, username) \
+    X(STR, NONE, password) /* ifdef AUTOPASS */ \
     X(INT, NONE, username_from_env) \
     X(STR, NONE, localusername) \
     X(INT, NONE, rfc_environ) \
