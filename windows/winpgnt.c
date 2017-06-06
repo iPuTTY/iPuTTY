@@ -154,7 +154,7 @@ static INT_PTR CALLBACK AboutProc(HWND hwnd, UINT msg,
         {
             char *buildinfo_text = buildinfo("\r\n");
             char *text = dupprintf
-                ("Pageant\r\n\r\n%s\r\n\r\n%s\r\n\r\n%s",
+                ("iPageant\r\n\r\n%s\r\n\r\n%s\r\n\r\n%s",
                  ver, buildinfo_text,
                  "(C) " SHORT_COPYRIGHT_DETAILS ". All rights reserved.");
             sfree(buildinfo_text);
@@ -178,7 +178,7 @@ static INT_PTR CALLBACK AboutProc(HWND hwnd, UINT msg,
 	  case 102:
 	    /* Load web browser */
 	    ShellExecute(hwnd, "open",
-			 "http://www.chiark.greenend.org.uk/~sgtatham/putty/",
+			 "https://github.com/iPuTTY/iPuTTY/wiki",
 			 0, 0, SW_SHOWDEFAULT);
 	    return 0;
 	}

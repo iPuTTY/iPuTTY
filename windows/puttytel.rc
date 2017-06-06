@@ -1,6 +1,6 @@
 #include "rcstuff.h"
 
-#define APPNAME "PuTTYtel"
+#define APPNAME "iPuTTYtel"
 #define APPDESC "Telnet 과 Rlogin 클라이언트 프로그램"
 
 #include "win_res.rc2"

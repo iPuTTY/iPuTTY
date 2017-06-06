@@ -2844,7 +2844,7 @@ static void usage(void)
 static void version(void)
 {
   char *buildinfo_text = buildinfo("\n");
-  printf("psftp: %s\n%s\n", ver, buildinfo_text);
+  printf("iPSFTP: %s\n%s\n", ver, buildinfo_text);
   sfree(buildinfo_text);
   exit(0);
 }

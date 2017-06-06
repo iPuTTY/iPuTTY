@@ -4,7 +4,7 @@
 
 #include "rcstuff.h"
 
-#define APPNAME "Pageant"
+#define APPNAME "iPageant"
 #define APPDESC "PuTTY SSH 인증 에이전트"
 
 200 ICON "pageant.ico"
@@ -12,7 +12,7 @@
 
 210 DIALOG DISCARDABLE 0, 0, 140, 60
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Pageant: 암호어구 입력"
+CAPTION "iPageant: 암호어구 입력"
 FONT 8, "MS Shell Dlg"
 BEGIN
     CTEXT "키 암호어구 입력", 100, 10, 6, 120, 8
@@ -24,7 +24,7 @@ END
 
 211 DIALOG DISCARDABLE 0, 0, 330, 200
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Pageant 키 목록"
+CAPTION "iPageant 키 목록"
 FONT 8, "MS Shell Dlg"
 BEGIN
     LISTBOX 100, 10, 10, 310, 155,
@@ -38,7 +38,7 @@ END
 /* Accelerators used: cl */
 213 DIALOG DISCARDABLE 140, 40, 270, 106
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Pageant 정보"
+CAPTION "iPageant 정보"
 FONT 8, "MS Shell Dlg"
 BEGIN
     DEFPUSHBUTTON "닫기(&C)", IDOK, 216, 88, 48, 14
@@ -50,7 +50,7 @@ END
 /* No accelerators used */
 214 DIALOG DISCARDABLE 50, 50, 326, 265
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "PuTTY 라이센스"
+CAPTION "iPuTTY 라이센스"
 FONT 8, "MS Shell Dlg"
 BEGIN
     DEFPUSHBUTTON "확인", IDOK, 148, 242, 44, 14

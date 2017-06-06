@@ -37,9 +37,17 @@ The PuTTY home web site is
 
     http://www.chiark.greenend.org.uk/~sgtatham/putty/
 
+The iPuTTY home web site is
+
+	https://github.com/iPuTTY/iPuTTY
+
 Here you will find our list of known bugs and pending feature
 requests. If your problem is not listed in there, or in the FAQ, or
 in the manuals, read the Feedback page to find out how to report
 bugs to us. PLEASE read the Feedback page carefully: it is there to
 save you time as well as us. Do not send us one-line bug reports
 telling us `it doesn't work'.
+
+NOTE: This "iPuTTY" branch is maintained by iPuTTY project, so bug reports
+related to extra features included only in iPuTTY should be registed at
+https://github.com/iPuTTY/iPuTTY/issues .
