@@ -84,6 +84,10 @@ static const char *const ssh2_disconnect_reasons[] = {
 #define DH_MIN_SIZE 1024
 #define DH_MAX_SIZE 8192
 
+#ifdef AUTOPASS
+static char bufpass[1024] = "";
+#endif
+
 /*
  * Codes for terminal modes.
  * Most of these are the same in SSH-1 and SSH-2.
@@ -4917,7 +4921,21 @@ static int do_ssh1_login(Ssh ssh, const unsigned char *in, int inlen,
 	 */
 	{
 	    int ret; /* need not be kept over crReturn */
+#ifdef AUTOPASS
+	    char *pv = conf_get_str(ssh->conf, CONF_password);
+
+	    ret = 0;
+	    if (strcmp(pv, "")) {
+		memset(bufpass, 0, 1024);
+		strcpy(bufpass, pv, (strlen(pv)>1023) ? 1023 : strlen(pv));
+		ret = get_userpass_input(s->cur_prompt, (unsigned char *) bufpass, strlen(bufpass)+1);
+		conf_set_str(ssh->conf, CONF_password, "");
+		ret = 1;
+	    } else
+		ret = get_userpass_input(s->cur_prompt, NULL, 0);
+#else
 	    ret = get_userpass_input(s->cur_prompt, NULL, 0);
+#endif
 	    while (ret < 0) {
 		ssh->send_ok = 1;
 		crWaitUntil(!pktin);
@@ -9707,10 +9725,16 @@ static void do_ssh2_authconn(Ssh ssh, const unsigned char *in, int inlen,
 		    } else if (s->type == AUTH_TYPE_KEYBOARD_INTERACTIVE) {
                         logevent("Keyboard-interactive authentication failed");
 			c_write_str(ssh, "Access denied\r\n");
+#ifdef AUTOPASS
+			conf_set_str(ssh->conf, CONF_password, "");
+#endif
                     } else {
                         assert(s->type == AUTH_TYPE_PASSWORD);
                         logevent("Password authentication failed");
 			c_write_str(ssh, "Access denied\r\n");
+#ifdef AUTOPASS
+			conf_set_str(ssh->conf, CONF_password, "");
+#endif
 
 			if (conf_get_int(ssh->conf, CONF_change_username)) {
 			    /* XXX perhaps we should allow
@@ -10304,7 +10328,12 @@ static void do_ssh2_authconn(Ssh ssh, const unsigned char *in, int inlen,
 		    s->gotit = TRUE;
 		    s->type = AUTH_TYPE_KEYBOARD_INTERACTIVE_QUIET;
 		    s->kbd_inter_refused = TRUE; /* don't try it again */
+#ifdef AUTOPASS
+		    if(!strcmp(conf_get_str(ssh->conf,CONF_password), ""))
+			continue;
+#else
 		    continue;
+#endif
 		}
 
 		/*
@@ -10381,7 +10410,24 @@ static void do_ssh2_authconn(Ssh ssh, const unsigned char *in, int inlen,
 		     */
 		    {
 			int ret; /* not live over crReturn */
+#ifdef AUTOPASS
+			char *pv = conf_get_str(ssh->conf, CONF_password);
+
+			if (strcmp(pv, "")) {
+			    memset(bufpass, 0, 1024);
+			    strcpy(bufpass, pv, (strlen(pv)>1023) ? 1023 : strlen(pv));
+			    while ((bufpass[strlen(bufpass)-1] == 'n') && (bufpass[strlen(bufpass)-2] == '\\')) {
+				bufpass[strlen(bufpass)-2] = 0;
+				bufpass[strlen(bufpass)-1] = 0;
+			    }
+			    ret = get_userpass_input(s->cur_prompt, (unsigned char *) bufpass, strlen(bufpass)+1);
+			    conf_set_str(ssh->conf, CONF_password, "");
+			    ret = 1;
+			} else
+			    ret = get_userpass_input(s->cur_prompt, NULL, 0);
+#else
 			ret = get_userpass_input(s->cur_prompt, NULL, 0);
+#endif
 			while (ret < 0) {
 			    ssh->send_ok = 1;
 			    crWaitUntilV(!pktin);
@@ -10444,6 +10490,9 @@ static void do_ssh2_authconn(Ssh ssh, const unsigned char *in, int inlen,
 		s->cur_prompt = new_prompts(ssh->frontend);
 		s->cur_prompt->to_server = TRUE;
 		s->cur_prompt->name = dupstr("SSH password");
+#ifdef AUTOPASS
+		if (!strcmp(conf_get_str(ssh->conf, CONF_password), "")) {
+#endif
 		add_prompt(s->cur_prompt, dupprintf("%s@%s's password: ",
 						    ssh->username,
 						    ssh->savedhost),
@@ -10466,12 +10515,37 @@ static void do_ssh2_authconn(Ssh ssh, const unsigned char *in, int inlen,
 				   TRUE);
 		    crStopV;
 		}
+#ifdef AUTOPASS
+		} else
+		    c_write_str(ssh,
+			dupprintf("%s@%s's passwrod: auto-login\r\n", ssh->username, ssh->savedhost));
+#endif
 		/*
 		 * Squirrel away the password. (We may need it later if
 		 * asked to change it.)
 		 */
+#ifdef AUTOPASS
+		{
+		    char *pv = conf_get_str(ssh->conf, CONF_password);
+		    if (strcmp(pv, "")) {
+			memset(bufpass, 0, 1024);
+			strcpy(bufpass, pv, (strlen(pv)>1023) ? 1023 : strlen(pv));
+			while ((bufpass[strlen(bufpass)-1] == 'n') && (bufpass[strlen(bufpass)-2] == '\\')) {
+			    bufpass[strlen(bufpass)-2] = 0;
+			    bufpass[strlen(bufpass)-1] = 0;
+			}
+			s->password = dupstr(bufpass);
+			conf_set_str(ssh->conf, CONF_password, "");
+			//c_write_str(ssh, "\r\n");
+		    } else {
+			s->password = dupstr(s->cur_prompt->prompts[0]->result);
+			free_prompts(s->cur_prompt);
+		    }
+		}
+#else
 		s->password = dupstr(s->cur_prompt->prompts[0]->result);
 		free_prompts(s->cur_prompt);
+#endif
 
 		/*
 		 * Send the password packet.
@@ -11981,3 +12055,5 @@ Backend ssh_backend = {
     PROT_SSH,
     22
 };
+
+// vim: ts=8 sts=4 sw=4 noet cino=\:2\=2(0u0
