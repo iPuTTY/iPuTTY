@@ -6,7 +6,7 @@
 <assemblyIdentity
    version="0.69.0.0"
    processorArchitecture="*"
-   name="Pageant"
+   name="iPageant"
    type="win32" />
    <description>PuTTY SSH authentication agent</description>
    <dependency>

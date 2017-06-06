@@ -6,7 +6,7 @@
 <assemblyIdentity
    version="0.69.0.0"
    processorArchitecture="*"
-   name="PuTTYgen"
+   name="iPuTTYgen"
    type="win32" />
    <description>SSH key generator for PuTTY</description>
    <dependency>
