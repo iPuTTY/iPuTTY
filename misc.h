@@ -209,4 +209,11 @@ void debug_memdump(const void *buf, int len, int L);
  * then safely say things like printf("%.*s", length, NULLTOEMPTY(ptr)) */
 #define NULLTOEMPTY(s) ((s)?(s):"")
 
+#ifdef AUTOPASS
+extern char *base64_encode_r(char *, size_t);
+extern char *base64_decode_r(char *, size_t);
 #endif
+
+#endif
+
+// vim: ts=8 sts=4 sw=4 noet cino=\:2\=2(0u0

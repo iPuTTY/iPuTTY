@@ -175,11 +175,11 @@ int cmdline_process_param(const char *p, char *value,
     }
     
 #ifdef PUTTY_WIN_RES_H
-	/*
-	 * HACK: PuttyTray / PuTTY File
-	 * Load file based session from commandline
-	 */
-	if (!strcmp(p, "-loadfile") || !strcmp(p, "-file") || !strcmp(p, "-fileload")) {
+    /*
+     * HACK: PuttyTray / PuTTY File
+     * Load file based session from commandline
+     */
+    if (!strcmp(p, "-loadfile") || !strcmp(p, "-file") || !strcmp(p, "-fileload")) {
 	RETURN(2);
 	do_defaults_file(value, conf);
 	loaded_session = TRUE;
@@ -187,7 +187,7 @@ int cmdline_process_param(const char *p, char *value,
     }
 #endif
 
-	if (!strcmp(p, "-ssh")) {
+    if (!strcmp(p, "-ssh")) {
 	RETURN(1);
 	UNAVAILABLE_IN(TOOLTYPE_FILETRANSFER | TOOLTYPE_NONNETWORK);
 	SAVEABLE(0);
@@ -410,6 +410,9 @@ int cmdline_process_param(const char *p, char *value,
 	     * attempt to trample it, to stop it showing up in `ps' output
 	     * on Unix-like systems. Not guaranteed, of course. */
 	    smemclr(value, strlen(value));
+#ifdef AUTOPASS
+	    conf_set_str(conf, CONF_password, cmdline_password);
+#endif
 	}
     }
 

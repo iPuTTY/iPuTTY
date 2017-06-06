@@ -522,6 +522,20 @@ void save_open_settings(void *sesskey, Conf *conf)
     wmap(sesskey, "Environment", conf, CONF_environmt, TRUE);
     write_setting_s(sesskey, "UserName", conf_get_str(conf, CONF_username));
     write_setting_i(sesskey, "UserNameFromEnvironment", conf_get_int(conf, CONF_username_from_env));
+#ifdef AUTOPASS
+    {
+	char *pv = conf_get_str(conf, CONF_password);
+	if (pv != NULL) {
+	    char *ev = base64_encode_r(pv, strlen(pv));
+	    if (ev != NULL ) {
+		write_setting_s(sesskey, "UserPassword", ev);
+		sfree(ev);
+	    } else
+		write_setting_s(sesskey, "UserPassword", pv);
+	} else
+	    write_setting_s(sesskey, "UserPassword", pv);
+    }
+#endif
     write_setting_s(sesskey, "LocalUserName", conf_get_str(conf, CONF_localusername));
     write_setting_i(sesskey, "NoPTY", conf_get_int(conf, CONF_nopty));
     write_setting_i(sesskey, "Compression", conf_get_int(conf, CONF_compression));
@@ -941,6 +955,19 @@ void load_open_settings(void *sesskey, Conf *conf)
     gppmap(sesskey, "Environment", conf, CONF_environmt);
     gpps(sesskey, "UserName", "", conf, CONF_username);
     gppi(sesskey, "UserNameFromEnvironment", 0, conf, CONF_username_from_env);
+#ifdef AUTOPASS
+    //gpps(sesskey, "UserPassword", "", conf, CONF_password);
+    {
+	char *pv = gpps_raw(sesskey, "UserPassword", "");
+	char *dv = base64_decode_r(pv, strlen(pv));
+	if (dv != NULL) {
+	    conf_set_str(conf, CONF_password, dv);
+	    sfree (dv);
+	} else
+	    conf_set_str(conf, CONF_password, "");
+	sfree (pv);
+    }
+#endif
     gpps(sesskey, "LocalUserName", "", conf, CONF_localusername);
     gppi(sesskey, "NoPTY", 0, conf, CONF_nopty);
     gppi(sesskey, "Compression", 0, conf, CONF_compression);
