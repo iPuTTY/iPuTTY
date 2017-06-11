@@ -30,8 +30,9 @@ iPuTTY Official site
 * switch between iPuTTY windows with CTRL + TAB
 * Italics font support
 * support PuTTYTray functions
-* support Cygterm backend
-* translate UI
+* support Cygterm backend (0.69 and after)
+* translate UI (0.69 and after)
+* support ZMODEM (0.69.1 and after)
 * and so on..
 
 ## LICENSE
