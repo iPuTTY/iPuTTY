@@ -482,8 +482,27 @@ void ctrl_free(union control *ctrl)
       case CTRL_FILESELECT:
 	sfree(ctrl->fileselect.title);
 	break;
+#ifdef ZMODEM
+      case CTRL_DIRECTORYSELECT:
+	sfree(ctrl->fileselect.title);
+	break;
+#endif
     }
     sfree(ctrl);
 }
+
+#ifdef ZMODEM
+union control *ctrl_directorysel(struct controlset *s,char *label,char shortcut,
+				 char *title,
+				 intorptr helpctx, handler_fn handler,
+				 intorptr context)
+{
+    union control *c = ctrl_new(s, CTRL_DIRECTORYSELECT, helpctx, handler, context);
+    c->fileselect.label = label ? dupstr(label) : NULL;
+    c->fileselect.shortcut = shortcut;
+    c->fileselect.title = dupstr(title);
+    return c;
+}
+#endif
 
 // vim: ts=8 sts=4 sw=4 noet cino=\:2\=2(0u0

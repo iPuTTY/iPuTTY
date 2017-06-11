@@ -1000,6 +1000,16 @@ void cleanup_exit(int);
      * HACK: PuttyTray / Session Icon	\
      */ \
     X(STR, NONE, win_icon) \
+    /*                                  \
+     * #ifdef ZMODEM                    \
+     */ \
+    X(FILENAME, NONE, rzcommand) \
+    X(STR, NONE, rzoptions) \
+    X(FILENAME, NONE, szcommand) \
+    X(STR, NONE, szoptions) \
+    X(STR, NONE, zdownloaddir) \
+    /* #endif */ \
+
 
 /* Now define the actual enum of option keywords using that macro. */
 #define CONF_ENUM_DEF(valtype, keytype, keyword) CONF_ ## keyword,
@@ -1679,6 +1689,17 @@ void request_callback_notifications(toplevel_callback_notify_fn_t notify,
 #define FROM_SURROGATES(wch1, wch2) \
     (0x10000 + (((wch1) & 0x3FF) << 10) + ((wch2) & 0x3FF))
 
+#endif
+
+#ifdef ZMODEM
+#define IDM_XYZSTART  0x0810
+#define IDM_XYZUPLOAD 0x0820
+#define IDM_XYZABORT  0x0830
+int xyz_Process(Backend *back, void *backhandle, Terminal *term);
+void xyz_ReceiveInit(Terminal *term);
+void xyz_StartSending(Terminal *term);
+void xyz_Cancel(Terminal *term);
+void xyz_updateMenuItems(Terminal *term);
 #endif
 
 // vim: ts=8 sts=4 sw=4 noet cino=\:2\=2(0u0

@@ -2155,7 +2155,7 @@ void setup_config_box(struct controlbox *b, int midsession,
 			 HELPCTX(connection_username),
 			 conf_editbox_handler, I(CONF_username), I(1));
 #ifdef AUTOPASS
-	    c = ctrl_editbox(s, "Auto-login password", 'u', 50,
+	    c = ctrl_editbox(s, "자동 로그인 암호", 'u', 50,
 			 HELPCTX(connection_username),
 			 conf_editbox_handler, I(CONF_password), I(1));
 	    c->editbox.password = 1;
@@ -2845,6 +2845,66 @@ void setup_config_box(struct controlbox *b, int midsession,
 			  sshbug_handler, I(CONF_sshbug_rsa1));
 	}
     }
+
+#ifdef ZMODEM
+    ctrl_settitle(b, "연결/ZModem",
+		  "Z Modem 전송 조절 옵션");
+
+    s = ctrl_getset(b, "연결/ZModem", "receive",
+		    "받기 명령");
+
+    ctrl_filesel(s, "rz 실행 파일 경로:", NO_SHORTCUT,
+		 FILTER_EXE_FILES, FALSE, "zmodem 데이터를 받기 위한 실행파일 선택",
+		 HELPCTX(no_help),
+		 conf_filesel_handler, I(CONF_rzcommand) ) ;
+
+    ctrl_editbox(s, "옵션", NO_SHORTCUT,
+		 50,
+		 HELPCTX(no_help),
+		 conf_editbox_handler, I(CONF_rzoptions), I(1));
+
+    s = ctrl_getset(b, "연결/ZModem", "send",
+		    "보내기 명령");
+
+    ctrl_filesel(s, "sz 실행 파일 경로:", NO_SHORTCUT,
+		 FILTER_EXE_FILES, FALSE, "zmodem 데이터를 보내기 위한 실행파일 선택",
+		 HELPCTX(no_help),
+		 conf_filesel_handler, I(CONF_szcommand) ) ;
+
+    ctrl_editbox(s, "옵션", NO_SHORTCUT,
+		 50,
+		 HELPCTX(no_help),
+		 conf_editbox_handler, I(CONF_szoptions), I(1));
+
+    s = ctrl_getset(b, "연결/ZModem", "download",
+		    "다운로드 폴더");
+    ctrl_editbox(s, "파일 위치:",  NO_SHORTCUT, 100,
+		 HELPCTX(no_help),
+		 conf_editbox_handler, I(CONF_zdownloaddir), I(1));
+
+#endif
 }
+
+#ifdef ZMODEM
+/*
+ * The standard directory-selector handler expects the main `context'
+ * field to contain the `offsetof' a Filename field in the
+ * structure pointed to by `data'.
+ */
+void conf_directorysel_handler(union control *ctrl, void *dlg, void *data, int event) {
+    /*
+     * The standard file-selector handler expects the `context'
+     * field to contain the `offsetof' a Filename field in the
+     * structure pointed to by `data'.
+     */
+    int offset = ctrl->directoryselect.context.i;
+
+    if (event == EVENT_REFRESH) {
+	dlg_directorysel_set(ctrl, dlg, *(Filename *)ATOFFSET(data, offset));
+    } else if (event == EVENT_VALCHANGE) {
+	dlg_directorysel_get(ctrl, dlg, (Filename *)ATOFFSET(data, offset));
+    }
+}
+#endif
 
 // vim: ts=8 sts=4 sw=4 noet cino=\:2\=2(0u0

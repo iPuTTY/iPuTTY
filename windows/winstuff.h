@@ -286,6 +286,11 @@ GLOBAL void *logctx;
 			       "All Files (*.*)\0*\0\0\0")
 #define FILTER_DYNLIB_FILES ("Dynamic Library Files (*.dll)\0*.dll\0" \
 				 "All Files (*.*)\0*\0\0\0")
+#ifdef ZMODEM
+#define FILTER_EXE_FILES ("Executable Files (*.exe)\0*.EXE\0" \
+			       "All Files (*.*)\0*\0\0\0")
+char *get_user_desktop_dir(void);
+#endif
 
 /*
  * Exports from winnet.c.

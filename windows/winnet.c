@@ -66,6 +66,9 @@ struct Socket_tag {
     Plug plug;
     bufchain output_data;
     int connected;
+#ifdef ZMODEM
+    int closing; /* used when closing the connection, while we flush the remaining items */
+#endif
     int writable;
     int frozen; /* this causes readability notifications to be ignored */
     int frozen_readable; /* this means we missed at least one readability
@@ -130,6 +133,10 @@ struct SockAddr_tag {
 #endif
 
 static tree234 *sktree;
+
+#ifdef ZMODEM
+static int curpass;
+#endif
 
 static int cmpfortree(void *av, void *bv)
 {
@@ -349,6 +356,9 @@ void sk_init(void)
     }
 
     sktree = newtree234(cmpfortree);
+#ifdef ZMODEM
+    curpass = 1;
+#endif
 }
 
 void sk_cleanup(void)
@@ -963,6 +973,9 @@ static Socket sk_tcp_accept(accept_ctx_t ctx, Plug plug)
     ret->error = NULL;
     ret->plug = plug;
     bufchain_init(&ret->output_data);
+#ifdef ZMODEM
+    ret->closing = 0;
+#endif
     ret->writable = 1;		       /* to start with */
     ret->sending_oob = 0;
     ret->outgoingeof = EOF_NO;
@@ -1013,6 +1026,9 @@ static DWORD try_connect(Actual_Socket sock)
         p_closesocket(sock->s);
     }
 
+#ifdef ZMODEM
+    if (!sock->closing)
+#endif
     {
         struct SockAddr_tag thisaddr = sk_extractaddr_tmp(
             sock->addr, &sock->step);
@@ -1186,7 +1202,12 @@ static DWORD try_connect(Actual_Socket sock)
      */
     add234(sktree, sock);
 
-    if (err) {
+#ifdef ZMODEM
+    if(err && !sock->closing)
+#else
+    if (err)
+#endif
+    {
         struct SockAddr_tag thisaddr = sk_extractaddr_tmp(
             sock->addr, &sock->step);
 	plug_log(sock->plug, 1, &thisaddr, sock->port, sock->error, err);
@@ -1221,6 +1242,9 @@ Socket sk_new(SockAddr addr, int port, int privport, int oobinline,
     ret->plug = plug;
     bufchain_init(&ret->output_data);
     ret->connected = 0;		       /* to start with */
+#ifdef ZMODEM
+    ret->closing = 0;
+#endif
     ret->writable = 0;		       /* to start with */
     ret->sending_oob = 0;
     ret->outgoingeof = EOF_NO;
@@ -1283,6 +1307,9 @@ Socket sk_newlistener(const char *srcaddr, int port, Plug plug,
     ret->error = NULL;
     ret->plug = plug;
     bufchain_init(&ret->output_data);
+#ifdef ZMODEM
+    ret->closing = 0;
+#endif
     ret->writable = 0;		       /* to start with */
     ret->sending_oob = 0;
     ret->outgoingeof = EOF_NO;
@@ -1675,15 +1702,25 @@ int select_result(WPARAM wParam, LPARAM lParam)
 	 * plug.
 	 */
 	if (s->addr) {
+#ifdef ZMODEM
+	    if (!s->closing) {
+#endif
             struct SockAddr_tag thisaddr = sk_extractaddr_tmp(
                 s->addr, &s->step);
 	    plug_log(s->plug, 1, &thisaddr, s->port,
 		     winsock_error_string(err), err);
+#ifdef ZMODEM
+	    }
+#endif
 	    while (err && s->addr && sk_nextaddr(s->addr, &s->step)) {
 		err = try_connect(s);
 	    }
 	}
+#ifdef ZMODEM
+	if (err != 0 && !s->closing)
+#else
 	if (err != 0)
+#endif
 	    return plug_closing(s->plug, winsock_error_string(err), err, 0);
 	else
 	    return 1;
@@ -1738,6 +1775,9 @@ int select_result(WPARAM wParam, LPARAM lParam)
 		break;
 	    }
 	}
+#ifdef ZMODEM
+	if (!s->closing) {
+#endif
 	if (ret < 0) {
 	    return plug_closing(s->plug, winsock_error_string(err), err,
 				0);
@@ -1746,6 +1786,9 @@ int select_result(WPARAM wParam, LPARAM lParam)
 	} else {
 	    return plug_receive(s->plug, atmark ? 0 : 1, buf, ret);
 	}
+#ifdef ZMODEM
+	}
+#endif
 	break;
       case FD_OOB:
 	/*
@@ -1763,6 +1806,10 @@ int select_result(WPARAM wParam, LPARAM lParam)
 	     * that the frontend handle is unnecessary. */
 	    logevent(NULL, str);
 	    fatalbox("%s", str);
+#ifdef ZMODEM
+	} else if (s->closing) {
+	    return 1;
+#endif
 	} else {
 	    return plug_receive(s->plug, 2, buf, ret);
 	}
@@ -1774,7 +1821,11 @@ int select_result(WPARAM wParam, LPARAM lParam)
 	    bufsize_before = s->sending_oob + bufchain_size(&s->output_data);
 	    try_send(s);
 	    bufsize_after = s->sending_oob + bufchain_size(&s->output_data);
+#ifdef ZMODEM
+	    if (bufsize_after < bufsize_before && !s->closing)
+#else
 	    if (bufsize_after < bufsize_before)
+#endif
 		plug_sent(s->plug, bufsize_after);
 	}
 	break;
@@ -1787,8 +1838,15 @@ int select_result(WPARAM wParam, LPARAM lParam)
 		err = p_WSAGetLastError();
 		if (err == WSAEWOULDBLOCK)
 		    break;
+#ifdef ZMODEM
+		if (s->closing) return 1;
+#endif
 		return plug_closing(s->plug, winsock_error_string(err),
 				    err, 0);
+#ifdef ZMODEM
+	    } else if (s->closing) {
+		open = 1;
+#endif
 	    } else {
 		if (ret)
 		    open &= plug_receive(s->plug, 0, buf, ret);
@@ -1829,7 +1887,11 @@ int select_result(WPARAM wParam, LPARAM lParam)
 #endif
 	    {
 		p_closesocket(t);      /* dodgy WinSock let nonlocal through */
+#ifdef ZMODEM
+	    } else if (!s->closing && plug_accepting(s->plug, sk_tcp_accept, actx)) {
+#else
 	    } else if (plug_accepting(s->plug, sk_tcp_accept, actx)) {
+#endif
 		p_closesocket(t);      /* denied or error */
 	    }
 	}
@@ -1837,6 +1899,61 @@ int select_result(WPARAM wParam, LPARAM lParam)
 
     return 1;
 }
+
+#ifdef ZMODEM
+struct netscheduler_tag {
+    int interval;
+    int pending;
+    long next;
+};
+
+static void netscheduler_schedule(struct netscheduler_tag *netscheduler);
+
+static void netscheduler_timer(void *ctx, long now)
+{
+    struct netscheduler_tag *netscheduler = (struct netscheduler_tag *)ctx;
+
+    if (netscheduler->pending && now - netscheduler->next >= 0) {
+	// net_pending_errors(); /* fonction supprimee en 0.64 */
+	netscheduler->pending = FALSE;
+	netscheduler_schedule(netscheduler);
+    }
+}
+
+static void netscheduler_schedule(struct netscheduler_tag *netscheduler)
+{
+    int next;
+
+    if (!netscheduler->interval) {
+	netscheduler->pending = FALSE;       /* cancel any pending ping */
+	return;
+    }
+
+    next = schedule_timer(netscheduler->interval * TICKSPERSEC,
+			  (void *) netscheduler_timer, netscheduler);
+    if (!netscheduler->pending || next < netscheduler->next) {
+	netscheduler->next = next;
+	netscheduler->pending = TRUE;
+    }
+}
+
+struct netscheduler_tag* netscheduler_new()
+{
+    struct netscheduler_tag* netscheduler = snew(struct netscheduler_tag);
+
+    netscheduler->interval = 1;
+    netscheduler->pending = FALSE;
+    netscheduler_schedule(netscheduler);
+
+    return netscheduler;
+}
+
+void netscheduler_free(struct netscheduler_tag* netscheduler)
+{
+    expire_timer_context(netscheduler);
+    sfree(netscheduler);
+}
+#endif
 
 /*
  * Special error values are returned from sk_namelookup and sk_new
@@ -1974,3 +2091,5 @@ SockAddr platform_get_x11_unix_address(const char *display, int displaynum,
     ret->refcount = 1;
     return ret;
 }
+
+// vim: ts=8 sts=4 sw=4 noet cino=\=2\:2(0u0

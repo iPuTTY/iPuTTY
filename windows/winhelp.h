@@ -177,6 +177,13 @@
 #define WINHELP_CTX_puttygen_pastekey "puttygen.pastekey:puttygen-pastekey"
 #define WINHELP_CTX_puttygen_load "puttygen.load:puttygen-load"
 #define WINHELP_CTX_puttygen_conversions "puttygen.conversions:puttygen-conversions"
+#ifdef ZMODEM
+#define WINHELP_CTX_zmodem_rzcommand "zmodem.rzcommand"
+#define WINHELP_CTX_zmodem_rzoptions "zmodem.rzoptions"
+#define WINHELP_CTX_zmodem_szcommand "zmodem.szcommand"
+#define WINHELP_CTX_zmodem_szoptions "zmodem.szoptions"
+#define WINHELP_CTX_zmodem_zdownloaddir "zmodem.zdownloaddir"
+#endif
 
 /* These are used in Windows-specific bits of the frontend.
  * We (ab)use "help context identifiers" (dwContextId) to identify them. */

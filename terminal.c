@@ -16,6 +16,9 @@
  * HACK: PuttyTray / Nutty
  */ 
 #include "urlhack.h"
+#ifdef ZMODEM
+int xyz_ReceiveData(Terminal *term, const u_char *buffer, int len);
+#endif
 
 #define poslt(p1,p2) ( (p1).y < (p2).y || ( (p1).y == (p2).y && (p1).x < (p2).x ) )
 #define posle(p1,p2) ( (p1).y < (p2).y || ( (p1).y == (p2).y && (p1).x <= (p2).x ) )
@@ -1674,6 +1677,10 @@ Terminal *term_init(Conf *myconf, struct unicode_data *ucsdata,
     term->basic_erase_char.attr = ATTR_DEFAULT;
     term->basic_erase_char.cc_next = 0;
     term->erase_char = term->basic_erase_char;
+#ifdef ZMODEM
+    term->xyz_transfering = 0;
+    term->xyz_Internals = NULL;
+#endif
 
     return term;
 }
@@ -6584,6 +6591,11 @@ int term_ldisc(Terminal *term, int option)
 
 int term_data(Terminal *term, int is_stderr, const char *data, int len)
 {
+#ifdef ZMODEM
+    if ( term->xyz_transfering && !is_stderr) {
+	return xyz_ReceiveData(term, (const u_char *) data, len) ;
+    } else {
+#endif
     bufchain_add(&term->inbuf, data, len);
 
     if (!term->in_term_out) {
@@ -6602,6 +6614,9 @@ int term_data(Terminal *term, int is_stderr, const char *data, int len)
 	 * HACK: PuttyTray / Nutty
 	 */
 	term->url_update = TRUE;
+#ifdef ZMODEM
+    }
+#endif
     }
 
     /*
