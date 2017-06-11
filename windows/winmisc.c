@@ -10,6 +10,10 @@
 #endif
 #include <security.h>
 
+#ifdef ZMODEM
+#include "terminal.h"
+#endif
+
 /*
  * HACK: PuttyTray / Session Icon
  * Otherwise it will not know IDI_MAINICON
@@ -709,6 +713,15 @@ char *get_user_desktop_dir(void) {
 	strcpy(path, "C:\\");
 
     return path;
+}
+
+void xyz_updateMenuItems(Terminal *term)
+{
+    HMENU m = GetSystemMenu(hwnd, FALSE);
+    EnableMenuItem(m, IDM_XYZSTART, term->xyz_transfering?MF_GRAYED:MF_ENABLED);
+    EnableMenuItem(m, IDM_XYZUPLOAD, term->xyz_transfering?MF_GRAYED:MF_ENABLED);
+    EnableMenuItem(m, IDM_XYZABORT, !term->xyz_transfering?MF_GRAYED:MF_ENABLED);
+
 }
 #endif
 

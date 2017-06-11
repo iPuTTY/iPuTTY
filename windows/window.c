@@ -6975,15 +6975,4 @@ void MakeWindowOnTop(HWND hwnd) {
     }
 }
 
-#ifdef ZMODEM
-void xyz_updateMenuItems(Terminal *term)
-{
-    HMENU m = GetSystemMenu(hwnd, FALSE);
-    EnableMenuItem(m, IDM_XYZSTART, term->xyz_transfering?MF_GRAYED:MF_ENABLED);
-    EnableMenuItem(m, IDM_XYZUPLOAD, term->xyz_transfering?MF_GRAYED:MF_ENABLED);
-    EnableMenuItem(m, IDM_XYZABORT, !term->xyz_transfering?MF_GRAYED:MF_ENABLED);
-
-}
-#endif
-
 // vim: ts=8 sts=4 sw=4 noet cino=\=2\:2(0u0
