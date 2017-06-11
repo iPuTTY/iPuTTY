@@ -17,6 +17,9 @@
 #include "win_res.h"
 #include <shellapi.h>
 //--------------------------
+#ifdef ZMODEM
+#include <shlobj.h>
+#endif
 
 OSVERSIONINFO osVersion;
 
@@ -697,5 +700,16 @@ char *toUTF8 (char *src, int isUTF8) {
 
     return to;
 }
+
+#ifdef ZMODEM
+char *get_user_desktop_dir(void) {
+    char *path = snewn(MAX_PATH+1, char);
+    memset (path, 0, (MAX_PATH+1) * sizeof(char));
+    if (!SHGetSpecialFolderPath(HWND_DESKTOP, path, CSIDL_DESKTOP, FALSE))
+	strcpy(path, "C:\\");
+
+    return path;
+}
+#endif
 
 // vim: ts=8 sts=4 sw=4 noet cino=\:2\=2(0u0

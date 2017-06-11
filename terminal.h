@@ -237,6 +237,11 @@ struct terminal_tag {
 
     struct unicode_data *ucsdata;
 
+#ifdef ZMODEM
+	int xyz_transfering;
+	struct zModemInternals *xyz_Internals;
+#endif
+
     /*
      * We maintain a full copy of a Conf here, not merely a pointer
      * to it. That way, when we're passed a new one for
