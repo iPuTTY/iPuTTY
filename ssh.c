@@ -4927,7 +4927,7 @@ static int do_ssh1_login(Ssh ssh, const unsigned char *in, int inlen,
 	    ret = 0;
 	    if (strcmp(pv, "")) {
 		memset(bufpass, 0, 1024);
-		strcpy(bufpass, pv, (strlen(pv)>1023) ? 1023 : strlen(pv));
+		strncpy(bufpass, pv, (strlen(pv)>1023) ? 1023 : strlen(pv));
 		ret = get_userpass_input(s->cur_prompt, (unsigned char *) bufpass, strlen(bufpass)+1);
 		conf_set_str(ssh->conf, CONF_password, "");
 		ret = 1;
@@ -10415,7 +10415,7 @@ static void do_ssh2_authconn(Ssh ssh, const unsigned char *in, int inlen,
 
 			if (strcmp(pv, "")) {
 			    memset(bufpass, 0, 1024);
-			    strcpy(bufpass, pv, (strlen(pv)>1023) ? 1023 : strlen(pv));
+			    strncpy(bufpass, pv, (strlen(pv)>1023) ? 1023 : strlen(pv));
 			    while ((bufpass[strlen(bufpass)-1] == 'n') && (bufpass[strlen(bufpass)-2] == '\\')) {
 				bufpass[strlen(bufpass)-2] = 0;
 				bufpass[strlen(bufpass)-1] = 0;
@@ -10529,7 +10529,7 @@ static void do_ssh2_authconn(Ssh ssh, const unsigned char *in, int inlen,
 		    char *pv = conf_get_str(ssh->conf, CONF_password);
 		    if (strcmp(pv, "")) {
 			memset(bufpass, 0, 1024);
-			strcpy(bufpass, pv, (strlen(pv)>1023) ? 1023 : strlen(pv));
+			strncpy(bufpass, pv, (strlen(pv)>1023) ? 1023 : strlen(pv));
 			while ((bufpass[strlen(bufpass)-1] == 'n') && (bufpass[strlen(bufpass)-2] == '\\')) {
 			    bufpass[strlen(bufpass)-2] = 0;
 			    bufpass[strlen(bufpass)-1] = 0;
