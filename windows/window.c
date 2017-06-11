@@ -263,6 +263,11 @@ static int compose_state = 0;
 
 static UINT wm_mousewheel = WM_MOUSEWHEEL;
 
+#ifdef ZMODEM
+struct netscheduler_tag* netscheduler_new(void);
+void netscheduler_free(struct netscheduler_tag* netscheduler);
+#endif
+
 /*
  * HACK: PuttyTray
  * Trayicon struct, Message ID and functions
@@ -472,6 +477,10 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
     HACCEL hAccel;
 
     dll_hijacking_protection();
+
+#ifdef ZMODEM
+    struct netscheduler_tag *netsc = NULL;
+#endif
 
     hinst = inst;
     hwnd = NULL;
@@ -1013,7 +1022,12 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 		AppendMenu(m, MF_ENABLED | MF_UNCHECKED, IDM_VISIBLE, "Alwa&ys on top");
 	    }
 	    AppendMenu(m, MF_ENABLED, IDM_NEXTWINDOW, "Next &Window\tCtrl+Tab");
-
+#ifdef ZMODEM
+	    AppendMenu(m, MF_SEPARATOR, 0, 0);
+	    AppendMenu(m, term->xyz_transfering ? MF_GRAYED : MF_ENABLED, IDM_XYZSTART, "&Zmodem Receive");
+	    AppendMenu(m, term->xyz_transfering ? MF_GRAYED : MF_ENABLED, IDM_XYZUPLOAD, "Zmodem &Upload");
+	    AppendMenu(m, !term->xyz_transfering ? MF_GRAYED : MF_ENABLED, IDM_XYZABORT, "Zmodem &Abort");
+#endif
 	    AppendMenu(m, MF_SEPARATOR, 0, 0);
 	    if (has_help())
 		AppendMenu(m, MF_ENABLED, IDM_HELP, "&Help");
@@ -1119,6 +1133,10 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 
     hAccel = LoadAccelerators(inst, MAKEINTRESOURCE(IDR_ACCELERATOR1));
 
+#ifdef ZMODEM
+    netsc = netscheduler_new();
+#endif
+
     while (1) {
 	HANDLE *handles;
 	int nhandles, n;
@@ -1158,6 +1176,9 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 	if ((unsigned)(n - WAIT_OBJECT_0) < (unsigned)nhandles) {
 	    handle_got_event(handles[n - WAIT_OBJECT_0]);
 	    sfree(handles);
+#ifdef ZMODEM
+	    continue;
+#endif
 	} else
 	    sfree(handles);
 
@@ -1168,6 +1189,10 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 
 			if (!(IsWindow(logbox) && IsDialogMessage(logbox, &msg)))
 			DispatchMessageW(&msg);
+#ifdef ZMODEM
+			if (xyz_Process(back, backhandle, term))
+			    continue;
+#endif
 
 				/*
 				 * WM_NETEVENT messages seem to jump ahead of others in
@@ -1197,6 +1222,9 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
     }
 
 finished:
+#ifdef ZMODEM
+    netscheduler_free(netsc);
+#endif
     cleanup_exit(msg.wParam);	       /* this doesn't return... */
     return msg.wParam;		       /* ... but optimiser doesn't know */
 }
@@ -2939,6 +2967,20 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message,
 	  case IDM_FULLSCREEN:
 	    flip_full_screen();
 	    break;
+#ifdef ZMODEM
+	  case IDM_XYZSTART:
+	    xyz_ReceiveInit(term);
+	    xyz_updateMenuItems(term);
+	    break;
+	  case IDM_XYZUPLOAD:
+	    xyz_StartSending(term);
+	    xyz_updateMenuItems(term);
+	    break;
+	  case IDM_XYZABORT:
+	    xyz_Cancel(term);
+	    xyz_updateMenuItems(term);
+	    break;
+#endif
 	  default:
 	    if (wParam >= IDM_SAVED_MIN && wParam < IDM_SAVED_MAX) {
 		SendMessage(hwnd, WM_SYSCOMMAND, IDM_SAVEDSESS, wParam);
@@ -6933,5 +6975,15 @@ void MakeWindowOnTop(HWND hwnd) {
     }
 }
 
+#ifdef ZMODEM
+void xyz_updateMenuItems(Terminal *term)
+{
+    HMENU m = GetSystemMenu(hwnd, FALSE);
+    EnableMenuItem(m, IDM_XYZSTART, term->xyz_transfering?MF_GRAYED:MF_ENABLED);
+    EnableMenuItem(m, IDM_XYZUPLOAD, term->xyz_transfering?MF_GRAYED:MF_ENABLED);
+    EnableMenuItem(m, IDM_XYZABORT, !term->xyz_transfering?MF_GRAYED:MF_ENABLED);
+
+}
+#endif
 
 // vim: ts=8 sts=4 sw=4 noet cino=\=2\:2(0u0

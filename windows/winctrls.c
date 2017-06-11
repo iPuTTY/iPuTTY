@@ -22,6 +22,10 @@
 
 #include <commctrl.h>
 
+#ifdef ZMODEM
+#include <shlobj.h>
+#endif
+
 /*
  * HACK: PuttyTray / Session Icon
  */ 
@@ -1695,6 +1699,17 @@ void winctrl_layout(struct dlgparam *dp, struct winctrls *wc,
             data = fontspec_new("", 0, 0, 0);
 	    sfree(escaped);
 	    break;
+#ifdef ZMODEM
+	  case CTRL_DIRECTORYSELECT:
+	    num_ids = 3;
+	    escaped = shortcut_escape(ctrl->fileselect.label,
+				      ctrl->fileselect.shortcut);
+	    shortcuts[nshortcuts++] = ctrl->fileselect.shortcut;
+	    editbutton(&pos, escaped, base_id, base_id+1,
+		       "Bro&wse...", base_id+2);
+	    sfree(escaped);
+	    break;
+#endif
 	  default:
 	    assert(!"Can't happen");
 	    num_ids = 0;	       /* placate gcc */
@@ -2023,6 +2038,43 @@ int winctrl_handle_command(struct dlgparam *dp, UINT msg,
 	    }
 	}
 	break;
+#ifdef ZMODEM
+      case CTRL_DIRECTORYSELECT:
+	if (msg == WM_COMMAND && id == 1 &&
+	    (HIWORD(wParam) == EN_SETFOCUS || HIWORD(wParam) == EN_KILLFOCUS))
+	    winctrl_set_focus(ctrl, dp, HIWORD(wParam) == EN_SETFOCUS);
+	if (msg == WM_COMMAND && id == 2 &&
+	    (HIWORD(wParam) == BN_SETFOCUS || HIWORD(wParam) == BN_KILLFOCUS))
+	    winctrl_set_focus(ctrl, dp, HIWORD(wParam) == BN_SETFOCUS);
+	if (msg == WM_COMMAND && id == 1 && HIWORD(wParam) == EN_CHANGE)
+	    ctrl->generic.handler(ctrl, dp, dp->data, EVENT_VALCHANGE);
+	if (id == 2 &&
+	    (msg == WM_COMMAND &&
+	     (HIWORD(wParam) == BN_CLICKED ||
+	      HIWORD(wParam) == BN_DOUBLECLICKED))) {
+	    BROWSEINFO bi;
+	    char filename[FILENAME_MAX];
+	    LPITEMIDLIST folder;
+
+	    memset(&bi, 0, sizeof(bi));
+	    bi.hwndOwner = dp->hwnd;
+	    bi.pszDisplayName = filename;
+	    bi.lpszTitle = ctrl->fileselect.title;
+	    bi.ulFlags = BIF_RETURNONLYFSDIRS;
+
+	    CoInitialize(NULL);
+	    if( (folder=SHBrowseForFolder(&bi))!=NULL ) {
+		LPMALLOC shmalloc;
+		if (SHGetPathFromIDList(folder, filename)) {
+		    SetDlgItemText(dp->hwnd, c->base_id + 1, filename);
+		    ctrl->generic.handler(ctrl, dp, dp->data, EVENT_VALCHANGE);
+		}
+		SHGetMalloc(&shmalloc);
+		(*shmalloc->lpVtbl->Free)(shmalloc, folder);
+	    }
+	}
+	break;
+#endif
     }
 
     /*
@@ -2454,6 +2506,9 @@ void dlg_set_focus(union control *ctrl, void *dlg)
       case CTRL_LISTBOX: id = c->base_id + 1; break;
       case CTRL_FILESELECT: id = c->base_id + 1; break;
       case CTRL_FONTSELECT: id = c->base_id + 2; break;
+#ifdef ZMODEM
+      case CTRL_DIRECTORYSELECT: id = c->base_id + 1; break;
+#endif
       default: id = c->base_id; break;
     }
     ctl = GetDlgItem(dp->hwnd, id);
@@ -2639,6 +2694,25 @@ void dp_cleanup(struct dlgparam *dp)
     sfree(dp->errtitle);
 }
 
+#ifdef ZMODEM
+void dlg_directorysel_set(union control *ctrl, void *dlg, Filename fn)
+{
+    struct dlgparam *dp = (struct dlgparam *)dlg;
+    struct winctrl *c = dlg_findbyctrl(dp, ctrl);
+    assert(c && c->ctrl->generic.type == CTRL_DIRECTORYSELECT);
+    SetDlgItemText(dp->hwnd, c->base_id+1, fn.path);
+}
+
+void dlg_directorysel_get(union control *ctrl, void *dlg, Filename *fn)
+{
+    struct dlgparam *dp = (struct dlgparam *)dlg;
+    struct winctrl *c = dlg_findbyctrl(dp, ctrl);
+    assert(c && c->ctrl->generic.type == CTRL_DIRECTORYSELECT);
+    GetDlgItemText(dp->hwnd, c->base_id+1, fn->path, lenof(fn->path));
+    fn->path[lenof(fn->path)-1] = '\0';
+}
+#endif
+
 /*
  * HACK: PuttyTray / Session Icon
  */ 
@@ -2697,3 +2771,5 @@ void *dlg_alloc_privdata(union control *ctrl, void *dlg, size_t size)
     p->data = smalloc(size);
     return p->data;
 }
+
+// vim: ts=8 sts=4 sw=4 noet cino=\=2\:2(0u0

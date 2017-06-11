@@ -780,6 +780,13 @@ void save_open_settings(void *sesskey, Conf *conf)
     write_setting_i(sesskey, "Cygterm64", conf_get_int(conf, CONF_cygterm64));
     write_setting_s(sesskey, "CygtermCommand", conf_get_str(conf, CONF_cygcmd));
 #endif
+#ifdef ZMODEM
+    write_setting_filename(sesskey, "rzCommand", conf_get_filename(conf, CONF_rzcommand));
+    write_setting_s(sesskey, "rzOptions", conf_get_str(conf, CONF_rzoptions));
+    write_setting_filename(sesskey, "szCommand", conf_get_filename(conf, CONF_szcommand));
+    write_setting_s(sesskey, "szOptions", conf_get_str(conf, CONF_szoptions));
+    write_setting_s(sesskey, "zDownloadDir", conf_get_str(conf, CONF_zdownloaddir));
+#endif
 }
 
 void load_settings(const char *section, Conf *conf)
@@ -1329,6 +1336,17 @@ void load_open_settings(void *sesskey, Conf *conf)
     gppi(sesskey, "CygtermAutoPath", 1, conf, CONF_cygautopath);
     gppi(sesskey, "Cygterm64", 0, conf, CONF_cygterm64);
     gpps(sesskey, "CygtermCommand", "", conf, CONF_cygcmd);
+#endif
+#ifdef ZMODEM
+    gppfile(sesskey, "rzCommand", conf, CONF_rzcommand);
+    gpps(sesskey, "rzOptions", "-e -v", conf, CONF_rzoptions);
+    gppfile(sesskey, "szCommand", conf, CONF_szcommand);
+    gpps(sesskey, "szOptions", "-e -v", conf, CONF_szoptions);
+    {
+	char *path = get_user_desktop_dir();
+	gpps(sesskey, "zDownloadDir", path, conf, CONF_zdownloaddir);
+	sfree(path);
+    }
 #endif
 }
 

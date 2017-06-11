@@ -2846,6 +2846,66 @@ void setup_config_box(struct controlbox *b, int midsession,
 			  sshbug_handler, I(CONF_sshbug_rsa1));
 	}
     }
+
+#ifdef ZMODEM
+    ctrl_settitle(b, "Connection/ZModem",
+		  "Options controlling Z Modem transfers");
+
+    s = ctrl_getset(b, "Connection/ZModem", "receive",
+		    "Receive command");
+
+    ctrl_filesel(s, "Path of the rz command:", NO_SHORTCUT,
+		 FILTER_EXE_FILES, FALSE, "Select command to receive zmodem data",
+		 HELPCTX(no_help),
+		 conf_filesel_handler, I(CONF_rzcommand) ) ;
+
+    ctrl_editbox(s, "Options", NO_SHORTCUT,
+		 50,
+		 HELPCTX(no_help),
+		 conf_editbox_handler, I(CONF_rzoptions), I(1));
+
+    s = ctrl_getset(b, "Connection/ZModem", "send",
+		    "Send command");
+
+    ctrl_filesel(s, "Path of the sz command:", NO_SHORTCUT,
+		 FILTER_EXE_FILES, FALSE, "Select command to send zmodem data",
+		 HELPCTX(no_help),
+		 conf_filesel_handler, I(CONF_szcommand) ) ;
+
+    ctrl_editbox(s, "Options", NO_SHORTCUT,
+		 50,
+		 HELPCTX(no_help),
+		 conf_editbox_handler, I(CONF_szoptions), I(1));
+
+    s = ctrl_getset(b, "Connection/ZModem", "download",
+		    "Download folder");
+    ctrl_editbox(s, "Location:",  NO_SHORTCUT, 100,
+		 HELPCTX(no_help),
+		 conf_editbox_handler, I(CONF_zdownloaddir), I(1));
+
+#endif
 }
+
+#ifdef ZMODEM
+/*
+ * The standard directory-selector handler expects the main `context'
+ * field to contain the `offsetof' a Filename field in the
+ * structure pointed to by `data'.
+ */
+void conf_directorysel_handler(union control *ctrl, void *dlg, void *data, int event) {
+    /*
+     * The standard file-selector handler expects the `context'
+     * field to contain the `offsetof' a Filename field in the
+     * structure pointed to by `data'.
+     */
+    int offset = ctrl->directoryselect.context.i;
+
+    if (event == EVENT_REFRESH) {
+	dlg_directorysel_set(ctrl, dlg, *(Filename *)ATOFFSET(data, offset));
+    } else if (event == EVENT_VALCHANGE) {
+	dlg_directorysel_get(ctrl, dlg, (Filename *)ATOFFSET(data, offset));
+    }
+}
+#endif
 
 // vim: ts=8 sts=4 sw=4 noet cino=\:2\=2(0u0
