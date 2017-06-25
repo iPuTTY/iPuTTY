@@ -14,10 +14,10 @@
 
 [Setup]
 AppName=PuTTY
-AppVerName=PuTTY version 0.69
-VersionInfoTextVersion=Release 0.69
-AppVersion=0.69
-VersionInfoVersion=0.69.0.0
+AppVerName=PuTTY version 0.69.1
+VersionInfoTextVersion=Release 0.69.1
+AppVersion=0.69.1
+VersionInfoVersion=0.69.1.0
 AppPublisher=iPuTTY Project
 AppPublisherURL=https://github.com/iPuTTY/iPuTTY
 AppReadmeFile={app}\README.txt
