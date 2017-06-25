@@ -36,7 +36,7 @@ BEGIN
     BLOCK "StringFileInfo"
     BEGIN
 	/* "lang-charset" LLLLCCCC = (UK English, Unicode) */
-	BLOCK "080904B0"
+	BLOCK "041204B0"
 	BEGIN
 	    VALUE "CompanyName",	"iPuTTY Project"  /* required :/ */
 	    VALUE "ProductName",	"iPuTTY suite"
@@ -55,6 +55,6 @@ BEGIN
     BLOCK "VarFileInfo"
     BEGIN
 	/* Once again -- same meanings -- apparently necessary */
-	VALUE "Translation", 0x809, 1200
+	VALUE "Translation", 0x412, 1200
     END
 END
