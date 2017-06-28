@@ -1000,7 +1000,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 	    AppendMenu(m, MF_ENABLED, IDM_NEWSESS, "货肺款 技记(&w)...");
 	    AppendMenu(m, MF_ENABLED, IDM_DUPSESS, "技记 汗力(&D)");
 	    AppendMenu(m, MF_POPUP | MF_ENABLED, (UINT_PTR) savedsess_menu,
-		       "技记 历厘(&v)");
+		       "技记 格废(&v)");
 	    AppendMenu(m, MF_ENABLED, IDM_RECONF, "汲沥 函版(&g)...");
 	    AppendMenu(m, MF_SEPARATOR, 0, 0);
 	    AppendMenu(m, MF_ENABLED | (strncmp(conf_get_str(conf, CONF_line_codepage), "UTF-8", 6) ? 0 : MF_CHECKED), IDM_UNICODE, "蜡聪内靛 葛靛(&U)");
