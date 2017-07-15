@@ -29,7 +29,7 @@ What do I do if it doesn't work?
 
 The PuTTY home web site is
 
-    http://www.chiark.greenend.org.uk/~sgtatham/putty/
+    https://www.chiark.greenend.org.uk/~sgtatham/putty/
 
 The iPuTTY home web site is
 
