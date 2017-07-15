@@ -1770,7 +1770,8 @@ void setup_config_box(struct controlbox *b, int midsession,
 		      conf_radiobutton_handler,
 		      I(CONF_funky_type),
 		      "ESC[n~", I(0), "Linux", I(1), "Xterm R6", I(2),
-		      "VT400", I(3), "VT100+", I(4), "SCO", I(5), NULL);
+		      "VT400", I(3), "VT100+", I(4), "SCO", I(5),
+		      "Hanterm", I(6), NULL);
 
     s = ctrl_getset(b, "터미널/키보드", "appkeypad",
 		    "응용 프로그램 키패드 설정:");
