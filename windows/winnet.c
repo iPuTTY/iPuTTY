@@ -316,11 +316,21 @@ void sk_init(void)
     GET_WINDOWS_FUNCTION(winsock_module, WSAStartup);
     GET_WINDOWS_FUNCTION(winsock_module, WSACleanup);
     GET_WINDOWS_FUNCTION(winsock_module, closesocket);
+#ifndef COVERITY
     GET_WINDOWS_FUNCTION(winsock_module, ntohl);
     GET_WINDOWS_FUNCTION(winsock_module, htonl);
     GET_WINDOWS_FUNCTION(winsock_module, htons);
     GET_WINDOWS_FUNCTION(winsock_module, ntohs);
     GET_WINDOWS_FUNCTION(winsock_module, gethostname);
+#else
+    /* The toolchain I use for Windows Coverity builds doesn't know
+     * the type signatures of these */
+    GET_WINDOWS_FUNCTION_NO_TYPECHECK(winsock_module, ntohl);
+    GET_WINDOWS_FUNCTION_NO_TYPECHECK(winsock_module, htonl);
+    GET_WINDOWS_FUNCTION_NO_TYPECHECK(winsock_module, htons);
+    GET_WINDOWS_FUNCTION_NO_TYPECHECK(winsock_module, ntohs);
+    GET_WINDOWS_FUNCTION_NO_TYPECHECK(winsock_module, gethostname);
+#endif
     GET_WINDOWS_FUNCTION(winsock_module, gethostbyname);
     GET_WINDOWS_FUNCTION(winsock_module, getservbyname);
     GET_WINDOWS_FUNCTION(winsock_module, inet_addr);
@@ -565,7 +575,7 @@ SockAddr sk_namelookup(const char *host, char **canonicalname,
 
     if ((a = p_inet_addr(host)) == (unsigned long) INADDR_NONE) {
 	struct hostent *h = NULL;
-	int err;
+	int err = 0;
 #ifndef NO_IPV6
 	/*
 	 * Use getaddrinfo when it's available
@@ -1679,9 +1689,9 @@ static void sk_tcp_write_eof(Socket sock)
 	try_send(s);
 }
 
-int select_result(WPARAM wParam, LPARAM lParam)
+void select_result(WPARAM wParam, LPARAM lParam)
 {
-    int ret, open;
+    int ret;
     DWORD err;
     char buf[20480];		       /* nice big buffer for plenty of speed */
     Actual_Socket s;
@@ -1690,11 +1700,11 @@ int select_result(WPARAM wParam, LPARAM lParam)
     /* wParam is the socket itself */
 
     if (wParam == 0)
-	return 1;		       /* boggle */
+	return;		       /* boggle */
 
     s = find234(sktree, (void *) wParam, cmpforsearch);
     if (!s)
-	return 1;		       /* boggle */
+	return;		       /* boggle */
 
     if ((err = WSAGETSELECTERROR(lParam)) != 0) {
 	/*
@@ -1721,9 +1731,8 @@ int select_result(WPARAM wParam, LPARAM lParam)
 #else
 	if (err != 0)
 #endif
-	    return plug_closing(s->plug, winsock_error_string(err), err, 0);
-	else
-	    return 1;
+	    plug_closing(s->plug, winsock_error_string(err), err, 0);
+	return;
     }
 
     noise_ultralight(lParam);
@@ -1779,12 +1788,11 @@ int select_result(WPARAM wParam, LPARAM lParam)
 	if (!s->closing) {
 #endif
 	if (ret < 0) {
-	    return plug_closing(s->plug, winsock_error_string(err), err,
-				0);
+	    plug_closing(s->plug, winsock_error_string(err), err, 0);
 	} else if (0 == ret) {
-	    return plug_closing(s->plug, NULL, 0, 0);
+	    plug_closing(s->plug, NULL, 0, 0);
 	} else {
-	    return plug_receive(s->plug, atmark ? 0 : 1, buf, ret);
+	    plug_receive(s->plug, atmark ? 0 : 1, buf, ret);
 	}
 #ifdef ZMODEM
 	}
@@ -1808,10 +1816,10 @@ int select_result(WPARAM wParam, LPARAM lParam)
 	    fatalbox("%s", str);
 #ifdef ZMODEM
 	} else if (s->closing) {
-	    return 1;
+	    return;
 #endif
 	} else {
-	    return plug_receive(s->plug, 2, buf, ret);
+	    plug_receive(s->plug, 2, buf, ret);
 	}
 	break;
       case FD_WRITE:
@@ -1831,7 +1839,6 @@ int select_result(WPARAM wParam, LPARAM lParam)
 	break;
       case FD_CLOSE:
 	/* Signal a close on the socket. First read any outstanding data. */
-	open = 1;
 	do {
 	    ret = p_recv(s->s, buf, sizeof(buf), 0);
 	    if (ret < 0) {
@@ -1839,22 +1846,21 @@ int select_result(WPARAM wParam, LPARAM lParam)
 		if (err == WSAEWOULDBLOCK)
 		    break;
 #ifdef ZMODEM
-		if (s->closing) return 1;
+		if (s->closing) return;
 #endif
-		return plug_closing(s->plug, winsock_error_string(err),
-				    err, 0);
+		plug_closing(s->plug, winsock_error_string(err), err, 0);
 #ifdef ZMODEM
 	    } else if (s->closing) {
-		open = 1;
+		continue;
 #endif
 	    } else {
 		if (ret)
-		    open &= plug_receive(s->plug, 0, buf, ret);
+		    plug_receive(s->plug, 0, buf, ret);
 		else
-		    open &= plug_closing(s->plug, NULL, 0, 0);
+		    plug_closing(s->plug, NULL, 0, 0);
 	    }
 	} while (ret > 0);
-	return open;
+	return;
        case FD_ACCEPT:
 	{
 #ifdef NO_IPV6
@@ -1896,8 +1902,6 @@ int select_result(WPARAM wParam, LPARAM lParam)
 	    }
 	}
     }
-
-    return 1;
 }
 
 #ifdef ZMODEM

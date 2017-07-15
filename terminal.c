@@ -4407,7 +4407,7 @@ static void term_out(Terminal *term)
 			    for (i = 1; i < term->esc_nargs; i++) {
 				if (i != 1)
 				    strcat(term->id_string, ";");
-				sprintf(lbuf, "%d", term->esc_args[i]);
+				sprintf(lbuf, "%u", term->esc_args[i]);
 				strcat(term->id_string, lbuf);
 			    }
 			    strcat(term->id_string, "c");

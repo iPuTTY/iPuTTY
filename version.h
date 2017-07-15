@@ -8,10 +8,10 @@
  * default stuff used for local development runs of 'make'.
  */
 
-#define RELEASE 0.69.1
-#define TEXTVER "Release 0.69.1"
-#define SSHVER "iPuTTY-Release-0.69.1"
-#define BINARY_VERSION 0,69,1,0
+#define RELEASE 0.70
+#define TEXTVER "Release 0.70"
+#define SSHVER "iPuTTY-Release-0.70"
+#define BINARY_VERSION 0,70,0,0
 
 #ifndef SOURCE_COMMIT
 /*
