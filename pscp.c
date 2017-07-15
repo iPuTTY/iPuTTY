@@ -61,7 +61,7 @@ static void sink(const char *targ, const char *src);
 static int check_is_dir(char *dstfname);
 
 const char *const appname = "PSCP";
-static char isUTF8 = 0;
+static char isUTF8 = 1;
 static int hostkeychk = 0;
 
 /*
