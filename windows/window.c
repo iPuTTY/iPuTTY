@@ -1815,8 +1815,7 @@ static void init_fonts(int pick_width, int pick_height)
 	    strncmp(font->name, "ÇÔÃÊ", 4) == 0 ||
 	    strncmp(font->name, "ÈÞ¸Õ", 4) == 0) {
 	    font->charset = HANGEUL_CHARSET;
-	} else
-	    font->charset = ANSI_CHARSET;
+	}
     }
 
     f(FONT_NORMAL, font->charset, fw_dontcare, FALSE, FALSE);
