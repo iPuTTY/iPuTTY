@@ -2179,6 +2179,16 @@ void setup_config_box(struct controlbox *b, int midsession,
 		sfree(userlabel);
 	    }
 
+#ifdef AUTOPASS
+	    s = ctrl_getset(b, "Connection/Data", "2factor",
+			    "2 factor authenticate");
+            c = ctrl_text(s, "2 factor authentication works only in SSH2 mode.",
+                          HELPCTX(connection_username));
+	    c = ctrl_editbox(s, "prompt strings", 'u', 50,
+			 HELPCTX(connection_username),
+			 conf_editbox_handler, I(CONF_factor2_auth), I(1));
+#endif
+
 	    s = ctrl_getset(b, "Connection/Data", "term",
 			    "Terminal details");
 	    ctrl_editbox(s, "Terminal-type string", 't', 50,

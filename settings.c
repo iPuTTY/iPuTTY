@@ -535,6 +535,7 @@ void save_open_settings(void *sesskey, Conf *conf)
 	} else
 	    write_setting_s(sesskey, "UserPassword", pv);
     }
+    write_setting_s(sesskey, "Auth2FactorString", conf_get_str(conf, CONF_factor2_auth));
 #endif
     write_setting_s(sesskey, "LocalUserName", conf_get_str(conf, CONF_localusername));
     write_setting_i(sesskey, "NoPTY", conf_get_int(conf, CONF_nopty));
@@ -974,6 +975,7 @@ void load_open_settings(void *sesskey, Conf *conf)
 	    conf_set_str(conf, CONF_password, "");
 	sfree (pv);
     }
+    gpps(sesskey, "Auth2FactorString", "", conf, CONF_factor2_auth);
 #endif
     gpps(sesskey, "LocalUserName", "", conf, CONF_localusername);
     gppi(sesskey, "NoPTY", 0, conf, CONF_nopty);

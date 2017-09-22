@@ -10355,6 +10355,10 @@ static void do_ssh2_authconn(Ssh ssh, const unsigned char *in, int inlen,
 		    char *name, *inst, *lang;
 		    int name_len, inst_len, lang_len;
 		    int i;
+#ifdef AUTOPASS
+		    int factor2 = 0;
+		    char *f2s = conf_get_str(ssh->conf, CONF_factor2_auth);
+#endif
 
 		    /*
 		     * We've got a fresh USERAUTH_INFO_REQUEST.
@@ -10386,6 +10390,9 @@ static void do_ssh2_authconn(Ssh ssh, const unsigned char *in, int inlen,
 			add_prompt(s->cur_prompt,
 				   dupprintf("%.*s", prompt_len, prompt),
                                    echo);
+#ifdef AUTOPASS
+			factor2 = (strncmp (prompt, f2s, strlen (f2s)) == 0) ? 1 : 0;
+#endif
 		    }
 
 		    if (name_len) {
@@ -10424,7 +10431,7 @@ static void do_ssh2_authconn(Ssh ssh, const unsigned char *in, int inlen,
 #ifdef AUTOPASS
 			char *pv = conf_get_str(ssh->conf, CONF_password);
 
-			if (strcmp(pv, "")) {
+			if (strcmp(pv, "") && !factor2) {
 			    memset(bufpass, 0, 1024);
 			    strncpy(bufpass, pv, (strlen(pv)>1023) ? 1023 : strlen(pv));
 			    while ((bufpass[strlen(bufpass)-1] == 'n') && (bufpass[strlen(bufpass)-2] == '\\')) {
