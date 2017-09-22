@@ -797,6 +797,7 @@ void cleanup_exit(int);
     X(STR, STR, environmt) \
     X(STR, NONE, username) \
     X(STR, NONE, password) /* ifdef AUTOPASS */ \
+    X(STR, NONE, factor2_auth) /* ifdef AUTOPASS */ \
     X(INT, NONE, username_from_env) \
     X(STR, NONE, localusername) \
     X(INT, NONE, rfc_environ) \

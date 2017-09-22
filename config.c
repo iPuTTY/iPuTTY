@@ -2178,6 +2178,16 @@ void setup_config_box(struct controlbox *b, int midsession,
 		sfree(userlabel);
 	    }
 
+#ifdef AUTOPASS
+	    s = ctrl_getset(b, "연결/데이터", "2factor",
+			    "2 단계 인증");
+            c = ctrl_text(s, "2 단계 인증 필터는 SSH2 연결에서만 동작 합니다.",
+                          HELPCTX(connection_username));
+	    c = ctrl_editbox(s, "프롬프트 문자열", 'u', 50,
+			 HELPCTX(connection_username),
+			 conf_editbox_handler, I(CONF_factor2_auth), I(1));
+#endif
+
 	    s = ctrl_getset(b, "연결/데이터", "term",
 			    "터미널 세부 사항");
 	    ctrl_editbox(s, "터미널 형식 문자열", 't', 50,
