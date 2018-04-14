@@ -1110,7 +1110,7 @@ FontSpec *file_read_setting_fontspec(void *handle, const char *name)
     FontSpec *ret;
     int isbold, height, charset;
 
-    fontname = file_read_setting_s(handle, name, fontname);
+    fontname = file_read_setting_s(handle, name);
     if (!fontname)
 	return NULL;
     settingname = dupcat(name, "IsBold", NULL);
