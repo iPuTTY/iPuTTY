@@ -707,8 +707,59 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 			if (c == ':')
 			    conf_set_int(conf, CONF_port, atoi(p));
 			else
-			    conf_set_int(conf, CONF_port, -1);
+			    conf_set_int(conf, CONF_port, 23);
 			conf_set_str(conf, CONF_host, q);
+			got_host = 1;
+		    } else if (!strncmp(q, "ssh:", 4)) {
+			/*
+			 * If the hostname starts with "ssh:",
+			 * set the protocol to SSH and process
+			 * the string as a SSH URL (copy-paste of the telnet: code)
+			 */
+			char c;
+
+			q += 4;
+			if (q[0] == '/' && q[1] == '/')
+			    q += 2;
+			conf_set_int(conf, CONF_protocol, PROT_SSH);
+			p = q;
+			while (*p && *p != ':' && *p != '/')
+			    p++;
+			c = *p;
+			if (*p)
+			    *p++ = '\0';
+			if (c == ':')
+			    conf_set_int(conf, CONF_port, atoi(p));
+			else
+			    conf_set_int(conf, CONF_port, 22);
+			conf_set_str(conf, CONF_host, q);
+			got_host = 1;
+		    } else if (!strncmp(q, "putty:", 6)) {
+			// use file session: putty.exe putty:file:SESSION_NAME
+			q += 6;
+			if (q[0] == '/' && q[1] == '/')
+			    q += 2;
+			if (q[strlen(q) - 1] == '/')
+			    q[strlen(q) - 1] = '\0';
+			p = q;
+			int ret = cmdline_process_param("-load", p, 1, conf);
+			assert(ret == 2);
+		    } else if (conf_get_int(conf, CONF_protocol) == PROT_CYGTERM) {
+			/* Concatenate all the remaining arguments separating
+			 * them with spaces to get the command line to execute.
+			 */
+			const size_t max_len = 0x10000;
+			char *buf = malloc(max_len);
+			char *p = buf;
+			char *end = p + max_len;
+			p = stpcpy_max(p, conf_get_str(conf, CONF_cygcmd), max_len - 1);
+			for (; i < argc && (p - buf) < max_len; i++) {
+			    p = stpcpy_max(p, argv[i], max_len - 1);
+			    *p++ = ' ';
+			}
+			*--p = '\0';
+			conf_set_str(conf, CONF_cygcmd, buf);
+			free(buf);
 			got_host = 1;
 #ifdef SUPPORT_CYGTERM
 		    } else if ( conf_get_int(conf,CONF_protocol) == PROT_CYGTERM) {
