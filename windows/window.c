@@ -707,8 +707,59 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 			if (c == ':')
 			    conf_set_int(conf, CONF_port, atoi(p));
 			else
-			    conf_set_int(conf, CONF_port, -1);
+			    conf_set_int(conf, CONF_port, 23);
 			conf_set_str(conf, CONF_host, q);
+			got_host = 1;
+		    } else if (!strncmp(q, "ssh:", 4)) {
+			/*
+			 * If the hostname starts with "ssh:",
+			 * set the protocol to SSH and process
+			 * the string as a SSH URL (copy-paste of the telnet: code)
+			 */
+			char c;
+
+			q += 4;
+			if (q[0] == '/' && q[1] == '/')
+			    q += 2;
+			conf_set_int(conf, CONF_protocol, PROT_SSH);
+			p = q;
+			while (*p && *p != ':' && *p != '/')
+			    p++;
+			c = *p;
+			if (*p)
+			    *p++ = '\0';
+			if (c == ':')
+			    conf_set_int(conf, CONF_port, atoi(p));
+			else
+			    conf_set_int(conf, CONF_port, 22);
+			conf_set_str(conf, CONF_host, q);
+			got_host = 1;
+		    } else if (!strncmp(q, "putty:", 6)) {
+			// use file session: putty.exe putty:file:SESSION_NAME
+			q += 6;
+			if (q[0] == '/' && q[1] == '/')
+			    q += 2;
+			if (q[strlen(q) - 1] == '/')
+			    q[strlen(q) - 1] = '\0';
+			p = q;
+			int ret = cmdline_process_param("-load", p, 1, conf);
+			assert(ret == 2);
+		    } else if (conf_get_int(conf, CONF_protocol) == PROT_CYGTERM) {
+			/* Concatenate all the remaining arguments separating
+			 * them with spaces to get the command line to execute.
+			 */
+			const size_t max_len = 0x10000;
+			char *buf = malloc(max_len);
+			char *p = buf;
+			char *end = p + max_len;
+			p = stpcpy_max(p, conf_get_str(conf, CONF_cygcmd), max_len - 1);
+			for (; i < argc && (p - buf) < max_len; i++) {
+			    p = stpcpy_max(p, argv[i], max_len - 1);
+			    *p++ = ' ';
+			}
+			*--p = '\0';
+			conf_set_str(conf, CONF_cygcmd, buf);
+			free(buf);
 			got_host = 1;
 #ifdef SUPPORT_CYGTERM
 		    } else if ( conf_get_int(conf,CONF_protocol) == PROT_CYGTERM) {
@@ -1024,8 +1075,8 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 	    AppendMenu(m, MF_ENABLED, IDM_NEXTWINDOW, "다음 창(&W)\tCtrl+Tab");
 #ifdef ZMODEM
 	    AppendMenu(m, MF_SEPARATOR, 0, 0);
-	    AppendMenu(m, term->xyz_transfering ? MF_GRAYED : MF_ENABLED, IDM_XYZSTART, "ZMODEM 받기(&Z)");
-	    AppendMenu(m, term->xyz_transfering ? MF_GRAYED : MF_ENABLED, IDM_XYZUPLOAD, "ZMODEM 보내기(&U)");
+	    AppendMenu(m, term->xyz_transfering ? MF_GRAYED : MF_ENABLED, IDM_XYZSTART, "ZMODEM 받기(&Z)\tF11");
+	    AppendMenu(m, term->xyz_transfering ? MF_GRAYED : MF_ENABLED, IDM_XYZUPLOAD, "ZMODEM 보내기(&U)\tF12");
 	    AppendMenu(m, !term->xyz_transfering ? MF_GRAYED : MF_ENABLED, IDM_XYZABORT, "ZMODEM 중지(&A)");
 #endif
 	    AppendMenu(m, MF_SEPARATOR, 0, 0);
@@ -4540,6 +4591,24 @@ void do_text_internal(Context ctx, int x, int y, wchar_t *text, int len,
 void do_text(Context ctx, int x, int y, wchar_t *text, int len,
 	     unsigned long attr, int lattr)
 {
+    BSTR unicode = NULL;
+    int n = 0;
+    NFC_nomalize(text, len, &unicode, &n);
+    text = unicode;
+    /*
+    int n = NormalizeString(NormalizationC, text, len, NULL, 0);
+    for (int i = 0; i < 10; i++) {
+	if (unicode != NULL) SysFreeString(unicode);
+	unicode = SysAllocStringLen(0, n);
+	n = NormalizeString(NormalizationC, text, len, unicode, n);
+	if (n > 0) break;
+	if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) break;
+	n = -n;
+    }
+    text = unicode;
+    len = n;
+    */
+
     if (attr & TATTR_COMBINING) {
 	unsigned long a = 0;
 	int len0 = 1;
@@ -4576,6 +4645,8 @@ void do_text(Context ctx, int x, int y, wchar_t *text, int len,
 	}
     } else
 	do_text_internal(ctx, x, y, text, len, attr, lattr);
+
+    SysFreeString(unicode);
 }
 
 void do_cursor(Context ctx, int x, int y, wchar_t *text, int len,
@@ -5378,6 +5449,20 @@ static int TranslateKey(UINT message, WPARAM wParam, LPARAM lParam,
 	    code = 6;
 	    break;
 	}
+#ifdef ZMODEM
+	// press F11 zmode recieve
+	if (wParam == VK_F11 && code == 23 ) {
+	    xyz_ReceiveInit(term);
+	    xyz_updateMenuItems(term);
+	    return -1;
+	}
+	// press F12 zmodem send
+	if (wParam == VK_F12 && code == 24 ) {
+	    xyz_StartSending(term);
+	    xyz_updateMenuItems(term);
+	    return -1;
+	}
+#endif
 	/* Reorder edit keys to physical order */
 	if (funky_type == FUNKY_VT400 && code <= 6)
 	    code = "\0\2\1\4\5\3\6"[code];
@@ -5874,6 +5959,10 @@ void write_clip(void *frontend, wchar_t * data, int *attr, int len, int must_des
 
     len2 = WideCharToMultiByte(CP_ACP, 0, data, len, 0, 0, NULL, NULL);
 
+    BSTR unicode = NULL;
+    int n = 0;
+    NFC_nomalize(data, len, &unicode, &n);
+
     clipdata = GlobalAlloc(GMEM_DDESHARE | GMEM_MOVEABLE,
 			   len * sizeof(wchar_t));
     clipdata2 = GlobalAlloc(GMEM_DDESHARE | GMEM_MOVEABLE, len2);
@@ -5883,22 +5972,26 @@ void write_clip(void *frontend, wchar_t * data, int *attr, int len, int must_des
 	    GlobalFree(clipdata);
 	if (clipdata2)
 	    GlobalFree(clipdata2);
+	SysFreeString(unicode);
 	return;
     }
     if (!(lock = GlobalLock(clipdata))) {
         GlobalFree(clipdata);
         GlobalFree(clipdata2);
+	SysFreeString(unicode);
 	return;
     }
     if (!(lock2 = GlobalLock(clipdata2))) {
         GlobalUnlock(clipdata);
         GlobalFree(clipdata);
         GlobalFree(clipdata2);
+	SysFreeString(unicode);
 	return;
     }
 
-    memcpy(lock, data, len * sizeof(wchar_t));
-    WideCharToMultiByte(CP_ACP, 0, data, len, lock2, len2, NULL, NULL);
+    memcpy(lock, unicode, len * sizeof(wchar_t));
+    WideCharToMultiByte(CP_ACP, 0, unicode, n, lock2, len2, NULL, NULL);
+    SysFreeString(unicode);
 
     if (conf_get_int(conf, CONF_rtf_paste)) {
 	wchar_t unitab[256];

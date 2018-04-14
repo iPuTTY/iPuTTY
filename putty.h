@@ -1520,6 +1520,7 @@ char *get_username(void);	       /* return value needs freeing */
 char *get_random_data(int bytes, const char *device); /* used in cmdgen.c */
 char filename_char_sanitise(char c);   /* rewrite special pathname chars */
 
+void NFC_nomalize(wchar_t *, int, BSTR *, int *);
 char *toUTF8 (char *, int);
 char *toCP949 (char *, int);
 

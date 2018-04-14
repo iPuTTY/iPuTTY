@@ -651,10 +651,24 @@ FontSpec *fontspec_deserialise(void *vdata, int maxsize, int *used)
                         GET_32BIT_MSB_FIRST(end + 8));
 }
 
+void NFC_nomalize(wchar_t *text, int len, BSTR *unicode, int *n) {
+    *n = NormalizeString(NormalizationC, text, len, NULL, 0);
+
+    for (int i = 0; i < 10; i++) {
+	if (*unicode != NULL) SysFreeString(*unicode);
+	*unicode = SysAllocStringLen(0, *n);
+	*n = NormalizeString(NormalizationC, text, len, *unicode, *n);
+	if (*n > 0) break;
+	if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) break;
+	*n = -(*n);
+    }
+}
+
 char *toCP949 (char *src, int isUTF8) {
-    BSTR unicode;
+    BSTR unicode, unicode_norm = NULL;
     char *to;
     int len;
+    int un = -1, n = 0;
 
     if (!isUTF8)
 	return dupstr(src);
@@ -664,6 +678,11 @@ char *toCP949 (char *src, int isUTF8) {
 	return dupstr(src);
     unicode = SysAllocStringLen(NULL, len);
     MultiByteToWideChar(CP_UTF8, 0, src, lstrlen(src) + 1, unicode, len);
+
+    NFC_nomalize(unicode, un, &unicode_norm, &n);
+    SysFreeString(unicode);
+    unicode = unicode_norm;
+    unicode_norm = 0;
 
     len = WideCharToMultiByte(CP_ACP, 0, unicode, -1, NULL, 0, NULL, NULL);
     if (len < 1) {
