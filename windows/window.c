@@ -1075,8 +1075,8 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 	    AppendMenu(m, MF_ENABLED, IDM_NEXTWINDOW, "Next &Window\tCtrl+Tab");
 #ifdef ZMODEM
 	    AppendMenu(m, MF_SEPARATOR, 0, 0);
-	    AppendMenu(m, term->xyz_transfering ? MF_GRAYED : MF_ENABLED, IDM_XYZSTART, "&Zmodem Receive");
-	    AppendMenu(m, term->xyz_transfering ? MF_GRAYED : MF_ENABLED, IDM_XYZUPLOAD, "Zmodem &Upload");
+	    AppendMenu(m, term->xyz_transfering ? MF_GRAYED : MF_ENABLED, IDM_XYZSTART, "&Zmodem Receive\tF11");
+	    AppendMenu(m, term->xyz_transfering ? MF_GRAYED : MF_ENABLED, IDM_XYZUPLOAD, "Zmodem &Upload\tF12");
 	    AppendMenu(m, !term->xyz_transfering ? MF_GRAYED : MF_ENABLED, IDM_XYZABORT, "Zmodem &Abort");
 #endif
 	    AppendMenu(m, MF_SEPARATOR, 0, 0);
@@ -5429,6 +5429,20 @@ static int TranslateKey(UINT message, WPARAM wParam, LPARAM lParam,
 	    code = 6;
 	    break;
 	}
+#ifdef ZMODEM
+	// press F11 zmode recieve
+	if (wParam == VK_F11 && code == 23 ) {
+	    xyz_ReceiveInit(term);
+	    xyz_updateMenuItems(term);
+	    return -1;
+	}
+	// press F12 zmodem send
+	if (wParam == VK_F12 && code == 24 ) {
+	    xyz_StartSending(term);
+	    xyz_updateMenuItems(term);
+	    return -1;
+	}
+#endif
 	/* Reorder edit keys to physical order */
 	if (funky_type == FUNKY_VT400 && code <= 6)
 	    code = "\0\2\1\4\5\3\6"[code];
