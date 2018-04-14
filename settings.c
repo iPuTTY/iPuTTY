@@ -815,9 +815,6 @@ void load_settings_file(char *section, Conf *conf)
     sesskey = open_settings_r(section);
     load_open_settings(sesskey, conf);
     close_settings_r(sesskey);
-
-    if (conf_launchable(conf))
-	add_session_to_jumplist(section);
 }
 
 void load_open_settings(void *sesskey, Conf *conf)
