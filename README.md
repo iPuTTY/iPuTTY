@@ -41,6 +41,6 @@ iPuTTY Official site
 
 ***PuTTY*** is copyright 1997-2017 Simon Tatham and PuTTY teamd
 
-***iPuTTY*** is portions copyright 2003-2017 iPuTTY project
+***iPuTTY*** is portions copyright 2003-2018 iPuTTY project
 
 All contributors can be found at https://github.com/iPuTTY/iPuTTY/wiki/Credit
