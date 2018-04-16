@@ -10536,7 +10536,7 @@ static void do_ssh2_authconn(Ssh ssh, const unsigned char *in, int inlen,
 #ifdef AUTOPASS
 		} else
 		    c_write_str(ssh,
-			dupprintf("%s@%s's passwrod: auto-login\r\n", ssh->username, ssh->savedhost));
+			dupprintf("%s@%s's password: auto-login\r\n", ssh->username, ssh->savedhost));
 #endif
 		/*
 		 * Squirrel away the password. (We may need it later if
