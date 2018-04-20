@@ -1189,12 +1189,16 @@ char *buildinfo(const char *newline)
     strbuf_catf(buf, ", emulating ");
 #endif
     strbuf_catf(buf, "Visual Studio", newline);
-#if _MSC_VER == 1912
+#if _MSC_VER == 1914
+    strbuf_catf(buf, " 2017 / MSVC++ 14.14");
+#elif _MSC_VER == 1913
+    strbuf_catf(buf, " 2017 / MSVC++ 14.13");
+#elif _MSC_VER == 1912
     strbuf_catf(buf, " 2017 / MSVC++ 14.12");
 #elif _MSC_VER == 1911
     strbuf_catf(buf, " 2017 / MSVC++ 14.11");
 #elif _MSC_VER == 1910
-    strbuf_catf(buf, " 2017 / MSVC++ 14.10");
+    strbuf_catf(buf, " 2017 / MSVC++ 14.1");
 #elif _MSC_VER == 1900
     strbuf_catf(buf, " 2015 / MSVC++ 14.0");
 #elif _MSC_VER == 1800

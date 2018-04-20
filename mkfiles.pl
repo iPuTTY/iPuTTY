@@ -1162,8 +1162,13 @@ if (defined $makefiles{'vstudio10'} || defined $makefiles{'vstudio12'} || define
         create_vs_solution('vstudio15', "2015", "14.00", "v140");
     }
 
+	# MSVC++ 14.14 _MSC_VER == 1914 (Visual Studio 2017 version 15.7)
+    # MSVC++ 14.13 _MSC_VER == 1913 (Visual Studio 2017 version 15.6)
+    # MSVC++ 14.12 _MSC_VER == 1912 (Visual Studio 2017 version 15.5)
+    # MSVC++ 14.11 _MSC_VER == 1911 (Visual Studio 2017 version 15.3)
+	# MSVC++ 14.1  _MSC_VER == 1910 (Visual Studio 2017 version 15.0)
     if (defined $makefiles{'vstudio17'}) {
-        create_vs_solution('vstudio17', "2017", "14.10", "v141");
+        create_vs_solution('vstudio17', "2017", "14.13", "v141");
     }
 
     sub create_vs_solution {
