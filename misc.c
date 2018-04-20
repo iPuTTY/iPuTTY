@@ -1386,12 +1386,12 @@ char *base64_decode_r(char *string, size_t len) {
     char *buf, *nbuf, *buf1;
     size_t msize, n, r;
 
-    if (string == NULL || len < 1)
+    if (string == NULL || len < 4 || (len%4) != 0)
 	return NULL;
 
     buf = revstr(string, len, 2);
 
-    msize = 3 * (len/4);
+    msize = 3 * (len/4) + 1;
     buf1 = snewn(msize, char);
     memset(buf1, 0, msize);
 
