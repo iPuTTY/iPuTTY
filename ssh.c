@@ -85,7 +85,7 @@ static const char *const ssh2_disconnect_reasons[] = {
 #define DH_MAX_SIZE 8192
 
 #ifdef AUTOPASS
-static char bufpass[1024] = "";
+static char bufpass[1024];
 #endif
 
 /*
