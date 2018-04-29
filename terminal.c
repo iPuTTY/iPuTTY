@@ -1295,17 +1295,6 @@ static void power_on(Terminal *term, int clear)
     term->curs.x = 0;
     term_schedule_tblink(term);
     term_schedule_cblink(term);
-#ifdef ONTHESPOT
-    {
-	int cp = decode_codepage(conf_get_str(term->conf, CONF_line_codepage));
-	if (cp == CP_UTF8 || cp == 949)
-	    term->onthespot = 1;
-	else
-	    term->onthespot = 0;
-	term->onthespot_buf[0] = 0;
-	term->onthespot_buf[1] = 0;
-    }
-#endif
 }
 
 /*
@@ -5187,9 +5176,6 @@ static void do_paint(Terminal *term, Context ctx, int may_optimise)
 	 */
 	for (j = 0; j < term->cols; j++) {
 	    unsigned long tattr, tchar;
-#ifdef ONTHESPOT
-	    int j_offset = 0;
-#endif
 	    termchar *d = lchars + j;
 	    scrpos.x = backward ? backward[j] : j;
 
@@ -5308,20 +5294,6 @@ static void do_paint(Terminal *term, Context ctx, int may_optimise)
                 if (/*in_dbcs(term) &&*/ is_dbcs_leadbyte((term)->ucsdata->line_codepage, (unsigned char)tchar)) {
 		    cursor_wide = 1;
 		}
-#ifdef ONTHESPOT
-		if (term->onthespot && term->onthespot_buf[0]) {
-                    tchar = tchar & 0xffff0000 | term->onthespot_buf[0];
-		    tattr |= ATTR_INVALID;
-                }
-	    }
-	    /* Onthespot IMEs always process DBCS characters and cursors
-	     * are always wide while composing */
-	    else if (i == our_curs_y && j == our_curs_x + 1 &&
-			term->onthespot && term->onthespot_buf[0]) {
-	    	tattr |= cursor | ATTR_INVALID;
-		term->curstype = cursor;
-		j_offset = -1;
-#endif
 	    }
 	    else if (cursor_wide && i == our_curs_y && j == our_curs_x+1) {
 		tattr |= cursor;
@@ -5332,9 +5304,6 @@ static void do_paint(Terminal *term, Context ctx, int may_optimise)
 	    /* FULL-TERMCHAR */
 	    newline[j].attr = tattr;
 	    newline[j].chr = tchar;
-#ifdef ONTHESPOT
-	    newline[j].offset = j_offset;
-#endif
 	    /* Combining characters are still read from lchars */
 	    newline[j].cc_next = 0;
 	}
@@ -5413,9 +5382,6 @@ static void do_paint(Terminal *term, Context ctx, int may_optimise)
 	     * Separate out sequences of characters that have the
 	     * same CSET, if that CSET is a magic one.
 	     */
-#ifdef ONTHESPOT
-	    if (newline[j].offset == 0)
-#endif
 	    if (CSET_OF(tchar) != cset)
 		break_run = TRUE;
 

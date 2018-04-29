@@ -2358,19 +2358,6 @@ static void set_input_locale(HKL kl)
 		  lbuf, sizeof(lbuf));
 
     kbd_codepage = atoi(lbuf);
-
-#ifdef ONTHESPOT
-    /* Korean IME doesn't need to show the external IME composing
-     * window and it can make users less intuitive to see what they
-     * are typing. */
-    if (kbd_codepage == 949 /* Korean */) {
-	term->onthespot = 1;
-	term->onthespot_buf[0] = 0;
-	term->onthespot_buf[1] = 0;
-    }
-    else
-	term->onthespot = 0;
-#endif
 }
 
 static void click(Mouse_Button b, int x, int y, int shift, int ctrl, int alt)
@@ -3385,9 +3372,6 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message,
 	DestroyCaret();
 	caret_x = caret_y = -1;	       /* ensure caret is replaced next time */
 	term_update(term);
-#ifdef ONTHESPOT
-	term->onthespot_buf[0] = 0;
-#endif
 	break;
       case WM_ENTERSIZEMOVE:
 #ifdef RDB_DEBUG_PATCH
@@ -3820,33 +3804,10 @@ KEY_END:
 	{
 	    HIMC hImc = ImmGetContext(hwnd);
 	    LOGFONT lf_compose;
-#ifdef ONTHESPOT
-	    if (term->onthespot) {
-		COMPOSITIONFORM cf;
-		RECT rectWorkArea;
-
-		SystemParametersInfo(SPI_GETWORKAREA, 0,
-				     (void*)&rectWorkArea, 0);
-		cf.dwStyle = CFS_POINT;
-		cf.ptCurrentPos.x = 0; // drive out of screen
-		cf.ptCurrentPos.y = rectWorkArea.bottom+50;
-		GetObject(fonts[FONT_UNICODE], sizeof(LOGFONT), &lf_compose);
-		ImmSetCompositionFont(hImc, &lf_compose);
-		ImmSetCompositionWindow(hImc, &cf);
-		ImmReleaseContext(hwnd, hImc);
-		term->onthespot_buf[0] = 0;
-		return 0;
-	    }
-#endif
 	    ImmSetCompositionFont(hImc, &lfont);
 	    ImmReleaseContext(hwnd, hImc);
 	}
 	break;
-#ifdef ONTHESPOT
-      case WM_IME_ENDCOMPOSITION:
-	term->onthespot_buf[0] = 0;
-	break;
-#endif
       case WM_IME_COMPOSITION:
 	{
 	    HIMC hIMC = ImmGetContext(hwnd);
@@ -3858,37 +3819,8 @@ KEY_END:
 	       osVersion.dwPlatformId == VER_PLATFORM_WIN32s) break; /* no Unicode */
 
 	    if (lParam & GCS_COMPSTR) { /* Composition unfinished. */
-#ifdef ONTHESPOT
-		// wParam only has DBCS characters, but we want unicode characters.
-		// So we call the unicode version.
-		n = ImmGetCompositionStringW(hIMC, GCS_COMPSTR, NULL, 0);
-		if (term->onthespot) {
-		    RECT invrect;
-		    HDC hdc;
-		    if (n > 0) {
-			buff = snewn(n + 2, char);
-			memset(buff, 0, n + 2);
-			ImmGetCompositionStringW(hIMC, GCS_COMPSTR, buff, n);
-			wbuff = (wchar_t*) buff;
-			term->onthespot_buf[0] = wbuff[0];
-			free(buff);
-		    }
-		    else
-			term->onthespot_buf[0] = 0;
-
-		    invrect.left = caret_x;
-		    invrect.top = caret_y;
-		    invrect.right = caret_x + font_width * 2;
-		    invrect.bottom = caret_y + font_height;
-		    InvalidateRect(hwnd, &invrect, TRUE);
-		}
-#endif
 		break; /* fall back to DefWindowProc */
 	    }
-#ifdef ONTHESPOT
-	    else
-		term->onthespot_buf[0] = 0;
-#endif
 
 	    n = ImmGetCompositionStringW(hIMC, GCS_RESULTSTR, NULL, 0);
 	    if (n > 0) {
