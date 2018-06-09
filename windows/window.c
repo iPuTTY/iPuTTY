@@ -14,6 +14,8 @@
 #define NO_MULTIMON                    /* winelib doesn't have this */
 #endif
 
+#define ZMODEM_DRAG_AND_DROP
+
 /*
  * HACK: PuttyTray / Nutty
  */ 
@@ -947,6 +949,13 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
         sfree(uappname);
 	my_hwnd = hwnd;
     }
+
+#ifdef ZMODEM_DRAG_AND_DROP
+    /*
+     * Initialize the drag and drop
+     */
+    DragAcceptFiles(hwnd, TRUE);
+#endif
 
     /*
      * Initialise the fonts, simultaneously correcting the guesses
@@ -4002,6 +4011,45 @@ KEY_END:
 	/*
 	 * END HACKS: PuttyTray / Trayicon & Reconnect
 	 */
+
+#ifdef ZMODEM_DRAG_AND_DROP
+#ifdef ZMODEM
+
+      case WM_DROPFILES :
+	DragAcceptFiles(hwnd, FALSE);
+
+	/*
+	xyz_StartSending();
+	*/
+
+	{
+	    POINT pt;
+	    char params[30000] = { 0, };
+	    char *curparams;
+	    char buffer[MAX_PATH] = { 0, };
+
+	    curparams = params;
+
+	    if (DragQueryPoint((HDROP)wParam, &pt)) {
+		UINT i = 0;
+		UINT uCount = DragQueryFile((HDROP)wParam, 0xFFFFFFFF, NULL ,0);
+
+		for(i = 0;i < uCount;i++) {
+		    DragQueryFile((HDROP)wParam, i, buffer, MAX_PATH);
+		    curparams += sprintf(curparams, " \"%s\"", buffer);
+		}
+	    }
+	    //MessageBox(hwnd, params, "File Name", MB_OK);
+	    DragFinish((HDROP)wParam);
+
+	    xyz_DragAndDropDSending(term, params);
+	}
+
+
+	DragAcceptFiles(hwnd, TRUE);
+	break;
+#endif
+#endif
 
       default:
 	if (message == msg_TaskbarCreated) {

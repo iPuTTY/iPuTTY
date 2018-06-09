@@ -33,6 +33,7 @@ iPuTTY Official site
 * support Cygterm backend (0.69 and after)
 * translate UI (0.69 and after)
 * support ZMODEM (0.69.1 and after)
+* support ZMODEM sending with Drang And Drop (0.70.2 and after)
 * and so on..
 
 ## LICENSE

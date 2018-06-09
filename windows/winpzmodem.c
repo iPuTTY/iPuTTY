@@ -219,6 +219,29 @@ void xyz_StartSending(Terminal *term)
 	}
 }
 
+#ifdef ZMODEM_DRAG_AND_DROP
+void xyz_DragAndDropDSending(Terminal *term, char *params)
+{
+	const char *szcmd = conf_get_filename(term->conf,CONF_szcommand)->path;
+	char sz_full_params[32767] = { 0, };
+
+	if (!strcmp(szcmd, "")) {
+		MessageBox(NULL, "The sz command path is not specified.", "Error", MB_OK|MB_ICONERROR);
+		return;
+	}
+
+	sprintf (sz_full_params, "%s %s", conf_get_str(term->conf,CONF_szoptions), params);
+
+	if (xyz_SpawnProcess(term, szcmd, sz_full_params) == 0) {
+		term->xyz_transfering = 1;
+
+	} else {
+		MessageBox(NULL,"Unable to start sending !", "Error", MB_OK|MB_ICONERROR);
+	}
+
+}
+#endif
+
 void xyz_Cancel(Terminal *term)
 {
 	xyz_Done(term);
