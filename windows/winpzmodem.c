@@ -171,7 +171,7 @@ void xyz_StartSending(Terminal *term)
 	OPENFILENAME fn;
 	char filenames[32000];
 	BOOL res;
-	const char *szcmd = conf_get_filename(term->conf,CONF_rzcommand)->path;
+	const char *szcmd = conf_get_filename(term->conf,CONF_szcommand)->path;
 
 	if (!strcmp(szcmd, "")) {
 		MessageBox(NULL, "The sz command path is not specified.", "Error", MB_OK|MB_ICONERROR);
@@ -210,7 +210,7 @@ void xyz_StartSending(Terminal *term)
 			}
 		}
 
-		if (xyz_SpawnProcess(term, conf_get_filename(term->conf,CONF_szcommand)->path, sz_full_params) == 0) {
+		if (xyz_SpawnProcess(term, szcmd, sz_full_params) == 0) {
 			term->xyz_transfering = 1;
 
 		} else {
