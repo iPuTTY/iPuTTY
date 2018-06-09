@@ -1701,6 +1701,9 @@ void request_callback_notifications(toplevel_callback_notify_fn_t notify,
 int xyz_Process(Backend *back, void *backhandle, Terminal *term);
 void xyz_ReceiveInit(Terminal *term);
 void xyz_StartSending(Terminal *term);
+#ifdef ZMODEM_DRAG_AND_DROP
+void xyz_DragAndDropDSending(Terminal *term, char *params);
+#endif
 void xyz_Cancel(Terminal *term);
 void xyz_updateMenuItems(Terminal *term);
 #endif

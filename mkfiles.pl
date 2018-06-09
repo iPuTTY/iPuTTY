@@ -546,7 +546,7 @@ if (defined $makefiles{'clangcl'}) {
     &splitline("CFLAGS = /nologo /W3 /O1 " .
                (join " ", map {"-I$dirpfx$_"} @srcdirs) .
                " /D_WINDOWS /D_WIN32_WINDOWS=0x500 /DWINVER=0x500 ".
-               "/D_CRT_SECURE_NO_WARNINGS /DSUPPORT_CYGTERM /DAUTOPASS /DZMODEM")."\n".
+               "/D_CRT_SECURE_NO_WARNINGS /DSUPPORT_CYGTERM /DAUTOPASS /DZMODEM /DZMODEM_DRAG_AND_DROP")."\n".
     "LFLAGS = /incremental:no /dynamicbase /nxcompat\n".
     &splitline("RCFLAGS = ".(join " ", map {"-I$dirpfx$_"} @srcdirs).
                " -DWIN32 -D_WIN32 -DWINVER=0x0400")."\n".
@@ -799,7 +799,7 @@ if (defined $makefiles{'vc'}) {
       "# C compilation flags\n".
       "CFLAGS = /nologo /W3 /O1 " .
       (join " ", map {"-I$dirpfx$_"} @srcdirs) .
-      " /D_WINDOWS /D_WIN32_WINDOWS=0x500 /DWINVER=0x500 /D_CRT_SECURE_NO_WARNINGS /DSUPPORT_CYGTERM /DAUTOPASS /DZMODEM\n".
+      " /D_WINDOWS /D_WIN32_WINDOWS=0x500 /DWINVER=0x500 /D_CRT_SECURE_NO_WARNINGS /DSUPPORT_CYGTERM /DAUTOPASS /DZMODEM /DZMODEM_DRAG_AND_DROP\n".
       "LFLAGS = /incremental:no /dynamicbase /nxcompat\n".
       "RCFLAGS = ".(join " ", map {"-I$dirpfx$_"} @srcdirs).
       " -DWIN32 -D_WIN32 -DWINVER=0x0400\n".
@@ -1358,7 +1358,7 @@ if (defined $makefiles{'vstudio10'} || defined $makefiles{'vstudio12'} || define
             "      <SuppressStartupBanner>true</SuppressStartupBanner>\n" .
             "      <WarningLevel>Level3</WarningLevel>\n" .
             "      <AdditionalIncludeDirectories>..\\..\\../;" . (join ";", map {"..\\..\\$dirpfx$_"} @srcdirs) . ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n" .
-            "      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;POSIX;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;SUPPORT_CYGTERM;AUTOPASS;ZMODEM;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n" .
+            "      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;POSIX;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;SUPPORT_CYGTERM;AUTOPASS;ZMODEM;ZMODEM_DRAG_AND_DROP;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n" .
             "      <AssemblerListingLocation>.\\Release\\</AssemblerListingLocation>\n" .
             "      <PrecompiledHeaderOutputFile>.\\Release\\$windows_project.pch</PrecompiledHeaderOutputFile>\n" .
             "      <ObjectFileName>.\\Release\\</ObjectFileName>\n" .
@@ -1397,7 +1397,7 @@ if (defined $makefiles{'vstudio10'} || defined $makefiles{'vstudio12'} || define
             "      <MinimalRebuild>true</MinimalRebuild>\n" .
             "      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>\n" .
             "      <AdditionalIncludeDirectories>..\\..\\../;" . (join ";", map {"..\\..\\$dirpfx$_"} @srcdirs) . ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n" .
-            "      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;POSIX;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;SUPPORT_CYGTERM;AUTOPASS;ZMODEM;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n" .
+            "      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;POSIX;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;SUPPORT_CYGTERM;AUTOPASS;ZMODEM;ZMODEM_DRAG_AND_DROP;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n" .
             "      <AssemblerListingLocation>.\\Debug\\</AssemblerListingLocation>\n" .
             "      <PrecompiledHeaderOutputFile>.\\Debug\\$windows_project.pch</PrecompiledHeaderOutputFile>\n" .
             "      <ObjectFileName>.\\Debug\\</ObjectFileName>\n" .
