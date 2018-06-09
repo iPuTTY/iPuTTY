@@ -226,7 +226,7 @@ void xyz_DragAndDropDSending(Terminal *term, char *params)
 	char sz_full_params[32767] = { 0, };
 
 	if (!strcmp(szcmd, "")) {
-		MessageBox(NULL, "The sz command path is not specified.", "Error", MB_OK|MB_ICONERROR);
+		MessageBox(NULL, "sz 실행파일을 지정 하십시오.", "ZMODEM 에러", MB_OK|MB_ICONERROR);
 		return;
 	}
 
@@ -236,7 +236,7 @@ void xyz_DragAndDropDSending(Terminal *term, char *params)
 		term->xyz_transfering = 1;
 
 	} else {
-		MessageBox(NULL,"Unable to start sending !", "Error", MB_OK|MB_ICONERROR);
+		MessageBox(NULL,"파일 전송을 시작할수 없습니다!", "ZMODEM 에러", MB_OK|MB_ICONERROR);
 	}
 
 }
