@@ -4045,8 +4045,8 @@ KEY_END:
 	    xyz_DragAndDropDSending(term, params);
 	}
 
-
 	DragAcceptFiles(hwnd, TRUE);
+	SetForegroundWindow(hwnd);
 	break;
 #endif
 #endif
