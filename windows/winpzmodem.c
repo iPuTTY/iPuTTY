@@ -84,7 +84,7 @@ static int xyz_Check(Backend *back, void *backhandle, Terminal *term, int outerr
 		while (1)
 		{
 			bread = 0;
-		
+
 			PeekNamedPipe(h,buf,1,&bread,&avail,NULL);
 			if (bread == 0)
 				return 0;
@@ -94,7 +94,7 @@ static int xyz_Check(Backend *back, void *backhandle, Terminal *term, int outerr
 #if 0
 					char *buffer;
 					int len;
-					
+
 					buffer = buf;
 					len = bread;
 					if (0)
@@ -102,7 +102,7 @@ static int xyz_Check(Backend *back, void *backhandle, Terminal *term, int outerr
 						char *debugbuff;
 						char *bb, *p;
 						int i;
-						
+
 						debugbuff = _alloca(len*3+128);
 						debugbuff[0] = 0;
 						bb = debugbuff;
@@ -112,7 +112,7 @@ static int xyz_Check(Backend *back, void *backhandle, Terminal *term, int outerr
 							bb += sprintf(bb, "%2x ", *p++);
 						}
 						bb += sprintf(bb, "\n");
-						
+
 						OutputDebugString(debugbuff);
 					} else {
 						char *debugbuff;
@@ -141,7 +141,7 @@ static int xyz_Check(Backend *back, void *backhandle, Terminal *term, int outerr
 		}
 		return 1;
 	}
-	
+
 	GetExitCodeProcess(term->xyz_Internals->pi.hProcess,&exitcode);
 	if (exitcode != STILL_ACTIVE) {
 		xyz_Done(term);
@@ -229,21 +229,19 @@ static int xyz_SpawnProcess(Terminal *term, const char *incommand, const char *i
 	STARTUPINFO si;
 	SECURITY_ATTRIBUTES sa;
 	SECURITY_DESCRIPTOR sd;               //security information for pipes
-	
-	
-	
+
 	/*   Essai en bypassant le process spawn 
 	GetStartupInfo(&si);      
 	term->xyz_Internals = (struct zModemInternals *)smalloc(sizeof(struct zModemInternals));
 	memset(term->xyz_Internals, 0, sizeof(struct zModemInternals));
-	
+
 	term->xyz_Internals->write_stdin = si.hStdInput ;
 	term->xyz_Internals->read_stdout = si.hStdOutput ;
 	term->xyz_Internals->read_stderr = si.hStdError ;
-	
+
 	return 0;
 	*/
-	
+
 	HANDLE read_stdout, read_stderr, write_stdin, newstdin, newstdout, newstderr; //pipe handles
 
 	term->xyz_Internals = (struct zModemInternals *)smalloc(sizeof(struct zModemInternals));
@@ -277,7 +275,7 @@ static int xyz_SpawnProcess(Terminal *term, const char *incommand, const char *i
 		CloseHandle(read_stdout);
 		return 1;
 	}
-	
+
 	GetStartupInfo(&si);      //set startupinfo for the spawned process
 				  /*
 				  The dwFlags member tells CreateProcess how to make the process.
@@ -396,7 +394,7 @@ int xyz_ReceiveData(Terminal *term, const u_char *buffer, int len)
 		OutputDebugString(debugbuff);
 	}
 #endif
-	
+
 	//if( !
 		WriteFile(term->xyz_Internals->write_stdin,buffer,len,&written,NULL)
 	;
