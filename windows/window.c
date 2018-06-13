@@ -14,8 +14,6 @@
 #define NO_MULTIMON                    /* winelib doesn't have this */
 #endif
 
-#define ZMODEM_DRAG_AND_DROP
-
 /*
  * HACK: PuttyTray / Nutty
  */ 
@@ -4014,13 +4012,8 @@ KEY_END:
 
 #ifdef ZMODEM_DRAG_AND_DROP
 #ifdef ZMODEM
-
       case WM_DROPFILES :
 	DragAcceptFiles(hwnd, FALSE);
-
-	/*
-	xyz_StartSending();
-	*/
 
 	{
 	    POINT pt;
