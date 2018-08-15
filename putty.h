@@ -1520,6 +1520,7 @@ char *get_username(void);	       /* return value needs freeing */
 char *get_random_data(int bytes, const char *device); /* used in cmdgen.c */
 char filename_char_sanitise(char c);   /* rewrite special pathname chars */
 
+void NFC_nomalize(wchar_t *, int, BSTR *, int *);
 char *toUTF8 (char *, int);
 char *toCP949 (char *, int);
 
@@ -1700,6 +1701,9 @@ void request_callback_notifications(toplevel_callback_notify_fn_t notify,
 int xyz_Process(Backend *back, void *backhandle, Terminal *term);
 void xyz_ReceiveInit(Terminal *term);
 void xyz_StartSending(Terminal *term);
+#ifdef ZMODEM_DRAG_AND_DROP
+void xyz_DragAndDropDSending(Terminal *term, char *params);
+#endif
 void xyz_Cancel(Terminal *term);
 void xyz_updateMenuItems(Terminal *term);
 #endif

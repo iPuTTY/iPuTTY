@@ -168,13 +168,17 @@ int cmdline_process_param(const char *p, char *value,
 	RETURN(2);
 	/* This parameter must be processed immediately rather than being
 	 * saved. */
-	do_defaults(value, conf);
+	if (strlen(value) > 5 && strncmp(value, "file:", 5) == 0)
+	    do_defaults_file(value+5, conf);
+	else
+	    do_defaults(value, conf);
+
 	loaded_session = TRUE;
 	cmdline_session_name = dupstr(value);
 	return 2;
     }
     
-#ifdef PUTTY_WIN_RES_H
+#ifdef PUTTY_WINSTUFF_H
     /*
      * HACK: PuttyTray / PuTTY File
      * Load file based session from commandline

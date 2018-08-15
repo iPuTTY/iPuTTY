@@ -707,8 +707,59 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 			if (c == ':')
 			    conf_set_int(conf, CONF_port, atoi(p));
 			else
-			    conf_set_int(conf, CONF_port, -1);
+			    conf_set_int(conf, CONF_port, 23);
 			conf_set_str(conf, CONF_host, q);
+			got_host = 1;
+		    } else if (!strncmp(q, "ssh:", 4)) {
+			/*
+			 * If the hostname starts with "ssh:",
+			 * set the protocol to SSH and process
+			 * the string as a SSH URL (copy-paste of the telnet: code)
+			 */
+			char c;
+
+			q += 4;
+			if (q[0] == '/' && q[1] == '/')
+			    q += 2;
+			conf_set_int(conf, CONF_protocol, PROT_SSH);
+			p = q;
+			while (*p && *p != ':' && *p != '/')
+			    p++;
+			c = *p;
+			if (*p)
+			    *p++ = '\0';
+			if (c == ':')
+			    conf_set_int(conf, CONF_port, atoi(p));
+			else
+			    conf_set_int(conf, CONF_port, 22);
+			conf_set_str(conf, CONF_host, q);
+			got_host = 1;
+		    } else if (!strncmp(q, "putty:", 6)) {
+			// use file session: putty.exe putty:file:SESSION_NAME
+			q += 6;
+			if (q[0] == '/' && q[1] == '/')
+			    q += 2;
+			if (q[strlen(q) - 1] == '/')
+			    q[strlen(q) - 1] = '\0';
+			p = q;
+			int ret = cmdline_process_param("-load", p, 1, conf);
+			assert(ret == 2);
+		    } else if (conf_get_int(conf, CONF_protocol) == PROT_CYGTERM) {
+			/* Concatenate all the remaining arguments separating
+			 * them with spaces to get the command line to execute.
+			 */
+			const size_t max_len = 0x10000;
+			char *buf = malloc(max_len);
+			char *p = buf;
+			char *end = p + max_len;
+			p = stpcpy_max(p, conf_get_str(conf, CONF_cygcmd), max_len - 1);
+			for (; i < argc && (p - buf) < max_len; i++) {
+			    p = stpcpy_max(p, argv[i], max_len - 1);
+			    *p++ = ' ';
+			}
+			*--p = '\0';
+			conf_set_str(conf, CONF_cygcmd, buf);
+			free(buf);
 			got_host = 1;
 #ifdef SUPPORT_CYGTERM
 		    } else if ( conf_get_int(conf,CONF_protocol) == PROT_CYGTERM) {
@@ -897,6 +948,13 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 	my_hwnd = hwnd;
     }
 
+#ifdef ZMODEM_DRAG_AND_DROP
+    /*
+     * Initialize the drag and drop
+     */
+    DragAcceptFiles(hwnd, TRUE);
+#endif
+
     /*
      * Initialise the fonts, simultaneously correcting the guesses
      * for font_{width,height}.
@@ -1024,8 +1082,8 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE prev, LPSTR cmdline, int show)
 	    AppendMenu(m, MF_ENABLED, IDM_NEXTWINDOW, "Next &Window\tCtrl+Tab");
 #ifdef ZMODEM
 	    AppendMenu(m, MF_SEPARATOR, 0, 0);
-	    AppendMenu(m, term->xyz_transfering ? MF_GRAYED : MF_ENABLED, IDM_XYZSTART, "&Zmodem Receive");
-	    AppendMenu(m, term->xyz_transfering ? MF_GRAYED : MF_ENABLED, IDM_XYZUPLOAD, "Zmodem &Upload");
+	    AppendMenu(m, term->xyz_transfering ? MF_GRAYED : MF_ENABLED, IDM_XYZSTART, "&Zmodem Receive\tF11");
+	    AppendMenu(m, term->xyz_transfering ? MF_GRAYED : MF_ENABLED, IDM_XYZUPLOAD, "Zmodem &Upload\tF12");
 	    AppendMenu(m, !term->xyz_transfering ? MF_GRAYED : MF_ENABLED, IDM_XYZABORT, "Zmodem &Abort");
 #endif
 	    AppendMenu(m, MF_SEPARATOR, 0, 0);
@@ -2307,19 +2365,6 @@ static void set_input_locale(HKL kl)
 		  lbuf, sizeof(lbuf));
 
     kbd_codepage = atoi(lbuf);
-
-#ifdef ONTHESPOT
-    /* Korean IME doesn't need to show the external IME composing
-     * window and it can make users less intuitive to see what they
-     * are typing. */
-    if (kbd_codepage == 949 /* Korean */) {
-	term->onthespot = 1;
-	term->onthespot_buf[0] = 0;
-	term->onthespot_buf[1] = 0;
-    }
-    else
-	term->onthespot = 0;
-#endif
 }
 
 static void click(Mouse_Button b, int x, int y, int shift, int ctrl, int alt)
@@ -3334,9 +3379,6 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message,
 	DestroyCaret();
 	caret_x = caret_y = -1;	       /* ensure caret is replaced next time */
 	term_update(term);
-#ifdef ONTHESPOT
-	term->onthespot_buf[0] = 0;
-#endif
 	break;
       case WM_ENTERSIZEMOVE:
 #ifdef RDB_DEBUG_PATCH
@@ -3769,33 +3811,10 @@ KEY_END:
 	{
 	    HIMC hImc = ImmGetContext(hwnd);
 	    LOGFONT lf_compose;
-#ifdef ONTHESPOT
-	    if (term->onthespot) {
-		COMPOSITIONFORM cf;
-		RECT rectWorkArea;
-
-		SystemParametersInfo(SPI_GETWORKAREA, 0,
-				     (void*)&rectWorkArea, 0);
-		cf.dwStyle = CFS_POINT;
-		cf.ptCurrentPos.x = 0; // drive out of screen
-		cf.ptCurrentPos.y = rectWorkArea.bottom+50;
-		GetObject(fonts[FONT_UNICODE], sizeof(LOGFONT), &lf_compose);
-		ImmSetCompositionFont(hImc, &lf_compose);
-		ImmSetCompositionWindow(hImc, &cf);
-		ImmReleaseContext(hwnd, hImc);
-		term->onthespot_buf[0] = 0;
-		return 0;
-	    }
-#endif
 	    ImmSetCompositionFont(hImc, &lfont);
 	    ImmReleaseContext(hwnd, hImc);
 	}
 	break;
-#ifdef ONTHESPOT
-      case WM_IME_ENDCOMPOSITION:
-	term->onthespot_buf[0] = 0;
-	break;
-#endif
       case WM_IME_COMPOSITION:
 	{
 	    HIMC hIMC = ImmGetContext(hwnd);
@@ -3807,37 +3826,8 @@ KEY_END:
 	       osVersion.dwPlatformId == VER_PLATFORM_WIN32s) break; /* no Unicode */
 
 	    if (lParam & GCS_COMPSTR) { /* Composition unfinished. */
-#ifdef ONTHESPOT
-		// wParam only has DBCS characters, but we want unicode characters.
-		// So we call the unicode version.
-		n = ImmGetCompositionStringW(hIMC, GCS_COMPSTR, NULL, 0);
-		if (term->onthespot) {
-		    RECT invrect;
-		    HDC hdc;
-		    if (n > 0) {
-			buff = snewn(n + 2, char);
-			memset(buff, 0, n + 2);
-			ImmGetCompositionStringW(hIMC, GCS_COMPSTR, buff, n);
-			wbuff = (wchar_t*) buff;
-			term->onthespot_buf[0] = wbuff[0];
-			free(buff);
-		    }
-		    else
-			term->onthespot_buf[0] = 0;
-
-		    invrect.left = caret_x;
-		    invrect.top = caret_y;
-		    invrect.right = caret_x + font_width * 2;
-		    invrect.bottom = caret_y + font_height;
-		    InvalidateRect(hwnd, &invrect, TRUE);
-		}
-#endif
 		break; /* fall back to DefWindowProc */
 	    }
-#ifdef ONTHESPOT
-	    else
-		term->onthespot_buf[0] = 0;
-#endif
 
 	    n = ImmGetCompositionStringW(hIMC, GCS_RESULTSTR, NULL, 0);
 	    if (n > 0) {
@@ -4019,6 +4009,40 @@ KEY_END:
 	/*
 	 * END HACKS: PuttyTray / Trayicon & Reconnect
 	 */
+
+#ifdef ZMODEM_DRAG_AND_DROP
+#ifdef ZMODEM
+      case WM_DROPFILES :
+	DragAcceptFiles(hwnd, FALSE);
+
+	{
+	    POINT pt;
+	    char params[30000] = { 0, };
+	    char *curparams;
+	    char buffer[MAX_PATH] = { 0, };
+
+	    curparams = params;
+
+	    if (DragQueryPoint((HDROP)wParam, &pt)) {
+		UINT i = 0;
+		UINT uCount = DragQueryFile((HDROP)wParam, 0xFFFFFFFF, NULL ,0);
+
+		for(i = 0;i < uCount;i++) {
+		    DragQueryFile((HDROP)wParam, i, buffer, MAX_PATH);
+		    curparams += sprintf(curparams, " \"%s\"", buffer);
+		}
+	    }
+	    //MessageBox(hwnd, params, "File Name", MB_OK);
+	    DragFinish((HDROP)wParam);
+
+	    xyz_DragAndDropDSending(term, params);
+	}
+
+	DragAcceptFiles(hwnd, TRUE);
+	SetForegroundWindow(hwnd);
+	break;
+#endif
+#endif
 
       default:
 	if (message == msg_TaskbarCreated) {
@@ -4540,6 +4564,24 @@ void do_text_internal(Context ctx, int x, int y, wchar_t *text, int len,
 void do_text(Context ctx, int x, int y, wchar_t *text, int len,
 	     unsigned long attr, int lattr)
 {
+    BSTR unicode = NULL;
+    int n = 0;
+    NFC_nomalize(text, len, &unicode, &n);
+    text = unicode;
+    /*
+    int n = NormalizeString(NormalizationC, text, len, NULL, 0);
+    for (int i = 0; i < 10; i++) {
+	if (unicode != NULL) SysFreeString(unicode);
+	unicode = SysAllocStringLen(0, n);
+	n = NormalizeString(NormalizationC, text, len, unicode, n);
+	if (n > 0) break;
+	if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) break;
+	n = -n;
+    }
+    text = unicode;
+    len = n;
+    */
+
     if (attr & TATTR_COMBINING) {
 	unsigned long a = 0;
 	int len0 = 1;
@@ -4576,6 +4618,8 @@ void do_text(Context ctx, int x, int y, wchar_t *text, int len,
 	}
     } else
 	do_text_internal(ctx, x, y, text, len, attr, lattr);
+
+    SysFreeString(unicode);
 }
 
 void do_cursor(Context ctx, int x, int y, wchar_t *text, int len,
@@ -5378,6 +5422,20 @@ static int TranslateKey(UINT message, WPARAM wParam, LPARAM lParam,
 	    code = 6;
 	    break;
 	}
+#ifdef ZMODEM
+	// press F11 zmode recieve
+	if (wParam == VK_F11 && code == 23 ) {
+	    xyz_ReceiveInit(term);
+	    xyz_updateMenuItems(term);
+	    return -1;
+	}
+	// press F12 zmodem send
+	if (wParam == VK_F12 && code == 24 ) {
+	    xyz_StartSending(term);
+	    xyz_updateMenuItems(term);
+	    return -1;
+	}
+#endif
 	/* Reorder edit keys to physical order */
 	if (funky_type == FUNKY_VT400 && code <= 6)
 	    code = "\0\2\1\4\5\3\6"[code];
@@ -5874,6 +5932,10 @@ void write_clip(void *frontend, wchar_t * data, int *attr, int len, int must_des
 
     len2 = WideCharToMultiByte(CP_ACP, 0, data, len, 0, 0, NULL, NULL);
 
+    BSTR unicode = NULL;
+    int n = 0;
+    NFC_nomalize(data, len, &unicode, &n);
+
     clipdata = GlobalAlloc(GMEM_DDESHARE | GMEM_MOVEABLE,
 			   len * sizeof(wchar_t));
     clipdata2 = GlobalAlloc(GMEM_DDESHARE | GMEM_MOVEABLE, len2);
@@ -5883,22 +5945,26 @@ void write_clip(void *frontend, wchar_t * data, int *attr, int len, int must_des
 	    GlobalFree(clipdata);
 	if (clipdata2)
 	    GlobalFree(clipdata2);
+	SysFreeString(unicode);
 	return;
     }
     if (!(lock = GlobalLock(clipdata))) {
         GlobalFree(clipdata);
         GlobalFree(clipdata2);
+	SysFreeString(unicode);
 	return;
     }
     if (!(lock2 = GlobalLock(clipdata2))) {
         GlobalUnlock(clipdata);
         GlobalFree(clipdata);
         GlobalFree(clipdata2);
+	SysFreeString(unicode);
 	return;
     }
 
-    memcpy(lock, data, len * sizeof(wchar_t));
-    WideCharToMultiByte(CP_ACP, 0, data, len, lock2, len2, NULL, NULL);
+    memcpy(lock, unicode, len * sizeof(wchar_t));
+    WideCharToMultiByte(CP_ACP, 0, unicode, n, lock2, len2, NULL, NULL);
+    SysFreeString(unicode);
 
     if (conf_get_int(conf, CONF_rtf_paste)) {
 	wchar_t unitab[256];

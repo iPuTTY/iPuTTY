@@ -1189,12 +1189,16 @@ char *buildinfo(const char *newline)
     strbuf_catf(buf, ", emulating ");
 #endif
     strbuf_catf(buf, "Visual Studio", newline);
-#if _MSC_VER == 1912
-	strbuf_catf(buf, " 2017 / MSVC++ 14.12");
+#if _MSC_VER == 1914
+    strbuf_catf(buf, " 2017 / MSVC++ 14.14");
+#elif _MSC_VER == 1913
+    strbuf_catf(buf, " 2017 / MSVC++ 14.13");
+#elif _MSC_VER == 1912
+    strbuf_catf(buf, " 2017 / MSVC++ 14.12");
 #elif _MSC_VER == 1911
     strbuf_catf(buf, " 2017 / MSVC++ 14.11");
 #elif _MSC_VER == 1910
-	strbuf_catf(buf, " 2017 / MSVC++ 14.10");
+    strbuf_catf(buf, " 2017 / MSVC++ 14.1");
 #elif _MSC_VER == 1900
     strbuf_catf(buf, " 2015 / MSVC++ 14.0");
 #elif _MSC_VER == 1800
@@ -1386,12 +1390,12 @@ char *base64_decode_r(char *string, size_t len) {
     char *buf, *nbuf, *buf1;
     size_t msize, n, r;
 
-    if (string == NULL || len < 1)
+    if (string == NULL || len < 4 || (len%4) != 0)
 	return NULL;
 
     buf = revstr(string, len, 2);
 
-    msize = 3 * (len/4);
+    msize = 3 * (len/4) + 1;
     buf1 = snewn(msize, char);
     memset(buf1, 0, msize);
 

@@ -546,7 +546,7 @@ if (defined $makefiles{'clangcl'}) {
     &splitline("CFLAGS = /nologo /W3 /O1 " .
                (join " ", map {"-I$dirpfx$_"} @srcdirs) .
                " /D_WINDOWS /D_WIN32_WINDOWS=0x500 /DWINVER=0x500 ".
-               "/D_CRT_SECURE_NO_WARNINGS /DONTHESPOT /DSUPPORT_CYGTERM /DAUTOPASS /DZMODEM")."\n".
+               "/D_CRT_SECURE_NO_WARNINGS /DSUPPORT_CYGTERM /DAUTOPASS /DZMODEM /DZMODEM_DRAG_AND_DROP")."\n".
     "LFLAGS = /incremental:no /dynamicbase /nxcompat\n".
     &splitline("RCFLAGS = ".(join " ", map {"-I$dirpfx$_"} @srcdirs).
                " -DWIN32 -D_WIN32 -DWINVER=0x0400")."\n".
@@ -799,7 +799,7 @@ if (defined $makefiles{'vc'}) {
       "# C compilation flags\n".
       "CFLAGS = /nologo /W3 /O1 " .
       (join " ", map {"-I$dirpfx$_"} @srcdirs) .
-      " /D_WINDOWS /D_WIN32_WINDOWS=0x500 /DWINVER=0x500 /D_CRT_SECURE_NO_WARNINGS /DONTHESPOT /DSUPPORT_CYGTERM /DAUTOPASS /DZMODEM\n".
+      " /D_WINDOWS /D_WIN32_WINDOWS=0x500 /DWINVER=0x500 /D_CRT_SECURE_NO_WARNINGS /DSUPPORT_CYGTERM /DAUTOPASS /DZMODEM /DZMODEM_DRAG_AND_DROP\n".
       "LFLAGS = /incremental:no /dynamicbase /nxcompat\n".
       "RCFLAGS = ".(join " ", map {"-I$dirpfx$_"} @srcdirs).
       " -DWIN32 -D_WIN32 -DWINVER=0x0400\n".
@@ -1162,8 +1162,13 @@ if (defined $makefiles{'vstudio10'} || defined $makefiles{'vstudio12'} || define
         create_vs_solution('vstudio15', "2015", "14.00", "v140");
     }
 
+	# MSVC++ 14.14 _MSC_VER == 1914 (Visual Studio 2017 version 15.7)
+    # MSVC++ 14.13 _MSC_VER == 1913 (Visual Studio 2017 version 15.6)
+    # MSVC++ 14.12 _MSC_VER == 1912 (Visual Studio 2017 version 15.5)
+    # MSVC++ 14.11 _MSC_VER == 1911 (Visual Studio 2017 version 15.3)
+	# MSVC++ 14.1  _MSC_VER == 1910 (Visual Studio 2017 version 15.0)
     if (defined $makefiles{'vstudio17'}) {
-        create_vs_solution('vstudio17', "2017", "14.10", "v141");
+        create_vs_solution('vstudio17', "2017", "14.13", "v141");
     }
 
     sub create_vs_solution {
@@ -1353,7 +1358,7 @@ if (defined $makefiles{'vstudio10'} || defined $makefiles{'vstudio12'} || define
             "      <SuppressStartupBanner>true</SuppressStartupBanner>\n" .
             "      <WarningLevel>Level3</WarningLevel>\n" .
             "      <AdditionalIncludeDirectories>..\\..\\../;" . (join ";", map {"..\\..\\$dirpfx$_"} @srcdirs) . ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n" .
-            "      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;POSIX;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;ONTHESPOT;SUPPORT_CYGTERM;AUTOPASS;ZMODEM;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n" .
+            "      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;POSIX;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;SUPPORT_CYGTERM;AUTOPASS;ZMODEM;ZMODEM_DRAG_AND_DROP;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n" .
             "      <AssemblerListingLocation>.\\Release\\</AssemblerListingLocation>\n" .
             "      <PrecompiledHeaderOutputFile>.\\Release\\$windows_project.pch</PrecompiledHeaderOutputFile>\n" .
             "      <ObjectFileName>.\\Release\\</ObjectFileName>\n" .
@@ -1392,7 +1397,7 @@ if (defined $makefiles{'vstudio10'} || defined $makefiles{'vstudio12'} || define
             "      <MinimalRebuild>true</MinimalRebuild>\n" .
             "      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>\n" .
             "      <AdditionalIncludeDirectories>..\\..\\../;" . (join ";", map {"..\\..\\$dirpfx$_"} @srcdirs) . ";%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>\n" .
-            "      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;POSIX;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;ONTHESPOT;SUPPORT_CYGTERM;AUTOPASS;ZMODEM;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n" .
+            "      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;POSIX;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;SUPPORT_CYGTERM;AUTOPASS;ZMODEM;ZMODEM_DRAG_AND_DROP;%(PreprocessorDefinitions)</PreprocessorDefinitions>\n" .
             "      <AssemblerListingLocation>.\\Debug\\</AssemblerListingLocation>\n" .
             "      <PrecompiledHeaderOutputFile>.\\Debug\\$windows_project.pch</PrecompiledHeaderOutputFile>\n" .
             "      <ObjectFileName>.\\Debug\\</ObjectFileName>\n" .

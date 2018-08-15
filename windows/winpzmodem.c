@@ -84,7 +84,7 @@ static int xyz_Check(Backend *back, void *backhandle, Terminal *term, int outerr
 		while (1)
 		{
 			bread = 0;
-		
+
 			PeekNamedPipe(h,buf,1,&bread,&avail,NULL);
 			if (bread == 0)
 				return 0;
@@ -94,7 +94,7 @@ static int xyz_Check(Backend *back, void *backhandle, Terminal *term, int outerr
 #if 0
 					char *buffer;
 					int len;
-					
+
 					buffer = buf;
 					len = bread;
 					if (0)
@@ -102,7 +102,7 @@ static int xyz_Check(Backend *back, void *backhandle, Terminal *term, int outerr
 						char *debugbuff;
 						char *bb, *p;
 						int i;
-						
+
 						debugbuff = _alloca(len*3+128);
 						debugbuff[0] = 0;
 						bb = debugbuff;
@@ -112,7 +112,7 @@ static int xyz_Check(Backend *back, void *backhandle, Terminal *term, int outerr
 							bb += sprintf(bb, "%2x ", *p++);
 						}
 						bb += sprintf(bb, "\n");
-						
+
 						OutputDebugString(debugbuff);
 					} else {
 						char *debugbuff;
@@ -141,7 +141,7 @@ static int xyz_Check(Backend *back, void *backhandle, Terminal *term, int outerr
 		}
 		return 1;
 	}
-	
+
 	GetExitCodeProcess(term->xyz_Internals->pi.hProcess,&exitcode);
 	if (exitcode != STILL_ACTIVE) {
 		xyz_Done(term);
@@ -171,7 +171,7 @@ void xyz_StartSending(Terminal *term)
 	OPENFILENAME fn;
 	char filenames[32000];
 	BOOL res;
-	const char *szcmd = conf_get_filename(term->conf,CONF_rzcommand)->path;
+	const char *szcmd = conf_get_filename(term->conf,CONF_szcommand)->path;
 
 	if (!strcmp(szcmd, "")) {
 		MessageBox(NULL, "The sz command path is not specified.", "Error", MB_OK|MB_ICONERROR);
@@ -210,7 +210,7 @@ void xyz_StartSending(Terminal *term)
 			}
 		}
 
-		if (xyz_SpawnProcess(term, conf_get_filename(term->conf,CONF_szcommand)->path, sz_full_params) == 0) {
+		if (xyz_SpawnProcess(term, szcmd, sz_full_params) == 0) {
 			term->xyz_transfering = 1;
 
 		} else {
@@ -218,6 +218,29 @@ void xyz_StartSending(Terminal *term)
 		}
 	}
 }
+
+#ifdef ZMODEM_DRAG_AND_DROP
+void xyz_DragAndDropDSending(Terminal *term, char *params)
+{
+	const char *szcmd = conf_get_filename(term->conf,CONF_szcommand)->path;
+	char sz_full_params[32767] = { 0, };
+
+	if (!strcmp(szcmd, "")) {
+		MessageBox(NULL, "The sz command path is not specified.", "Error", MB_OK|MB_ICONERROR);
+		return;
+	}
+
+	sprintf (sz_full_params, "%s %s", conf_get_str(term->conf,CONF_szoptions), params);
+
+	if (xyz_SpawnProcess(term, szcmd, sz_full_params) == 0) {
+		term->xyz_transfering = 1;
+
+	} else {
+		MessageBox(NULL,"Unable to start sending !", "Error", MB_OK|MB_ICONERROR);
+	}
+
+}
+#endif
 
 void xyz_Cancel(Terminal *term)
 {
@@ -229,21 +252,19 @@ static int xyz_SpawnProcess(Terminal *term, const char *incommand, const char *i
 	STARTUPINFO si;
 	SECURITY_ATTRIBUTES sa;
 	SECURITY_DESCRIPTOR sd;               //security information for pipes
-	
-	
-	
+
 	/*   Essai en bypassant le process spawn 
 	GetStartupInfo(&si);      
 	term->xyz_Internals = (struct zModemInternals *)smalloc(sizeof(struct zModemInternals));
 	memset(term->xyz_Internals, 0, sizeof(struct zModemInternals));
-	
+
 	term->xyz_Internals->write_stdin = si.hStdInput ;
 	term->xyz_Internals->read_stdout = si.hStdOutput ;
 	term->xyz_Internals->read_stderr = si.hStdError ;
-	
+
 	return 0;
 	*/
-	
+
 	HANDLE read_stdout, read_stderr, write_stdin, newstdin, newstdout, newstderr; //pipe handles
 
 	term->xyz_Internals = (struct zModemInternals *)smalloc(sizeof(struct zModemInternals));
@@ -277,7 +298,7 @@ static int xyz_SpawnProcess(Terminal *term, const char *incommand, const char *i
 		CloseHandle(read_stdout);
 		return 1;
 	}
-	
+
 	GetStartupInfo(&si);      //set startupinfo for the spawned process
 				  /*
 				  The dwFlags member tells CreateProcess how to make the process.
@@ -396,7 +417,7 @@ int xyz_ReceiveData(Terminal *term, const u_char *buffer, int len)
 		OutputDebugString(debugbuff);
 	}
 #endif
-	
+
 	//if( !
 		WriteFile(term->xyz_Internals->write_stdin,buffer,len,&written,NULL)
 	;

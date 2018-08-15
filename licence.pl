@@ -61,7 +61,7 @@ for my $i (0..$#paras) {
 print "\n";
 
 #printf "#define SHORT_COPYRIGHT_DETAILS \"%s\"\n", &stringlit($shortdetails);
-printf "#define SHORT_COPYRIGHT_DETAILS \"2017 iPuTTY Project\"\n";
+printf "#define SHORT_COPYRIGHT_DETAILS \"2018 iPuTTY Project\"\n";
 
 sub stringlit {
     my ($lit) = @_;

@@ -33,6 +33,7 @@ iPuTTY Official site
 * support Cygterm backend (0.69 and after)
 * translate UI (0.69 and after)
 * support ZMODEM (0.69.1 and after)
+* support ZMODEM sending with Drang And Drop (0.70.2 and after)
 * and so on..
 
 ## LICENSE
@@ -41,6 +42,6 @@ iPuTTY Official site
 
 ***PuTTY*** is copyright 1997-2017 Simon Tatham and PuTTY teamd
 
-***iPuTTY*** is portions copyright 2003-2017 iPuTTY project
+***iPuTTY*** is portions copyright 2003-2018 iPuTTY project
 
 All contributors can be found at https://github.com/iPuTTY/iPuTTY/wiki/Credit
