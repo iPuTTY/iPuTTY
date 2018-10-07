@@ -1191,7 +1191,7 @@ char *buildinfo(const char *newline)
     strbuf_catf(buf, "Visual Studio", newline);
 #if _MSC_VER == 1915
     strbuf_catf(buf, " 2017 / MSVC++ 14.15");
-#if _MSC_VER == 1914
+#elif _MSC_VER == 1914
     strbuf_catf(buf, " 2017 / MSVC++ 14.14");
 #elif _MSC_VER == 1913
     strbuf_catf(buf, " 2017 / MSVC++ 14.13");
